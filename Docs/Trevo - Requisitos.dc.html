@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="_ds/nocturne-b9a7cdcf-e509-49dd-9d81-730e5f5b22b4/styles.css">
+<script src="_ds/nocturne-b9a7cdcf-e509-49dd-9d81-730e5f5b22b4/_ds_bundle.js"></script>
+<script src="./doc-page.js"></script>
+<style>
+doc-page:not(:defined){visibility:hidden}
+body{margin:0;font-family:var(--font-body)}
+a{color:var(--color-accent-800)}
+a:hover{color:var(--color-accent-900)}
+</style>
+</helmet>
+<doc-page margin="0.8in">
+<div style="font-family:var(--font-body);color:var(--color-neutral-900);font-size:10pt;line-height:1.55">
+
+<div style="display:flex;align-items:baseline;gap:10px;font-size:8.5pt;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-800);margin-bottom:14px">
+<span>Especificação de requisitos</span>
+<span style="margin-left:auto;color:var(--color-neutral-800);letter-spacing:.04em">v1 · agosto de 2026</span>
+</div>
+
+<h1 style="margin:0 0 6px;font-family:var(--font-heading);font-size:26pt;font-weight:500;line-height:1.1;letter-spacing:-.02em">Trevo — Requisitos</h1>
+<p style="margin:0 0 4px;font-size:12pt;line-height:1.4;color:var(--color-neutral-800)">Requisitos funcionais e não funcionais do aplicativo Android de palpites para a Lotofácil.</p>
+<p style="margin:0 0 24px;font-size:9.5pt;color:var(--color-neutral-800)">Kotlin · Jetpack Compose · minSdk 26 · Play Store</p>
+
+<h2 style="margin:0 0 6px;font-family:var(--font-heading);font-size:14pt;font-weight:500;letter-spacing:-.01em">Como ler este documento</h2>
+<p style="margin:0 0 8px">Cada requisito tem um identificador estável. <strong style="font-weight:600">RF</strong> são requisitos funcionais, agrupados por módulo; <strong style="font-weight:600">RNF</strong> são não funcionais. A coluna de prioridade usa MoSCoW: <strong style="font-weight:600">M</strong> obrigatório na primeira versão publicável, <strong style="font-weight:600">S</strong> importante mas adiável, <strong style="font-weight:600">C</strong> desejável. A coluna Fase remete às quatro fases do escopo do projeto.</p>
+<p style="margin:0 0 22px;padding:9px 11px;border-left:3px solid var(--color-accent-800);background:var(--color-neutral-100);font-size:9.5pt">Premissa que atravessa todo o documento: o Trevo gera e organiza palpites. Não recebe aposta, não intermedia pagamento e não paga prêmio. Qualquer requisito que contrarie isso está fora de escopo.</p>
+
+<h2 style="margin:0 0 10px;font-family:var(--font-heading);font-size:16pt;font-weight:500;letter-spacing:-.01em">Parte 1 — Requisitos funcionais</h2>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-01 · Cadastro e onboarding</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-01.1</td><td style="padding:5px 6px">Apresentar tela inicial com a proposta do app e o aviso de que o sorteio é aleatório, antes de qualquer cadastro.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-01.2</td><td style="padding:5px 6px">Coletar nome e data de nascimento em campos separados.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-01.3</td><td style="padding:5px 6px">Validar a data no formato dd/mm/aaaa, verificando mês entre 1 e 12, dia existente no mês (com ano bissexto), ano entre 1900 e a data atual.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-01.4</td><td style="padding:5px 6px">Bloquear o cadastro de menores de 18 anos, com mensagem explícita.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-01.5</td><td style="padding:5px 6px">Calcular o signo a partir da data válida e exibir o signo com suas dezenas. Com data inválida, exibir marcador neutro, nunca um signo padrão.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-01.6</td><td style="padding:5px 6px">Impedir o avanço do passo enquanto houver erro de validação.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-01.7</td><td style="padding:5px 6px">Apresentar as 12 crenças com nome e descrição curta, permitindo seleção múltipla.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-01.8</td><td style="padding:5px 6px">Limitar a seleção a três crenças no plano grátis, exibindo cadeado nas demais e conduzindo ao paywall ao tocá-las.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">3</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-02 · Motor de geração de palpites</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-02.1</td><td style="padding:5px 6px">Gerar volante de 15 dezenas entre 1 e 25, sem repetição, a partir de sorteio ponderado.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-02.2</td><td style="padding:5px 6px">Somar peso às dezenas de cada crença ativa; dezenas fixas recebem peso dominante e entram sempre.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-02.3</td><td style="padding:5px 6px">Implementar as 12 crenças: signo, data de nascimento, números quentes, atrasados, fase da lua, sonho, moldura, sete pares e oito ímpares, primos e Fibonacci, faixa de soma, repetidas do concurso anterior e numerologia do nome.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-02.4</td><td style="padding:5px 6px">Traduzir o sonho pelos 25 grupos do jogo do bicho: o grupo N puxa a dezena N e a espelhada 26−N.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-02.5</td><td style="padding:5px 6px">Excluir do cálculo, sem falhar, as crenças cujos dados de origem estejam ausentes ou inválidos, informando o motivo na explicação.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-02.6</td><td style="padding:5px 6px">Registrar, para cada palpite, qual crença contribuiu com quais dezenas.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-02.7</td><td style="padding:5px 6px">Calcular um índice de força do palpite, derivado da cobertura das crenças ativas.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-02.8</td><td style="padding:5px 6px">Gerar fechamentos de 16, 18 e 20 dezenas pelo mesmo motor.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">3</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-02.9</td><td style="padding:5px 6px">Exibir animação de ritual durante a geração, com no mínimo três frases sequenciais.</td><td style="padding:5px 6px">C</td><td style="padding:5px 0 5px 6px">1</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-03 · Home e gestão de palpites</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-03.1</td><td style="padding:5px 6px">Exibir o concurso corrente, o horário de encerramento das apostas (19h) e o do sorteio (20h).</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-03.2</td><td style="padding:5px 6px">Exibir índice de sorte do dia, fase da lua e signo do usuário.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-03.3</td><td style="padding:5px 6px">Exibir o seletor dos 25 grupos do jogo do bicho quando a crença de sonho estiver ativa, com expansão para a lista completa.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-03.4</td><td style="padding:5px 6px">Listar os palpites do dia com dezenas, horário, força e crenças usadas.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-03.5</td><td style="padding:5px 6px">Indicar, em cada palpite, quantas e quais dezenas diferem do palpite imediatamente anterior.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-03.6</td><td style="padding:5px 6px">Exibir o total de jogos do dia e o custo correspondente na lotérica.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-03.7</td><td style="padding:5px 6px">Apresentar estado vazio quando não houver palpites.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-03.8</td><td style="padding:5px 6px">Permitir excluir um palpite, com diálogo de confirmação, tanto na lista quanto no detalhe.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-03.9</td><td style="padding:5px 6px">Exibir o número de palpites restantes no dia, ou a condição de ilimitado no Pro.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">3</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-04 · Detalhe, edição e desdobramentos</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.1</td><td style="padding:5px 6px">Exibir o volante em grade 5×5 com as dezenas marcadas distinguíveis das não marcadas.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.2</td><td style="padding:5px 6px">Listar cada crença que contribuiu, com a explicação em linguagem comum e as dezenas que ela trouxe.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.3</td><td style="padding:5px 6px">Exibir estatísticas do volante: soma das dezenas, divisão entre pares e ímpares, divisão entre moldura e miolo, e custo na lotérica.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.4</td><td style="padding:5px 6px">Exibir a probabilidade real de 15 acertos correspondente ao fechamento escolhido.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.5</td><td style="padding:5px 6px">Permitir editar manualmente as dezenas do volante, marcando e desmarcando na grade.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.6</td><td style="padding:5px 6px">Bloquear o salvamento da edição enquanto a quantidade de dezenas divergir da do fechamento, indicando quantas faltam ou sobram.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.7</td><td style="padding:5px 6px">Permitir guardar as dezenas adicionadas manualmente como fixas permanentes, exibi-las no detalhe e permitir limpá-las.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.8</td><td style="padding:5px 6px">Permitir refazer o palpite mantendo as crenças e as dezenas fixas.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.9</td><td style="padding:5px 6px">Para fechamentos acima de 15 dezenas, calcular e exibir a quantidade de jogos de 15 equivalentes e o custo total.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">3</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-04.10</td><td style="padding:5px 6px">Listar as combinações do desdobramento, limitando a exibição em tela e informando quantas existem no total.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">3</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-05 · Resultados e conferência</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.1</td><td style="padding:5px 6px">Buscar o resultado oficial do concurso na API pública da Caixa.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.2</td><td style="padding:5px 6px">Armazenar localmente os resultados obtidos, permitindo consulta sem rede.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.3</td><td style="padding:5px 6px">Conferir automaticamente todos os palpites do concurso assim que o resultado for obtido.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.4</td><td style="padding:5px 6px">Exibir, por palpite, a quantidade de acertos, a faixa premiada e o valor do prêmio.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.5</td><td style="padding:5px 6px">Destacar no volante as dezenas acertadas, as marcadas que não saíram e as sorteadas que não foram marcadas.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.6</td><td style="padding:5px 6px">Exibir o total ganho e o total gasto no concurso.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.7</td><td style="padding:5px 6px">Apresentar estado de espera quando o concurso ainda não tiver sido sorteado.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.8</td><td style="padding:5px 6px">Apresentar estado de ausência de conexão, informando que os palpites permanecem salvos e que a conferência ocorrerá quando a rede voltar.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.9</td><td style="padding:5px 6px">Apresentar estado de falha do serviço, com ação de nova tentativa.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-05.10</td><td style="padding:5px 6px">Permitir entrada manual das dezenas sorteadas como alternativa quando a API estiver indisponível de forma prolongada.</td><td style="padding:5px 6px">C</td><td style="padding:5px 0 5px 6px">2</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-06 · Histórico</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-06.1</td><td style="padding:5px 6px">Listar os concursos já conferidos, do mais recente ao mais antigo, com os palpites de cada um.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-06.2</td><td style="padding:5px 6px">Exibir total gasto, total ganho, saldo, retorno percentual sobre o apostado e média por concurso.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-06.3</td><td style="padding:5px 6px">Exibir a distribuição de faixas atingidas, de 11 a 15 acertos, e o melhor resultado obtido.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-06.4</td><td style="padding:5px 6px">Carregar o histórico por páginas, com ação explícita de carregar mais.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-06.5</td><td style="padding:5px 6px">Apresentar estado vazio quando nenhum concurso tiver sido conferido.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-06.6</td><td style="padding:5px 6px">Limitar o histórico do plano grátis aos três concursos mais recentes.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">3</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-07 · Perfil e notificações</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-07.1</td><td style="padding:5px 6px">Permitir editar nome e data de nascimento a qualquer momento, com a mesma validação do cadastro.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-07.2</td><td style="padding:5px 6px">Permitir alterar as crenças selecionadas em tela dedicada, acessível pelo perfil.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-07.3</td><td style="padding:5px 6px">Permitir ligar e desligar o lembrete anterior ao fechamento das apostas.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-07.4</td><td style="padding:5px 6px">Permitir definir livremente o horário do lembrete, com atalhos sugeridos e padrão às 18h.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-07.5</td><td style="padding:5px 6px">Alertar o usuário quando o horário escolhido for igual ou posterior às 19h, por já ser após o encerramento das apostas.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-07.6</td><td style="padding:5px 6px">Permitir ligar e desligar, de forma independente, a notificação de resultado do sorteio.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-07.7</td><td style="padding:5px 6px">Solicitar a permissão de notificação no momento em que o usuário ativa o primeiro aviso, não na abertura do app.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-07.8</td><td style="padding:5px 6px">Exibir o estado da assinatura e dar acesso ao gerenciamento na Play Store.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">3</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-08 · Compartilhamento e exportação</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-08.1</td><td style="padding:5px 6px">Compartilhar o palpite como texto pelo seletor do sistema, com o WhatsApp em destaque.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-08.2</td><td style="padding:5px 6px">Exibir a prévia da mensagem antes do envio e permitir copiar o texto.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-08.3</td><td style="padding:5px 6px">Exportar o volante em PDF, incluindo todos os jogos do desdobramento quando houver.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">3</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-08.4</td><td style="padding:5px 6px">Exportar o volante como imagem para a galeria.</td><td style="padding:5px 6px">C</td><td style="padding:5px 0 5px 6px">3</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-09 · Monetização</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-09.1</td><td style="padding:5px 6px">Limitar o plano grátis a um palpite por dia, com reinício do contador à meia-noite no fuso do aparelho.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">3</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-09.2</td><td style="padding:5px 6px">Oferecer anúncio recompensado de 15 segundos que libera um palpite extra no dia.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">3</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-09.3</td><td style="padding:5px 6px">Não exibir anúncios em nenhum outro formato nem para assinantes.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">3</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-09.4</td><td style="padding:5px 6px">Oferecer os planos anual e mensal com teste gratuito de sete dias, processados pelo Google Play Billing.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">3</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-09.5</td><td style="padding:5px 6px">Informar no paywall, antes da confirmação, o que acontece em cada etapa do teste e quando começa a cobrança.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">3</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-09.6</td><td style="padding:5px 6px">Liberar todos os recursos Pro imediatamente após a confirmação da compra e revogá-los ao fim da assinatura.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">3</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-09.7</td><td style="padding:5px 6px">Restaurar a assinatura ativa ao reinstalar o app ou trocar de aparelho na mesma conta Google.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">3</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RF-10 · Transparência e jogo responsável</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 20px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:66px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px;font-weight:600">Requisito</th>
+<th style="text-align:left;padding:6px;font-weight:600;width:34px">Pri</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600;width:34px">Fase</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-10.1</td><td style="padding:5px 6px">Exibir a probabilidade real em toda tela que apresente um palpite ou um fechamento.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-10.2</td><td style="padding:5px 6px">Não afirmar, em nenhum texto do app ou da loja, que qualquer método aumenta a chance de acerto.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-10.3</td><td style="padding:5px 6px">Deixar explícito que a aposta é feita pelo usuário na lotérica ou no canal oficial da Caixa.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">1</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-10.4</td><td style="padding:5px 6px">Exibir o gasto acumulado do usuário sem eufemismo, inclusive quando o saldo for negativo.</td><td style="padding:5px 6px">M</td><td style="padding:5px 0 5px 6px">2</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RF-10.5</td><td style="padding:5px 6px">Permitir definir limite de gasto mensal, com aviso ao se aproximar e ao ultrapassar.</td><td style="padding:5px 6px">S</td><td style="padding:5px 0 5px 6px">4</td></tr>
+</tbody>
+</table>
+
+<h2 style="margin:0 0 10px;font-family:var(--font-heading);font-size:16pt;font-weight:500;letter-spacing:-.01em">Parte 2 — Requisitos não funcionais</h2>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RNF-01 · Desempenho</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:74px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600">Requisito e critério mensurável</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-01.1</td><td style="padding:5px 0 5px 6px">Abertura a frio em até 2 segundos até a primeira tela interativa, em aparelho de referência de entrada (4 GB de RAM, Android 10).</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-01.2</td><td style="padding:5px 0 5px 6px">Geração do volante de 15 dezenas em menos de 100 ms, sem uso de rede.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-01.3</td><td style="padding:5px 0 5px 6px">Cálculo do desdobramento de 20 dezenas executado fora da thread principal, sem travar a interface.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-01.4</td><td style="padding:5px 0 5px 6px">Rolagem a 60 quadros por segundo nas listas de palpites, histórico e desdobramentos.</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-01.5</td><td style="padding:5px 0 5px 6px">APK de instalação abaixo de 25 MB.</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RNF-02 · Confiabilidade e disponibilidade offline</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:74px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600">Requisito e critério mensurável</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-02.1</td><td style="padding:5px 0 5px 6px">Todas as funções exceto a busca de resultado operam sem conexão.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-02.2</td><td style="padding:5px 0 5px 6px">Nenhum palpite pode ser perdido por falha de rede, fechamento do app ou reinício do aparelho.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-02.3</td><td style="padding:5px 0 5px 6px">Conferência pendente enfileirada e executada automaticamente quando a rede retornar.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-02.4</td><td style="padding:5px 0 5px 6px">Nova tentativa com recuo exponencial na busca de resultado, com no máximo cinco tentativas por concurso.</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-02.5</td><td style="padding:5px 0 5px 6px">Taxa de sessões sem falhas acima de 99% e taxa de ANR abaixo de 0,47%, os limites de qualidade da Play Store.</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RNF-03 · Usabilidade e acessibilidade</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:74px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600">Requisito e critério mensurável</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-03.1</td><td style="padding:5px 0 5px 6px">Todo alvo de toque com no mínimo 48 dp em ambas as dimensões.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-03.2</td><td style="padding:5px 0 5px 6px">Contraste mínimo de 4,5:1 para texto corrido e 3:1 para texto grande e elementos de interface.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-03.3</td><td style="padding:5px 0 5px 6px">Suporte a fonte ampliada do sistema até 200% sem corte ou sobreposição de conteúdo.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-03.4</td><td style="padding:5px 0 5px 6px">Todos os elementos interativos com descrição para o TalkBack; dezenas anunciadas com seu estado de marcação.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-03.5</td><td style="padding:5px 0 5px 6px">Estado de marcação nunca comunicado apenas por cor.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-03.6</td><td style="padding:5px 0 5px 6px">Qualquer função principal alcançável em no máximo três toques a partir da tela inicial.</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-03.7</td><td style="padding:5px 0 5px 6px">Interface e conteúdo integralmente em português do Brasil; valores monetários em real e datas em dd/mm/aaaa.</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RNF-04 · Segurança e privacidade</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:74px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600">Requisito e critério mensurável</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-04.1</td><td style="padding:5px 0 5px 6px">Toda comunicação de rede por HTTPS, com tráfego em texto claro desabilitado no manifesto.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-04.2</td><td style="padding:5px 0 5px 6px">Nenhum dado financeiro coletado, armazenado ou transmitido pelo app; toda cobrança ocorre no Play Billing.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-04.3</td><td style="padding:5px 0 5px 6px">Coleta limitada a nome e data de nascimento, ambos usados apenas para o cálculo dos palpites e a verificação de idade.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-04.4</td><td style="padding:5px 0 5px 6px">Conformidade com a LGPD: política de privacidade publicada, consentimento informado e exclusão completa dos dados a pedido do usuário.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-04.5</td><td style="padding:5px 0 5px 6px">Formulário de segurança de dados da Play Store preenchido e coerente com a coleta real.</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-04.6</td><td style="padding:5px 0 5px 6px">Nenhuma permissão além de notificação e rede; sem localização, contatos, câmera ou armazenamento amplo.</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RNF-05 · Compatibilidade</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:74px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600">Requisito e critério mensurável</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-05.1</td><td style="padding:5px 0 5px 6px">Android 8.0 (API 26) como mínimo e a API alvo exigida pela Play Store no momento da publicação.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-05.2</td><td style="padding:5px 0 5px 6px">Layout correto de 320 dp a 600 dp de largura, em retrato; sem quebra em telas pequenas.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-05.3</td><td style="padding:5px 0 5px 6px">Tema escuro como padrão, com contraste garantido também sob o modo de alto contraste do sistema.</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-05.4</td><td style="padding:5px 0 5px 6px">Estado da tela preservado em rotação, mudança de configuração e retorno de segundo plano.</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RNF-06 · Manutenibilidade e qualidade de código</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:74px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600">Requisito e critério mensurável</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-06.1</td><td style="padding:5px 0 5px 6px">Arquitetura MVVM com separação estrita entre interface, domínio e dados; o motor de geração sem dependência de Android.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-06.2</td><td style="padding:5px 0 5px 6px">Cobertura de testes unitários acima de 80% no motor de geração, no cálculo de acertos e nas validações.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-06.3</td><td style="padding:5px 0 5px 6px">Geração determinística sob semente fixa, para permitir teste reprodutível.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-06.4</td><td style="padding:5px 0 5px 6px">Testes de interface para os fluxos de cadastro, geração, edição e conferência.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-06.5</td><td style="padding:5px 0 5px 6px">Integração contínua executando compilação, lint e testes a cada envio.</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-06.6</td><td style="padding:5px 0 5px 6px">Migrações de banco versionadas, sem perda de dados entre versões do app.</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RNF-07 · Conformidade com a Play Store</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:74px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600">Requisito e critério mensurável</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-07.1</td><td style="padding:5px 0 5px 6px">Classificação etária 18 anos ou mais, coerente com o questionário de classificação de conteúdo.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-07.2</td><td style="padding:5px 0 5px 6px">Descrição da loja declarando explicitamente que o app não recebe apostas nem paga prêmios.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-07.3</td><td style="padding:5px 0 5px 6px">Toda transação pelo Play Billing, sem qualquer via de pagamento externa.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-07.4</td><td style="padding:5px 0 5px 6px">Assinatura com preço, periodicidade e condições do teste declarados antes da confirmação.</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-07.5</td><td style="padding:5px 0 5px 6px">Parecer jurídico obtido antes da primeira publicação, quanto ao enquadramento do app frente à legislação de loterias.</td></tr>
+</tbody>
+</table>
+
+<h3 style="margin:0 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">RNF-08 · Observabilidade</h3>
+<table style="width:100%;border-collapse:collapse;margin:0 0 20px;font-size:9pt">
+<thead><tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:6px 6px 6px 0;font-weight:600;width:74px;white-space:nowrap">ID</th>
+<th style="text-align:left;padding:6px 0 6px 6px;font-weight:600">Requisito e critério mensurável</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-08.1</td><td style="padding:5px 0 5px 6px">Registro de falhas com rastreamento de pilha, sem qualquer dado pessoal identificável.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-08.2</td><td style="padding:5px 0 5px 6px">Eventos de produto instrumentados: palpite gerado, palpite editado, palpite compartilhado, paywall exibido, teste iniciado, assinatura confirmada, notificação ativada.</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-08.3</td><td style="padding:5px 0 5px 6px">Falhas de integração com a API da Caixa registradas com código e latência, para diagnóstico de indisponibilidade.</td></tr>
+<tr><td style="padding:5px 6px 5px 0;white-space:nowrap">RNF-08.4</td><td style="padding:5px 0 5px 6px">Coleta analítica sujeita a consentimento e desativável pelo usuário.</td></tr>
+</tbody>
+</table>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:14pt;font-weight:500;letter-spacing:-.01em">Fora de escopo</h2>
+<p style="margin:0 0 6px">Registrado explicitamente para evitar ambiguidade na implementação:</p>
+<ul style="margin:0;padding-left:18px">
+<li style="margin-bottom:4px">Receber valores de aposta, intermediar pagamento entre usuários ou custodiar dinheiro de bolão.</li>
+<li style="margin-bottom:4px">Registrar a aposta junto à Caixa em nome do usuário.</li>
+<li style="margin-bottom:4px">Pagar prêmios ou operar qualquer forma de premiação própria.</li>
+<li style="margin-bottom:4px">Prometer, sugerir ou insinuar aumento de probabilidade de acerto.</li>
+<li>Outras loterias além da Lotofácil na primeira versão.</li>
+</ul>
+
+</div>
+</doc-page>
+</x-dc>
+</body>
+</html>

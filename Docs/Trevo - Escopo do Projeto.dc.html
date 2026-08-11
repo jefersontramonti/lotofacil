@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="_ds/nocturne-b9a7cdcf-e509-49dd-9d81-730e5f5b22b4/styles.css">
+<script src="_ds/nocturne-b9a7cdcf-e509-49dd-9d81-730e5f5b22b4/_ds_bundle.js"></script>
+<script src="./doc-page.js"></script>
+<style>
+doc-page:not(:defined){visibility:hidden}
+body{margin:0;font-family:var(--font-body)}
+a{color:var(--color-accent-800)}
+a:hover{color:var(--color-accent-900)}
+</style>
+</helmet>
+<doc-page margin="0.8in">
+<div style="font-family:var(--font-body);color:var(--color-neutral-900);font-size:10.5pt;line-height:1.6">
+
+<div style="display:flex;align-items:baseline;gap:10px;font-size:8.5pt;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-800);margin-bottom:14px">
+<span>Escopo de projeto</span>
+<span style="margin-left:auto;color:var(--color-neutral-800);letter-spacing:.04em">v1 · agosto de 2026</span>
+</div>
+
+<h1 style="margin:0 0 6px;font-family:var(--font-heading);font-size:27pt;font-weight:500;line-height:1.1;letter-spacing:-.02em">Trevo</h1>
+<p style="margin:0 0 4px;font-size:13pt;line-height:1.4;color:var(--color-neutral-800)">Aplicativo Android de palpites para a Lotofácil, construído sobre as crenças que os apostadores já usam.</p>
+<p style="margin:0 0 26px;font-size:10pt;color:var(--color-neutral-800)">Kotlin · Jetpack Compose · minSdk 26 · Play Store</p>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">1. Resumo</h2>
+<p style="margin:0 0 10px">O Trevo gera volantes da Lotofácil combinando signo, data de nascimento, números quentes, atrasados, fase da lua, sonho traduzido pelo jogo do bicho, moldura do volante e outras crenças populares. O usuário escolhe em quais acredita; o app monta o volante, explica de onde veio cada dezena e confere o resultado quando o sorteio sai.</p>
+<p style="margin:0 0 10px">O produto vende organização de palpites, nunca a aposta. O app não recebe dinheiro de aposta, não intermedia pagamento e não paga prêmio — essas atividades são exclusivas da Caixa. A aposta continua sendo feita pelo usuário na lotérica ou no canal oficial.</p>
+<p style="margin:0 0 22px">Cada tela que apresenta um palpite também apresenta a probabilidade real. Isso é uma decisão de produto, não um aviso legal escondido no rodapé: é o que separa o Trevo de um app que promete acerto e é o que sustenta a revisão na Play Store.</p>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">2. Público e proposta</h2>
+<p style="margin:0 0 10px"><strong style="font-weight:600">Quem usa:</strong> apostador recorrente da Lotofácil, que joga uma ou mais vezes por semana, tem dezenas fixas de família e já usa alguma superstição para escolher os números. Faixa de 30 a 65 anos, Android de entrada a intermediário, conexão instável.</p>
+<p style="margin:0 0 22px"><strong style="font-weight:600">O que resolve:</strong> escolher 15 dezenas dá trabalho e a pessoa refaz a mesma conta toda semana. O Trevo automatiza o ritual, guarda as dezenas fixas, confere o resultado sozinho e mostra o histórico do que foi gasto e ganho.</p>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">3. Escopo funcional</h2>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.1 Onboarding</h3>
+<p style="margin:0 0 10px">Três passos: apresentação com o aviso de aleatoriedade; nome e data de nascimento com validação completa (formato, dia real do mês, faixa de anos, idade mínima de 18) e cálculo automático do signo; seleção das crenças, limitada a três no plano grátis.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.2 Home</h3>
+<p style="margin:0 0 10px">Cabeçalho com o concurso corrente, horário de fechamento das apostas (19h) e do sorteio (20h), índice de sorte do dia, fase da lua e signo. Seletor dos 25 grupos do jogo do bicho quando a crença de sonho está ativa. Lista dos palpites do dia, cada um mostrando quantas dezenas mudaram em relação ao anterior. Contador de palpites restantes e o botão de gerar.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.3 Detalhe do palpite</h3>
+<p style="margin:0 0 10px">Volante 5×5, força do palpite, chance real da aposta, seletor de fechamento (15, 16, 18 ou 20 dezenas), lista explicando qual crença trouxe cada dezena, estatísticas do volante (soma, pares e ímpares, moldura e miolo, custo na lotérica) e a edição manual das dezenas com opção de guardar as escolhidas como fixas permanentes.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.4 Desdobramentos</h3>
+<p style="margin:0 0 10px">Um fechamento de N dezenas equivale a todas as combinações de 15 dentro dele. A tela mostra quantos jogos são, quanto custa na lotérica e lista as combinações.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.5 Conferência</h3>
+<p style="margin:0 0 10px">Dezenas sorteadas, total ganho contra total gasto e cada palpite com os acertos marcados no próprio volante e o prêmio da faixa. Estados de espera (antes do sorteio), offline e erro do servidor, todos com ação de nova tentativa.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.6 Histórico</h3>
+<p style="margin:0 0 10px">Concursos anteriores com saldo, retorno percentual sobre o apostado, média por concurso, distribuição das faixas de 11 a 15 acertos e os palpites de cada concurso. Paginação incremental e estado vazio.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.7 Perfil</h3>
+<p style="margin:0 0 10px">Nome, data de nascimento, edição das crenças, notificações e assinatura. O lembrete tem horário livre — as apostas encerram às 19h, então o padrão é 18h e o app avisa se o usuário escolher um horário depois do fechamento. Aviso de resultado às 20h é um toggle separado.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.8 Compartilhar e exportar</h3>
+<p style="margin:0 0 22px">Compartilhamento do palpite via WhatsApp e cópia do texto, liberados para todos. Exportação em PDF, imagem e texto, restrita ao Pro.</p>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">4. Monetização</h2>
+<table style="width:100%;border-collapse:collapse;margin:0 0 12px;font-size:10pt">
+<thead>
+<tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:7px 8px 7px 0;font-weight:600">Recurso</th>
+<th style="text-align:left;padding:7px 8px;font-weight:600">Grátis</th>
+<th style="text-align:left;padding:7px 0 7px 8px;font-weight:600">Pro</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Palpites por dia</td><td style="padding:6px 8px">1 (+1 por anúncio)</td><td style="padding:6px 0 6px 8px">ilimitado</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Crenças por palpite</td><td style="padding:6px 8px">3</td><td style="padding:6px 0 6px 8px">todas as 12</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Fechamento</td><td style="padding:6px 8px">15 dezenas</td><td style="padding:6px 0 6px 8px">16, 18 e 20</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Conferência</td><td style="padding:6px 8px">manual</td><td style="padding:6px 0 6px 8px">automática</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Histórico</td><td style="padding:6px 8px">últimos 3 concursos</td><td style="padding:6px 0 6px 8px">completo</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Exportar volante</td><td style="padding:6px 8px">—</td><td style="padding:6px 0 6px 8px">PDF, imagem, texto</td></tr>
+<tr><td style="padding:6px 8px 6px 0">Anúncios</td><td style="padding:6px 8px">recompensado</td><td style="padding:6px 0 6px 8px">nenhum</td></tr>
+</tbody>
+</table>
+<p style="margin:0 0 10px">Planos: anual R$ 89,90 e mensal R$ 11,90, ambos com 7 dias de teste grátis. Toda a cobrança passa pelo Google Play Billing — cobrar por fora é motivo de remoção do app.</p>
+<p style="margin:0 0 22px">Anúncio recompensado via AdMob: 15 segundos liberam um palpite extra no dia. Nenhum formato intersticial ou banner fixo, para não competir com a assinatura nem degradar a tela principal.</p>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">5. Arquitetura técnica</h2>
+<table style="width:100%;border-collapse:collapse;margin:0 0 14px;font-size:10pt">
+<thead>
+<tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:7px 8px 7px 0;font-weight:600">Camada</th>
+<th style="text-align:left;padding:7px 0 7px 8px;font-weight:600">Tecnologia</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">UI</td><td style="padding:6px 0 6px 8px">Jetpack Compose, Material 3, tema escuro próprio</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Arquitetura</td><td style="padding:6px 0 6px 8px">MVVM com ViewModel e StateFlow, camada de repositório</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Injeção</td><td style="padding:6px 0 6px 8px">Hilt</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Navegação</td><td style="padding:6px 0 6px 8px">Navigation Compose com bottom bar de quatro abas</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Persistência</td><td style="padding:6px 0 6px 8px">Room (palpites, concursos, conferências) e DataStore (preferências)</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Rede</td><td style="padding:6px 0 6px 8px">Retrofit e OkHttp sobre a API pública de resultados da Caixa</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Trabalho em segundo plano</td><td style="padding:6px 0 6px 8px">WorkManager (busca do resultado) e AlarmManager (lembrete no horário escolhido)</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Assinatura</td><td style="padding:6px 0 6px 8px">Play Billing Library 7</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Anúncios</td><td style="padding:6px 0 6px 8px">AdMob, formato recompensado</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Conta e sincronização</td><td style="padding:6px 0 6px 8px">Firebase Auth e Firestore (opcional na v1, necessário para troca de aparelho)</td></tr>
+<tr><td style="padding:6px 8px 6px 0">Métricas</td><td style="padding:6px 0 6px 8px">Firebase Analytics e Crashlytics</td></tr>
+</tbody>
+</table>
+<p style="margin:0 0 10px"><strong style="font-weight:600">Offline primeiro.</strong> Todo palpite é gerado e salvo localmente; o app funciona sem internet exceto na busca do resultado. A conferência entra na fila e roda quando a conexão volta.</p>
+<p style="margin:0 0 22px"><strong style="font-weight:600">Geração do volante.</strong> Motor de pesos puro em Kotlin, sem dependência de rede: cada crença ativa soma peso às suas dezenas, dezenas fixas recebem peso dominante, e o sorteio ponderado escolhe as 15 (ou N) maiores. Testável isoladamente.</p>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">6. Fases de entrega</h2>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">Fase 1 — MVP publicável</h3>
+<p style="margin:0 0 10px">Onboarding, motor de geração com as 12 crenças, home, detalhe do palpite, edição manual, dezenas fixas, persistência local, conferência com a API da Caixa, compartilhar no WhatsApp e os avisos de probabilidade. Sem monetização, sem conta. Objetivo: validar se as pessoas voltam. Estimativa de 6 a 8 semanas para um desenvolvedor.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">Fase 2 — Retenção</h3>
+<p style="margin:0 0 10px">Notificações (lembrete no horário escolhido e resultado às 20h), conferência automática em segundo plano, histórico com resumo de gastos e ganhos, perfil completo, estados de erro e offline. Estimativa de 3 a 4 semanas.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">Fase 3 — Monetização</h3>
+<p style="margin:0 0 10px">Play Billing com os dois planos e o teste de 7 dias, paywall, limites do plano grátis, anúncio recompensado, fechamento de 16 a 20 dezenas, desdobramentos e exportação. Estimativa de 4 a 5 semanas.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">Fase 4 — Escala</h3>
+<p style="margin:0 0 22px">Conta e sincronização entre aparelhos, limite de gasto mensal com aviso, bolão como organização de grupo sem custódia de dinheiro, e widget de tela inicial com o palpite do dia.</p>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">7. Conformidade com a Play Store</h2>
+<p style="margin:0 0 8px">Pontos que decidem a aprovação:</p>
+<ul style="margin:0 0 10px;padding-left:20px">
+<li style="margin-bottom:5px">O app não recebe aposta, não intermedia pagamento e não paga prêmio. Isso precisa estar explícito na descrição da loja e dentro do app.</li>
+<li style="margin-bottom:5px">Classificação etária 18+, com a idade validada no cadastro.</li>
+<li style="margin-bottom:5px">Nenhuma promessa de aumento de chance. Os avisos de probabilidade ficam nas telas de palpite, de detalhe e de desdobramento.</li>
+<li style="margin-bottom:5px">Toda cobrança pelo Play Billing.</li>
+<li style="margin-bottom:5px">Política de privacidade publicada e formulário de segurança de dados preenchido.</li>
+<li>Recurso de jogo responsável: limite de gasto mensal configurável e o total gasto sempre visível.</li>
+</ul>
+<p style="margin:0 0 22px">Recomendação: consultar advogado antes do lançamento. A fronteira entre ferramenta de palpite e intermediação de aposta é o principal risco do produto.</p>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">8. Riscos</h2>
+<table style="width:100%;border-collapse:collapse;margin:0 0 22px;font-size:10pt">
+<thead>
+<tr style="border-bottom:1.5px solid var(--color-neutral-900)">
+<th style="text-align:left;padding:7px 8px 7px 0;font-weight:600">Risco</th>
+<th style="text-align:left;padding:7px 0 7px 8px;font-weight:600">Mitigação</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0;width:38%">Remoção da Play Store por política de apostas</td><td style="padding:6px 0 6px 8px">Escopo restrito a palpite, avisos visíveis, parecer jurídico antes do lançamento</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">API da Caixa indisponível ou alterada</td><td style="padding:6px 0 6px 8px">Cache local, fila de conferência, entrada manual do resultado como plano B</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Conversão baixa para Pro</td><td style="padding:6px 0 6px 8px">Teste de 7 dias, anúncio recompensado como receita paralela</td></tr>
+<tr style="border-bottom:1px solid var(--color-neutral-200)"><td style="padding:6px 8px 6px 0">Retenção cai depois da novidade</td><td style="padding:6px 0 6px 8px">A conferência automática, não o gerador, é o motivo de voltar — priorizar na fase 2</td></tr>
+<tr><td style="padding:6px 8px 6px 0">Frustração do usuário que não ganha</td><td style="padding:6px 0 6px 8px">Histórico honesto de gastos e ganhos; o app nunca promete resultado</td></tr>
+</tbody>
+</table>
+
+<h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">9. Métricas de sucesso</h2>
+<ul style="margin:0 0 10px;padding-left:20px">
+<li style="margin-bottom:5px">Retenção D7 acima de 25% e D30 acima de 12%.</li>
+<li style="margin-bottom:5px">Média de 3 ou mais palpites gerados por usuário ativo por semana.</li>
+<li style="margin-bottom:5px">Conversão para Pro entre 2% e 4% dos ativos mensais.</li>
+<li style="margin-bottom:5px">70% ou mais dos usuários com notificação de lembrete ativa.</li>
+<li>Menos de 1% de sessões com crash.</li>
+</ul>
+
+</div>
+</doc-page>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat)\nf=$(printf '%s' \"$input\" | python -c \"\nimport json,sys\nd=json.load(sys.stdin)\nprint((d.get('tool_response') or {}).get('filePath') or d.get('tool_input',{}).get('file_path',''))\n\")\ncase \"$f\" in\n  *.kt)\n    out=$(./gradlew ktlintCheck 2>&1); code=$?\n    if [ $code -ne 0 ]; then status=falhou; else status=ok; fi\n    printf '%s' \"$out\" | python -c \"\nimport json,sys\nf=sys.argv[1]; status=sys.argv[2]; out=sys.stdin.read()\nif status=='falhou':\n    msg='ktlintCheck falhou depois de editar '+f+'. Rode ./gradlew ktlintFormat para corrigir automaticamente.\\n'+out[-1500:]\nelse:\n    msg='ktlintCheck ok depois de editar '+f+'.'\nprint(json.dumps({'hookSpecificOutput':{'hookEventName':'PostToolUse','additionalContext':msg}}))\n\" \"$f\" \"$status\"\n    ;;\nesac",
+            "timeout": 180,
+            "statusMessage": "ktlintCheck (feedback rápido)"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "touched=$(git status --porcelain --untracked-files=all -- . | cut -c4- | grep -E '\\.(kt|kts)$' | grep -E '(^|/)src/')\nif [ -n \"$touched\" ]; then\n  out=$(./gradlew test lint ktlintCheck 2>&1); code=$?\n  printf '%s' \"$out\" | python -c \"\nimport json,sys\ncode=int(sys.argv[1]); out=sys.stdin.read()\nif code!=0:\n    msg='Gate do CLAUDE.md falhou: ./gradlew test lint ktlintCheck nao passou (ha .kt/.kts com mudanca pendente em src/). Corrija antes de considerar a tarefa pronta.\\n'+out[-3000:]\n    print(json.dumps({'decision':'block','reason':msg}))\nelse:\n    print(json.dumps({'systemMessage':'gradlew test lint ktlintCheck passou - gate do CLAUDE.md OK.'}))\n\" \"$code\"\nfi",
+            "timeout": 300,
+            "statusMessage": "gradlew test lint ktlintCheck (gate CLAUDE.md)"
+          }
+        ]
+      }
+    ]
+  }
+}
