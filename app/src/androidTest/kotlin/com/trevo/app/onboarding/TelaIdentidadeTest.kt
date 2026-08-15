@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -37,9 +38,14 @@ import org.junit.runner.RunWith
  * RF-01.4 — "Bloquear o cadastro de menores de 18 anos, com mensagem
  * explícita." Casos T1–T3 (ver `.claude/handoff.md`): a mensagem de
  * `ErroDataNascimento.MENOR_DE_IDADE` aparece sob o mesmo
- * `TAG_ERRO_NASCIMENTO` dos erros de RF-01.3, o CTA "Continuar" continua
- * habilitado (RF-01.6 fora de escopo) e a string nova entra na checagem de
- * conformidade da regra inviolável 2.
+ * `TAG_ERRO_NASCIMENTO` dos erros de RF-01.3, e a string nova entra na
+ * checagem de conformidade da regra inviolável 2.
+ * RF-01.6 — "Impedir o avanço do passo enquanto houver erro de validação."
+ * O CTA "Continuar" fica desabilitado sempre que `erroNascimento != null`
+ * ou `nascimentoValido == false` — a segunda condição cobre o campo vazio
+ * (silencioso, sem mensagem, mas ainda não avançável) e a primeira cobre
+ * também `MENOR_DE_IDADE`, que RF-01.4 registra em `erroNascimento` mesmo
+ * com `nascimentoValido == true`.
  *
  * Dirige o [TelaIdentidade] stateless (sem Hilt), içando o estado
  * localmente no teste — a fonte da verdade do estado real é
@@ -51,13 +57,7 @@ import org.junit.runner.RunWith
  * `TAG_ERRO_NASCIMENTO` quando `uiState.erroNascimento` não é nulo — e,
  * desde RF-01.9, também a ponta a ponta pela UI real: digitar dígitos
  * crus no campo de nascimento precisa exibir o texto já com as barras e
- * entregar esse mesmo texto formatado ao callback. Nada mais muda de
- * comportamento (RF-01.6/RF-01.5 seguem fora de escopo).
- *
- * Cobre também que o escopo não vazou de requisitos vizinhos: sem cartão
- * de signo (RF-01.5) e sem bloqueio do CTA "Continuar" mesmo com erro
- * exibido (RF-01.6), que compartilham a mesma tela no wireframe 1b mas
- * não são parte desta entrega.
+ * entregar esse mesmo texto formatado ao callback.
  *
  * [TelaIdentidade], `TAG_CAMPO_NOME`, `TAG_CAMPO_NASCIMENTO`,
  * `TAG_ERRO_NASCIMENTO` e as strings `identidade_*` (incluindo as quatro
@@ -352,14 +352,14 @@ class TelaIdentidadeTest {
     }
 
     @Test
-    fun naoExibeErroDeValidacaoNemNomeDeSignoNemDesabilitaContinuarECartaoDeSignoApareceComMarcadorNeutro() {
+    fun naoExibeErroDeValidacaoNemNomeDeSignoDesabilitaContinuarPorNascimentoVazioECartaoComMarcadorNeutro() {
         // `IdentidadeUiState()` padrão tem `erroNascimento == null` (campo
         // vazio, ErroDataNascimento.VAZIO não vira mensagem — ver RF-01.3) e
-        // `signo == null`. RF-01.6 (travar avanço com erro) segue fora de
-        // escopo. RF-01.5 (cartão de signo) passou a estar DENTRO do escopo
-        // desta tela: o cartão agora é sempre renderizado (plano
-        // `.claude/handoff.md`, decisão D5), só que com o marcador neutro —
-        // nenhum nome de signo pode aparecer.
+        // `signo == null`. RF-01.5 (cartão de signo): o cartão é sempre
+        // renderizado, só que com o marcador neutro — nenhum nome de signo
+        // pode aparecer. RF-01.6: campo vazio não é mensagem de erro, mas
+        // também não é uma data avançável — `nascimentoValido == false`
+        // mantém o CTA desabilitado mesmo sem nenhum erro visível.
         mostrarTelaIdentidade()
 
         composeTestRule
@@ -392,7 +392,7 @@ class TelaIdentidadeTest {
         // Critério de aceite 18: com o marcador neutro visível.
         composeTestRule.onNodeWithText(signoMarcadorNeutro).assertIsDisplayed()
 
-        composeTestRule.onNodeWithText(ctaContinuar).assertIsEnabled()
+        composeTestRule.onNodeWithText(ctaContinuar).assertIsNotEnabled()
     }
 
     @Test
@@ -476,13 +476,14 @@ class TelaIdentidadeTest {
     }
 
     @Test
-    fun t2ComErroDeMenorDeIdadeContinuarSegueHabilitadoEOSignoAparece() {
-        // Inverte a versão pré-RF-01.5 deste teste: RF-01.6 (travar avanço)
-        // segue fora de escopo, mas RF-01.5 (cartão de signo) agora está
-        // dentro. "14/07/2020" é uma data formalmente válida, formadora de
-        // Câncer, reprovada só por idade — critério de aceite 12 e 19: os
-        // dois julgamentos (idade e signo) são independentes, e a mensagem
-        // de erro E o cartão com o signo aparecem ao mesmo tempo.
+    fun t2ComErroDeMenorDeIdadeContinuarFicaDesabilitadoEOSignoAparece() {
+        // "14/07/2020" é uma data formalmente válida, formadora de Câncer,
+        // reprovada só por idade — critério de aceite 12 e 19: os dois
+        // julgamentos (idade e signo) são independentes, e a mensagem de
+        // erro E o cartão com o signo aparecem ao mesmo tempo. RF-01.6: o
+        // CTA fica desabilitado porque `erroNascimento != null`, mesmo com
+        // `nascimentoValido == true` (RF-01.4 é o julgamento que bloqueia
+        // aqui, não a formatação da data).
         mostrarTelaIdentidade(
             uiState =
                 IdentidadeUiState(
@@ -493,7 +494,7 @@ class TelaIdentidadeTest {
                 ),
         )
 
-        composeTestRule.onNodeWithText(ctaContinuar).assertIsEnabled()
+        composeTestRule.onNodeWithText(ctaContinuar).assertIsNotEnabled()
 
         // Critério de aceite 19: erro de idade e cartão de signo, juntos.
         composeTestRule.onNodeWithTag(TAG_ERRO_NASCIMENTO).assertIsDisplayed()
@@ -508,12 +509,11 @@ class TelaIdentidadeTest {
     }
 
     @Test
-    fun comErroDeNascimentoContinuarSegueHabilitadoENenhumNomeDeSignoAparece() {
-        // RF-01.6 (travar avanço) segue fora de escopo: mesmo com erro de
-        // RF-01.3 exibido, o CTA "Continuar" segue habilitado. Data com mês
-        // inválido não é calculável (signo == null): nenhum nome de signo
-        // aparece — mas o cartão em si passou a existir sempre (RF-01.5),
-        // com o marcador neutro.
+    fun comErroDeNascimentoContinuarFicaDesabilitadoENenhumNomeDeSignoAparece() {
+        // RF-01.6: com erro de RF-01.3 exibido, o CTA "Continuar" fica
+        // desabilitado. Data com mês inválido não é calculável (signo ==
+        // null): nenhum nome de signo aparece — mas o cartão em si continua
+        // existindo sempre (RF-01.5), com o marcador neutro.
         mostrarTelaIdentidade(
             uiState =
                 IdentidadeUiState(
@@ -522,7 +522,7 @@ class TelaIdentidadeTest {
                 ),
         )
 
-        composeTestRule.onNodeWithText(ctaContinuar).assertIsEnabled()
+        composeTestRule.onNodeWithText(ctaContinuar).assertIsNotEnabled()
 
         nomesDosSignos.forEach { nomeDoSigno ->
             composeTestRule
@@ -536,6 +536,23 @@ class TelaIdentidadeTest {
             .onAllNodes(hasTestTag(tagCartaoSigno))
             .assertCountEquals(1)
         composeTestRule.onNodeWithText(signoMarcadorNeutro).assertIsDisplayed()
+    }
+
+    @Test
+    fun comNascimentoValidoESemErroContinuarFicaHabilitado() {
+        // RF-01.6, caso positivo: data formalmente válida e maior de idade
+        // — nenhuma das duas condições do guard (`nascimentoValido == false`
+        // ou `erroNascimento != null`) se aplica, então o CTA libera.
+        mostrarTelaIdentidade(
+            uiState =
+                IdentidadeUiState(
+                    nascimento = "14/07/1978",
+                    nascimentoValido = true,
+                    signo = Signo.CANCER,
+                ),
+        )
+
+        composeTestRule.onNodeWithText(ctaContinuar).assertIsEnabled()
     }
 
     // --- RF-01.5 · seção "6.3 Tela" do critério de aceite (itens 16-22) ---

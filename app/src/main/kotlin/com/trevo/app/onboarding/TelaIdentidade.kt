@@ -171,6 +171,12 @@ fun TelaIdentidade(
                     texto = stringResource(id = R.string.identidade_cta_continuar),
                     onClick = onContinuarClick,
                     modifier = Modifier.weight(1f),
+                    // RF-01.6: trava o avanço enquanto houver erro de validação.
+                    // `nascimentoValido` sozinho não basta — ele continua `true`
+                    // sob MENOR_DE_IDADE (RF-01.4 é um julgamento independente
+                    // sobre a mesma data válida), então checar `erroNascimento
+                    // == null` também é o que garante que RF-01.4 barra o avanço.
+                    enabled = uiState.nascimentoValido && uiState.erroNascimento == null,
                 )
             }
         }

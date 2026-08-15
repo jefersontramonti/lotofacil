@@ -16,10 +16,12 @@ fun BotaoPrimario(
     texto: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp),
+        enabled = enabled,
         border = BorderStroke(width = 1.dp, color = NocturneAccent),
         colors =
             ButtonDefaults.outlinedButtonColors(
