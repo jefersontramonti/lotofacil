@@ -15,7 +15,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-01.4 | Bloquear cadastro de menores de 18 anos | M | F1 | concluído |  |
 | RF-01.5 | Calcular signo a partir da data válida; marcador neutro se inválida | M | F1 | concluído |  |
 | RF-01.6 | Impedir avanço do passo com erro de validação | M | F1 | concluído | |
-| RF-01.7 | Apresentar as 12 crenças, seleção múltipla | M | F1 | não iniciado | |
+| RF-01.7 | Apresentar as 12 crenças, seleção múltipla | M | F1 | concluído | |
 | RF-01.8 | Limitar seleção a 3 crenças no grátis, cadeado leva ao paywall | M | F3 | não iniciado | |
 | RF-01.9 | Auto-formatar data de nascimento com barras enquanto digita | C | F1 | concluído |  |
 

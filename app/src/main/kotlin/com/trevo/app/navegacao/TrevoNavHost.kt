@@ -8,8 +8,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.trevo.app.onboarding.CrencasViewModel
 import com.trevo.app.onboarding.IdentidadeViewModel
 import com.trevo.app.onboarding.TelaAbertura
+import com.trevo.app.onboarding.TelaCrencas
 import com.trevo.app.onboarding.TelaIdentidade
 
 @Composable
@@ -33,8 +35,19 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 onNomeChange = viewModel::aoAlterarNome,
                 onNascimentoChange = viewModel::aoAlterarNascimento,
                 onVoltarClick = { navController.popBackStack() },
+                onContinuarClick = { navController.navigate(Rotas.CRENCAS) },
+            )
+        }
+        composable(Rotas.CRENCAS) {
+            val viewModel: CrencasViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+
+            TelaCrencas(
+                uiState = uiState,
+                onCrencaClick = viewModel::aoTocarCrenca,
+                onVoltarClick = { navController.popBackStack() },
                 onContinuarClick = {
-                    // RF-01.3/RF-01.5 registram a próxima rota aqui
+                    // RF-03 (home) registra a próxima rota aqui
                 },
             )
         }
