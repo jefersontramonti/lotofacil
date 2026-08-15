@@ -30,14 +30,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.trevo.app.R
 import com.trevo.core.engine.crenca.Crenca
+import com.trevo.core.engine.palpite.Palpite
 import com.trevo.core.ui.BotaoPrimario
 import com.trevo.core.ui.NocturneAccent
 import com.trevo.core.ui.NocturneOutline
 import com.trevo.core.ui.NocturneSurface
+
+const val TAG_RESULTADO_PALPITE = "resultado_palpite"
 
 // Prefixo público — TelaCrencasTest referencia esta função para montar as
 // mesmas tags sem duplicar a string literal.
@@ -89,12 +93,50 @@ fun TelaCrencas(
                     modifier = Modifier.weight(1f),
                 )
                 BotaoPrimario(
-                    texto = stringResource(id = R.string.crencas_cta_continuar),
+                    texto = stringResource(id = R.string.crencas_cta_gerar_palpite),
                     onClick = onContinuarClick,
                     modifier = Modifier.weight(1f),
                 )
             }
+            uiState.palpiteGerado?.let { palpite ->
+                ResultadoDoPalpite(palpite = palpite, modifier = Modifier.testTag(TAG_RESULTADO_PALPITE))
+            }
         }
+    }
+}
+
+@Composable
+private fun ResultadoDoPalpite(
+    palpite: Palpite,
+    modifier: Modifier = Modifier,
+) {
+    val dezenasFormatadas = palpite.dezenas.joinToString(separator = " · ") { it.toString().padStart(2, '0') }
+    val descricaoDoResultado = stringResource(id = R.string.crencas_resultado_dezenas_descricao, dezenasFormatadas)
+
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(color = NocturneSurface, shape = RoundedCornerShape(8.dp))
+                .border(border = BorderStroke(1.dp, NocturneOutline), shape = RoundedCornerShape(8.dp))
+                .padding(16.dp)
+                .semantics(mergeDescendants = true) { contentDescription = descricaoDoResultado },
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(id = R.string.crencas_resultado_titulo),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Text(text = dezenasFormatadas, style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = stringResource(id = R.string.crencas_resultado_forca, palpite.forca),
+            style = MaterialTheme.typography.bodyMedium,
+            color = NocturneAccent,
+        )
+        Text(
+            text = stringResource(id = R.string.crencas_resultado_probabilidade),
+            style = MaterialTheme.typography.bodySmall,
+        )
     }
 }
 

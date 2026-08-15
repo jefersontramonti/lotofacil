@@ -3,6 +3,7 @@ package com.trevo.app.navegacao
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -38,16 +39,31 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 onContinuarClick = { navController.navigate(Rotas.CRENCAS) },
             )
         }
-        composable(Rotas.CRENCAS) {
+        composable(Rotas.CRENCAS) { entradaAtual ->
             val viewModel: CrencasViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
+
+            // A entrada de IDENTIDADE continua na pilha (só POP_BACK a
+            // desfaz) — reaproveita o mesmo ViewModel em vez de duplicar
+            // nome/nascimento/signo como argumento de rota. `remember` usa
+            // a entrada da própria rota CRENCAS como chave, não o
+            // navController (regra UnrememberedGetBackStackEntry do lint
+            // do Navigation Compose).
+            val identidadeEntry =
+                remember(entradaAtual) { navController.getBackStackEntry(Rotas.IDENTIDADE) }
+            val identidadeViewModel: IdentidadeViewModel = hiltViewModel(identidadeEntry)
+            val identidadeUiState by identidadeViewModel.uiState.collectAsState()
 
             TelaCrencas(
                 uiState = uiState,
                 onCrencaClick = viewModel::aoTocarCrenca,
                 onVoltarClick = { navController.popBackStack() },
                 onContinuarClick = {
-                    // RF-03 (home) registra a próxima rota aqui
+                    viewModel.aoGerarPalpite(
+                        nome = identidadeUiState.nome,
+                        nascimentoTexto = identidadeUiState.nascimento,
+                        signo = identidadeUiState.signo,
+                    )
                 },
             )
         }

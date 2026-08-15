@@ -3,10 +3,12 @@ package com.trevo.app.onboarding
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -14,6 +16,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import com.trevo.app.R
 import com.trevo.core.engine.crenca.Crenca
+import com.trevo.core.engine.palpite.Palpite
 import com.trevo.core.ui.TrevoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -36,7 +39,9 @@ class TelaCrencasTest {
     private val titulo get() = context.getString(R.string.crencas_titulo)
     private val subtitulo get() = context.getString(R.string.crencas_subtitulo)
     private val ctaVoltar get() = context.getString(R.string.crencas_cta_voltar)
-    private val ctaContinuar get() = context.getString(R.string.crencas_cta_continuar)
+    private val ctaGerarPalpite get() = context.getString(R.string.crencas_cta_gerar_palpite)
+    private val resultadoTitulo get() = context.getString(R.string.crencas_resultado_titulo)
+    private val resultadoProbabilidade get() = context.getString(R.string.crencas_resultado_probabilidade)
 
     private val expressoesProibidas =
         listOf(
@@ -183,8 +188,37 @@ class TelaCrencasTest {
         composeTestRule.onNodeWithText(ctaVoltar).performScrollTo().performClick()
         assertTrue(voltouClicado)
 
-        composeTestRule.onNodeWithText(ctaContinuar).performScrollTo().performClick()
+        composeTestRule.onNodeWithText(ctaGerarPalpite).performScrollTo().performClick()
         assertTrue(continuouClicado)
+    }
+
+    @Test
+    fun semPalpiteGeradoNaoExibeOPainelDeResultado() {
+        mostrarTelaCrencas(uiState = CrencasUiState(palpiteGerado = null))
+
+        composeTestRule.onAllNodesWithTag(TAG_RESULTADO_PALPITE).assertCountEquals(0)
+    }
+
+    @Test
+    fun comPalpiteGeradoExibeAsDezenasAForcaEAProbabilidadeReal() {
+        val palpite =
+            Palpite(
+                dezenas = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
+                dezenasFixas = emptyList(),
+                contribuicoes = emptyMap(),
+                forca = 42,
+            )
+
+        mostrarTelaCrencas(uiState = CrencasUiState(palpiteGerado = palpite))
+
+        composeTestRule.onNodeWithTag(TAG_RESULTADO_PALPITE).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText(resultadoTitulo).assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(
+                "01 · 02 · 03 · 04 · 05 · 06 · 07 · 08 · 09 · 10 · 11 · 12 · 13 · 14 · 15",
+            ).assertIsDisplayed()
+        composeTestRule.onNodeWithText(context.getString(R.string.crencas_resultado_forca, 42)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(resultadoProbabilidade).assertIsDisplayed()
     }
 
     @Test
@@ -194,7 +228,9 @@ class TelaCrencasTest {
                 put("crencas_titulo", titulo)
                 put("crencas_subtitulo", subtitulo)
                 put("crencas_cta_voltar", ctaVoltar)
-                put("crencas_cta_continuar", ctaContinuar)
+                put("crencas_cta_gerar_palpite", ctaGerarPalpite)
+                put("crencas_resultado_titulo", resultadoTitulo)
+                put("crencas_resultado_probabilidade", resultadoProbabilidade)
                 Crenca.entries.forEach { crenca ->
                     put("nome de $crenca", context.getString(nomeStringDe.getValue(crenca)))
                     put("descrição de $crenca", context.getString(descricaoStringDe.getValue(crenca)))

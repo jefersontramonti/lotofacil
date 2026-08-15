@@ -2,6 +2,7 @@ package com.trevo.app.di
 
 import com.trevo.core.engine.identidade.ValidadorDataNascimento
 import com.trevo.core.engine.identidade.VerificadorDeIdade
+import com.trevo.core.engine.palpite.PalpiteGenerator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,4 +22,10 @@ object EngineModule {
 
     @Provides
     fun fornecerVerificadorDeIdade(clock: Clock): VerificadorDeIdade = VerificadorDeIdade(clock)
+
+    // Random.Default aqui é o único ponto de produção que o instancia —
+    // testes usam PalpiteGenerator(Random(semente)) diretamente, nunca
+    // esta função (CLAUDE.md §4).
+    @Provides
+    fun fornecerGeradorDePalpites(): PalpiteGenerator = PalpiteGenerator()
 }
