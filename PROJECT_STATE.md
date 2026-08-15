@@ -23,13 +23,13 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-02.1 | Gerar volante de 15 dezenas (1–25, sem repetição) por sorteio ponderado | M | F1 | não iniciado | |
-| RF-02.2 | Somar peso por crença ativa; dezenas fixas com peso dominante | M | F1 | não iniciado | |
-| RF-02.3 | Implementar as 12 crenças | M | F1 | não iniciado | |
-| RF-02.4 | Traduzir sonho pelos 25 grupos do jogo do bicho (grupo N + espelho 26−N) | M | F1 | não iniciado | |
-| RF-02.5 | Excluir sem falhar crenças com dado de origem ausente/inválido | M | F1 | não iniciado | |
-| RF-02.6 | Registrar qual crença contribuiu com quais dezenas | M | F1 | não iniciado | |
-| RF-02.7 | Calcular índice de força do palpite | S | F1 | não iniciado | |
+| RF-02.1 | Gerar volante de 15 dezenas (1–25, sem repetição) por sorteio ponderado | M | F1 | concluído | |
+| RF-02.2 | Somar peso por crença ativa; dezenas fixas com peso dominante | M | F1 | concluído | |
+| RF-02.3 | Implementar as 12 crenças | M | F1 | concluído | |
+| RF-02.4 | Traduzir sonho pelos 25 grupos do jogo do bicho (grupo N + espelho 26−N) | M | F1 | concluído | |
+| RF-02.5 | Excluir sem falhar crenças com dado de origem ausente/inválido | M | F1 | concluído | |
+| RF-02.6 | Registrar qual crença contribuiu com quais dezenas | M | F1 | concluído | |
+| RF-02.7 | Calcular índice de força do palpite | S | F1 | concluído | |
 | RF-02.8 | Gerar fechamentos de 16, 18 e 20 dezenas | S | F3 | não iniciado | |
 | RF-02.9 | Animação de ritual na geração (≥3 frases) | C | F1 | não iniciado | |
 
