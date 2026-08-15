@@ -36,13 +36,14 @@
     <string name="signo_escorpiao">Escorpião</string>
     <string name="signo_sagitario">Sagitário</string>
     <string name="crencas_titulo">No que você acredita</string>
-    <string name="crencas_subtitulo">Marque as crenças que você quer usar no palpite. Dá para mudar depois.</string>
+    <string name="crencas_subtitulo_prefixo">No grátis entram três por palpite.</string>
+    <plurals name="crencas_subtitulo_selecionadas">
+        <item quantity="one">%1$d selecionada</item>
+        <item quantity="other">%1$d selecionadas</item>
+    </plurals>
     <string name="crencas_cta_voltar">Voltar</string>
-    <string name="crencas_cta_gerar_palpite">Gerar palpite →</string>
-    <string name="crencas_resultado_titulo">Seu palpite</string>
-    <string name="crencas_resultado_forca">Força: %1$d%%</string>
-    <string name="crencas_resultado_probabilidade">Chance real de acertar as 15 dezenas: 1 em 3.268.760. Nenhuma crença muda essa probabilidade — a Lotofácil é aleatória.</string>
-    <string name="crencas_resultado_dezenas_descricao">Palpite gerado: %1$s</string>
+    <string name="crencas_cta_entrar_no_app">Entrar no app</string>
+    <string name="crencas_cadeado_indicador" translatable="false">🔒</string>
     <string name="crenca_signo_nome">Signo</string>
     <string name="crenca_signo_desc">Dezenas regidas pelo seu signo</string>
     <string name="crenca_nascimento_nome">Data de nascimento</string>

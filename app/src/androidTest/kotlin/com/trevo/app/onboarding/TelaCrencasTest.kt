@@ -16,9 +16,9 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import com.trevo.app.R
 import com.trevo.core.engine.crenca.Crenca
-import com.trevo.core.engine.palpite.Palpite
 import com.trevo.core.ui.TrevoTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -26,9 +26,12 @@ import org.junit.Test
 /**
  * RF-01.7 — "Apresentar as 12 crenças com nome e descrição curta,
  * permitindo seleção múltipla."
- *
- * O limite de 3 no plano grátis e o cadeado nas demais (RF-01.8) ficam
- * fora de escopo aqui — nenhuma crença é bloqueada nesta tela.
+ * RF-01.8 — "Limitar a seleção a três crenças no plano grátis, exibindo
+ * cadeado nas demais e conduzindo ao paywall ao tocá-las." Wireframe 1c
+ * (Docs/Trevo - Wireframes.dc.html): título, subtítulo com a contagem em
+ * negrito, cadeado nas crenças travadas e CTA "Entrar no app" — o palpite
+ * gerado não é exibido nesta tela (fica pronto pra tela de destino que
+ * RF-03/home ainda não define).
  */
 class TelaCrencasTest {
     @get:Rule
@@ -37,11 +40,19 @@ class TelaCrencasTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
     private val titulo get() = context.getString(R.string.crencas_titulo)
-    private val subtitulo get() = context.getString(R.string.crencas_subtitulo)
     private val ctaVoltar get() = context.getString(R.string.crencas_cta_voltar)
-    private val ctaGerarPalpite get() = context.getString(R.string.crencas_cta_gerar_palpite)
-    private val resultadoTitulo get() = context.getString(R.string.crencas_resultado_titulo)
-    private val resultadoProbabilidade get() = context.getString(R.string.crencas_resultado_probabilidade)
+    private val ctaEntrarNoApp get() = context.getString(R.string.crencas_cta_entrar_no_app)
+
+    private fun subtituloEsperado(quantidadeSelecionada: Int): String {
+        val prefixo = context.getString(R.string.crencas_subtitulo_prefixo)
+        val contagem =
+            context.resources.getQuantityString(
+                R.plurals.crencas_subtitulo_selecionadas,
+                quantidadeSelecionada,
+                quantidadeSelecionada,
+            )
+        return "$prefixo $contagem"
+    }
 
     private val expressoesProibidas =
         listOf(
@@ -86,6 +97,7 @@ class TelaCrencasTest {
     private fun mostrarTelaCrencas(
         uiState: CrencasUiState = CrencasUiState(),
         onCrencaClick: (Crenca) -> Unit = {},
+        onCrencaBloqueadaClick: () -> Unit = {},
         onVoltarClick: () -> Unit = {},
         onContinuarClick: () -> Unit = {},
     ) {
@@ -94,6 +106,7 @@ class TelaCrencasTest {
                 TelaCrencas(
                     uiState = uiState,
                     onCrencaClick = onCrencaClick,
+                    onCrencaBloqueadaClick = onCrencaBloqueadaClick,
                     onVoltarClick = onVoltarClick,
                     onContinuarClick = onContinuarClick,
                 )
@@ -102,11 +115,18 @@ class TelaCrencasTest {
     }
 
     @Test
-    fun exibeTituloESubtituloDaTelaDeCrencas() {
+    fun exibeTituloESubtituloComContagemZeradaQuandoNadaEstaSelecionado() {
         mostrarTelaCrencas()
 
         composeTestRule.onNodeWithText(titulo).assertIsDisplayed()
-        composeTestRule.onNodeWithText(subtitulo).assertIsDisplayed()
+        composeTestRule.onNodeWithText(subtituloEsperado(0)).assertIsDisplayed()
+    }
+
+    @Test
+    fun subtituloRefleteAContagemAtualDeCrencasSelecionadas() {
+        mostrarTelaCrencas(uiState = CrencasUiState(selecionadas = setOf(Crenca.SIGNO, Crenca.LUA)))
+
+        composeTestRule.onNodeWithText(subtituloEsperado(2)).assertIsDisplayed()
     }
 
     @Test
@@ -163,6 +183,7 @@ class TelaCrencasTest {
                         val atual = uiState.selecionadas
                         uiState = uiState.copy(selecionadas = if (crenca in atual) atual - crenca else atual + crenca)
                     },
+                    onCrencaBloqueadaClick = {},
                     onVoltarClick = {},
                     onContinuarClick = {},
                 )
@@ -176,7 +197,72 @@ class TelaCrencasTest {
     }
 
     @Test
-    fun botoesVoltarEContinuarExistemEDisparamOsCallbacksCorrespondentes() {
+    fun comTresCrencasSelecionadasAsDemaisExibemCadeadoEmVezDeCaixaDeMarcacao() {
+        val tresSelecionadas = setOf(Crenca.SIGNO, Crenca.LUA, Crenca.SONHO)
+
+        mostrarTelaCrencas(uiState = CrencasUiState(selecionadas = tresSelecionadas))
+
+        // A Row do cartão usa mergeDescendants — o cadeado só é alcançável
+        // como nó próprio com useUnmergedTree = true, por uma tag dedicada
+        // (tagCadeadoCrenca), não por texto: `onNodeWithText(cadeado)` sem
+        // escopo casaria com um dos 9 cartões bloqueados ao mesmo tempo.
+        composeTestRule
+            .onNodeWithTag(tagCadeadoCrenca(Crenca.MOLDURA), useUnmergedTree = true)
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithTag(tagCartaoCrenca(Crenca.MOLDURA)).assertIsDisplayed()
+    }
+
+    @Test
+    fun tocarUmaCrencaBloqueadaDisparaOnCrencaBloqueadaClickENaoOnCrencaClick() {
+        var crencaTocada: Crenca? = null
+        var bloqueadaTocada = false
+
+        mostrarTelaCrencas(
+            uiState = CrencasUiState(selecionadas = setOf(Crenca.SIGNO, Crenca.LUA, Crenca.SONHO)),
+            onCrencaClick = { crencaTocada = it },
+            onCrencaBloqueadaClick = { bloqueadaTocada = true },
+        )
+
+        composeTestRule.onNodeWithTag(tagCartaoCrenca(Crenca.MOLDURA)).performScrollTo().performClick()
+
+        assertTrue(bloqueadaTocada)
+        assertNull(crencaTocada)
+    }
+
+    @Test
+    fun crencaJaSelecionadaNuncaFicaBloqueadaMesmoNoLimiteDeTres() {
+        val tresSelecionadas = setOf(Crenca.SIGNO, Crenca.LUA, Crenca.SONHO)
+        var crencaTocada: Crenca? = null
+
+        mostrarTelaCrencas(
+            uiState = CrencasUiState(selecionadas = tresSelecionadas),
+            onCrencaClick = { crencaTocada = it },
+        )
+
+        composeTestRule.onNodeWithTag(tagCartaoCrenca(Crenca.SIGNO)).performScrollTo().assertIsOn()
+        composeTestRule.onNodeWithTag(tagCartaoCrenca(Crenca.SIGNO)).performClick()
+
+        assertEquals(Crenca.SIGNO, crencaTocada)
+    }
+
+    @Test
+    fun comMenosDeTresSelecionadasNenhumaCrencaFicaBloqueada() {
+        mostrarTelaCrencas(uiState = CrencasUiState(selecionadas = setOf(Crenca.SIGNO, Crenca.LUA)))
+
+        Crenca.entries.forEach { crenca ->
+            composeTestRule.onNodeWithTag(tagCartaoCrenca(crenca)).performScrollTo().assertIsDisplayed()
+        }
+        // Nenhum cadeado na árvore inteira — todas as 12 continuam com caixa de marcação.
+        Crenca.entries.forEach { crenca ->
+            composeTestRule
+                .onAllNodesWithTag(tagCadeadoCrenca(crenca), useUnmergedTree = true)
+                .assertCountEquals(0)
+        }
+    }
+
+    @Test
+    fun botoesVoltarEEntrarNoAppExistemEDisparamOsCallbacksCorrespondentes() {
         var voltouClicado = false
         var continuouClicado = false
 
@@ -188,37 +274,8 @@ class TelaCrencasTest {
         composeTestRule.onNodeWithText(ctaVoltar).performScrollTo().performClick()
         assertTrue(voltouClicado)
 
-        composeTestRule.onNodeWithText(ctaGerarPalpite).performScrollTo().performClick()
+        composeTestRule.onNodeWithText(ctaEntrarNoApp).performScrollTo().performClick()
         assertTrue(continuouClicado)
-    }
-
-    @Test
-    fun semPalpiteGeradoNaoExibeOPainelDeResultado() {
-        mostrarTelaCrencas(uiState = CrencasUiState(palpiteGerado = null))
-
-        composeTestRule.onAllNodesWithTag(TAG_RESULTADO_PALPITE).assertCountEquals(0)
-    }
-
-    @Test
-    fun comPalpiteGeradoExibeAsDezenasAForcaEAProbabilidadeReal() {
-        val palpite =
-            Palpite(
-                dezenas = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
-                dezenasFixas = emptyList(),
-                contribuicoes = emptyMap(),
-                forca = 42,
-            )
-
-        mostrarTelaCrencas(uiState = CrencasUiState(palpiteGerado = palpite))
-
-        composeTestRule.onNodeWithTag(TAG_RESULTADO_PALPITE).performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithText(resultadoTitulo).assertIsDisplayed()
-        composeTestRule
-            .onNodeWithText(
-                "01 · 02 · 03 · 04 · 05 · 06 · 07 · 08 · 09 · 10 · 11 · 12 · 13 · 14 · 15",
-            ).assertIsDisplayed()
-        composeTestRule.onNodeWithText(context.getString(R.string.crencas_resultado_forca, 42)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(resultadoProbabilidade).assertIsDisplayed()
     }
 
     @Test
@@ -226,11 +283,9 @@ class TelaCrencasTest {
         val stringsDaTela =
             buildMap {
                 put("crencas_titulo", titulo)
-                put("crencas_subtitulo", subtitulo)
+                put("crencas_subtitulo", subtituloEsperado(0))
                 put("crencas_cta_voltar", ctaVoltar)
-                put("crencas_cta_gerar_palpite", ctaGerarPalpite)
-                put("crencas_resultado_titulo", resultadoTitulo)
-                put("crencas_resultado_probabilidade", resultadoProbabilidade)
+                put("crencas_cta_entrar_no_app", ctaEntrarNoApp)
                 Crenca.entries.forEach { crenca ->
                     put("nome de $crenca", context.getString(nomeStringDe.getValue(crenca)))
                     put("descrição de $crenca", context.getString(descricaoStringDe.getValue(crenca)))

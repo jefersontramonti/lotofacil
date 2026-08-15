@@ -57,8 +57,15 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
             TelaCrencas(
                 uiState = uiState,
                 onCrencaClick = viewModel::aoTocarCrenca,
+                onCrencaBloqueadaClick = {
+                    // RF-01.8/RF-09 (paywall) registram o destino aqui
+                },
                 onVoltarClick = { navController.popBackStack() },
                 onContinuarClick = {
+                    // O palpite já é gerado com as crenças ativas, pronto
+                    // pra quando a tela de destino (RF-03/home) existir —
+                    // só não é exibido nesta tela (wireframe 1c: o CTA
+                    // leva pra dentro do app, não mostra resultado aqui).
                     viewModel.aoGerarPalpite(
                         nome = identidadeUiState.nome,
                         nascimentoTexto = identidadeUiState.nascimento,

@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,31 +27,36 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.trevo.app.R
 import com.trevo.core.engine.crenca.Crenca
-import com.trevo.core.engine.palpite.Palpite
 import com.trevo.core.ui.BotaoPrimario
 import com.trevo.core.ui.NocturneAccent
 import com.trevo.core.ui.NocturneOutline
 import com.trevo.core.ui.NocturneSurface
 
-const val TAG_RESULTADO_PALPITE = "resultado_palpite"
-
-// Prefixo público — TelaCrencasTest referencia esta função para montar as
-// mesmas tags sem duplicar a string literal.
+// Prefixo público — TelaCrencasTest referencia estas funções para montar
+// as mesmas tags sem duplicar a string literal.
 fun tagCartaoCrenca(crenca: Crenca): String = "crenca_${crenca.name.lowercase()}"
+
+fun tagCadeadoCrenca(crenca: Crenca): String = "${tagCartaoCrenca(crenca)}_cadeado"
 
 @Composable
 fun TelaCrencas(
     uiState: CrencasUiState,
     onCrencaClick: (Crenca) -> Unit,
+    onCrencaBloqueadaClick: () -> Unit,
     onVoltarClick: () -> Unit,
     onContinuarClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -72,15 +78,14 @@ fun TelaCrencas(
                 text = stringResource(id = R.string.crencas_titulo),
                 style = MaterialTheme.typography.headlineMedium,
             )
-            Text(
-                text = stringResource(id = R.string.crencas_subtitulo),
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Text(text = subtituloComContagem(uiState.selecionadas.size), style = MaterialTheme.typography.bodyLarge)
             Crenca.entries.forEach { crenca ->
                 CartaoCrenca(
                     crenca = crenca,
                     selecionada = crenca in uiState.selecionadas,
+                    bloqueada = uiState.crencaBloqueada(crenca),
                     onClick = { onCrencaClick(crenca) },
+                    onBloqueadaClick = onCrencaBloqueadaClick,
                 )
             }
             Row(
@@ -93,70 +98,53 @@ fun TelaCrencas(
                     modifier = Modifier.weight(1f),
                 )
                 BotaoPrimario(
-                    texto = stringResource(id = R.string.crencas_cta_gerar_palpite),
+                    texto = stringResource(id = R.string.crencas_cta_entrar_no_app),
                     onClick = onContinuarClick,
                     modifier = Modifier.weight(1f),
                 )
-            }
-            uiState.palpiteGerado?.let { palpite ->
-                ResultadoDoPalpite(palpite = palpite, modifier = Modifier.testTag(TAG_RESULTADO_PALPITE))
             }
         }
     }
 }
 
 @Composable
-private fun ResultadoDoPalpite(
-    palpite: Palpite,
-    modifier: Modifier = Modifier,
-) {
-    val dezenasFormatadas = palpite.dezenas.joinToString(separator = " · ") { it.toString().padStart(2, '0') }
-    val descricaoDoResultado = stringResource(id = R.string.crencas_resultado_dezenas_descricao, dezenasFormatadas)
-
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .background(color = NocturneSurface, shape = RoundedCornerShape(8.dp))
-                .border(border = BorderStroke(1.dp, NocturneOutline), shape = RoundedCornerShape(8.dp))
-                .padding(16.dp)
-                .semantics(mergeDescendants = true) { contentDescription = descricaoDoResultado },
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(
-            text = stringResource(id = R.string.crencas_resultado_titulo),
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Text(text = dezenasFormatadas, style = MaterialTheme.typography.headlineSmall)
-        Text(
-            text = stringResource(id = R.string.crencas_resultado_forca, palpite.forca),
-            style = MaterialTheme.typography.bodyMedium,
-            color = NocturneAccent,
-        )
-        Text(
-            text = stringResource(id = R.string.crencas_resultado_probabilidade),
-            style = MaterialTheme.typography.bodySmall,
-        )
+private fun subtituloComContagem(quantidadeSelecionada: Int) =
+    buildAnnotatedString {
+        append(stringResource(id = R.string.crencas_subtitulo_prefixo))
+        append(" ")
+        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+            append(
+                pluralStringResource(
+                    id = R.plurals.crencas_subtitulo_selecionadas,
+                    count = quantidadeSelecionada,
+                    quantidadeSelecionada,
+                ),
+            )
+        }
     }
-}
 
 @Composable
 private fun CartaoCrenca(
     crenca: Crenca,
     selecionada: Boolean,
+    bloqueada: Boolean,
     onClick: () -> Unit,
+    onBloqueadaClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
+                .alpha(if (bloqueada) 0.5f else 1f)
                 .background(color = NocturneSurface, shape = RoundedCornerShape(8.dp))
                 .border(border = BorderStroke(1.dp, NocturneOutline), shape = RoundedCornerShape(8.dp))
-                .toggleable(
-                    value = selecionada,
-                    onValueChange = { onClick() },
-                    role = Role.Checkbox,
+                .then(
+                    if (bloqueada) {
+                        Modifier.clickable(role = Role.Button, onClick = onBloqueadaClick)
+                    } else {
+                        Modifier.toggleable(value = selecionada, onValueChange = { onClick() }, role = Role.Checkbox)
+                    },
                 ).semantics(mergeDescendants = true) {}
                 .padding(12.dp)
                 .testTag(tagCartaoCrenca(crenca)),
@@ -172,14 +160,27 @@ private fun CartaoCrenca(
             Text(text = stringResource(id = nomeDe(crenca)), style = MaterialTheme.typography.titleMedium)
             Text(text = stringResource(id = descricaoDe(crenca)), style = MaterialTheme.typography.bodySmall)
         }
-        // `onCheckedChange = null`: o toque é tratado pelo `toggleable` da Row;
-        // o Checkbox aqui é só o indicador visual, mesclado no nó semântico
-        // acima — RNF-03.5, o estado de marcação nunca é só a cor de fundo.
-        Checkbox(
-            checked = selecionada,
-            onCheckedChange = null,
-            colors = CheckboxDefaults.colors(checkedColor = NocturneAccent),
-        )
+        if (bloqueada) {
+            // RF-01.8: cadeado no lugar da caixa de marcação — mesmo
+            // padrão de glifo-como-ícone já usado em
+            // identidade_erro_indicador ("⚠"), sem depender de uma nova
+            // biblioteca de ícones. TestTag próprio: a Row usa
+            // mergeDescendants, então esse nó só é alcançável em teste com
+            // useUnmergedTree = true.
+            Text(
+                text = stringResource(id = R.string.crencas_cadeado_indicador),
+                modifier = Modifier.testTag(tagCadeadoCrenca(crenca)),
+            )
+        } else {
+            // `onCheckedChange = null`: o toque é tratado pelo `toggleable` da Row;
+            // o Checkbox aqui é só o indicador visual, mesclado no nó semântico
+            // acima — RNF-03.5, o estado de marcação nunca é só a cor de fundo.
+            Checkbox(
+                checked = selecionada,
+                onCheckedChange = null,
+                colors = CheckboxDefaults.colors(checkedColor = NocturneAccent),
+            )
+        }
     }
 }
 

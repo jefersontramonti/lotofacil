@@ -16,7 +16,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-01.5 | Calcular signo a partir da data válida; marcador neutro se inválida | M | F1 | concluído |  |
 | RF-01.6 | Impedir avanço do passo com erro de validação | M | F1 | concluído | |
 | RF-01.7 | Apresentar as 12 crenças, seleção múltipla | M | F1 | concluído | |
-| RF-01.8 | Limitar seleção a 3 crenças no grátis, cadeado leva ao paywall | M | F3 | não iniciado | |
+| RF-01.8 | Limitar seleção a 3 crenças no grátis, cadeado leva ao paywall | M | F3 | em andamento | limite de 3 e cadeado prontos; toque no cadeado ainda não leva a lugar nenhum (RF-09/paywall não existe) |
 | RF-01.9 | Auto-formatar data de nascimento com barras enquanto digita | C | F1 | concluído |  |
 
 ## RF-02 · Motor de geração de palpites
