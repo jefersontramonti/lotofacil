@@ -33,7 +33,7 @@ a:hover{color:var(--color-accent-900)}
 <p style="margin:0 0 26px;font-size:10pt;color:var(--color-neutral-800)">Kotlin · Jetpack Compose · minSdk 26 · Play Store</p>
 
 <h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">1. Resumo</h2>
-<p style="margin:0 0 10px">O Trevo gera volantes da Lotofácil combinando signo, data de nascimento, números quentes, atrasados, fase da lua, sonho traduzido pelo jogo do bicho, moldura do volante e outras crenças populares. O usuário escolhe em quais acredita; o app monta o volante, explica de onde veio cada dezena e confere o resultado quando o sorteio sai.</p>
+<p style="margin:0 0 10px">O Trevo gera volantes da Lotofácil combinando signo, data de nascimento, números quentes, atrasados, fase da lua, sonho traduzido pelo jogo do bicho — com a leitura popular de cada um dos 25 grupos —, moldura do volante e outras crenças populares. O usuário escolhe em quais acredita; o app monta o volante, explica de onde veio cada dezena e confere o resultado quando o sorteio sai.</p>
 <p style="margin:0 0 10px">O produto vende organização de palpites, nunca a aposta. O app não recebe dinheiro de aposta, não intermedia pagamento e não paga prêmio — essas atividades são exclusivas da Caixa. A aposta continua sendo feita pelo usuário na lotérica ou no canal oficial.</p>
 <p style="margin:0 0 22px">Cada tela que apresenta um palpite também apresenta a probabilidade real. Isso é uma decisão de produto, não um aviso legal escondido no rodapé: é o que separa o Trevo de um app que promete acerto e é o que sustenta a revisão na Play Store.</p>
 
@@ -47,7 +47,10 @@ a:hover{color:var(--color-accent-900)}
 <p style="margin:0 0 10px">Três passos: apresentação com o aviso de aleatoriedade; nome e data de nascimento com validação completa (formato, dia real do mês, faixa de anos, idade mínima de 18) e cálculo automático do signo; seleção das crenças, limitada a três no plano grátis.</p>
 
 <h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.2 Home</h3>
-<p style="margin:0 0 10px">Cabeçalho com o concurso corrente, horário de fechamento das apostas (19h) e do sorteio (20h), índice de sorte do dia, fase da lua e signo. Seletor dos 25 grupos do jogo do bicho quando a crença de sonho está ativa. Lista dos palpites do dia, cada um mostrando quantas dezenas mudaram em relação ao anterior. Contador de palpites restantes e o botão de gerar.</p>
+<p style="margin:0 0 10px">Cabeçalho com o concurso corrente, horário de fechamento das apostas (19h) e do sorteio (20h), índice de sorte do dia, fase da lua e signo. Seletor dos 25 grupos do jogo do bicho quando a crença de sonho está ativa: tocar um grupo abre um card com a leitura popular daquele sonho, as dezenas que ele puxa e a confirmação como sonho do dia. Lista dos palpites do dia, cada um mostrando quantas dezenas mudaram em relação ao anterior. Seletor de modo, contador de palpites restantes e o botão de gerar.</p>
+
+<h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.2.1 Modos e ritual dos amuletos</h3>
+<p style="margin:0 0 10px">Três modos decidem o que alimenta o volante: Místico usa apenas as crenças, Cientista apenas as estatísticas, Destino combina as duas com o ritual dos amuletos. No modo Destino o botão de gerar dá lugar ao ritual: trevo de quatro folhas, ferradura e anéis de ouro em sequência, cada um revelando uma dezena depois da escolha do apostador. A escolha é dele, a dezena é sorteada pelo mesmo motor, e a tela diz isso. Ao fim, cada amuleto aparece na explicação de origem junto das crenças.</p>
 
 <h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">3.3 Detalhe do palpite</h3>
 <p style="margin:0 0 10px">Volante 5×5, força do palpite, chance real da aposta, seletor de fechamento (15, 16, 18 ou 20 dezenas), lista explicando qual crença trouxe cada dezena, estatísticas do volante (soma, pares e ímpares, moldura e miolo, custo na lotérica) e a edição manual das dezenas com opção de guardar as escolhidas como fixas permanentes.</p>
@@ -117,7 +120,7 @@ a:hover{color:var(--color-accent-900)}
 <h2 style="margin:0 0 8px;font-family:var(--font-heading);font-size:15pt;font-weight:500;letter-spacing:-.01em">6. Fases de entrega</h2>
 
 <h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">Fase 1 — MVP publicável</h3>
-<p style="margin:0 0 10px">Onboarding, motor de geração com as 12 crenças, home, detalhe do palpite, edição manual, dezenas fixas, persistência local, conferência com a API da Caixa, compartilhar no WhatsApp e os avisos de probabilidade. Sem monetização, sem conta. Objetivo: validar se as pessoas voltam. Estimativa de 6 a 8 semanas para um desenvolvedor.</p>
+<p style="margin:0 0 10px">Onboarding, motor de geração com as 12 crenças, os três modos e o ritual dos amuletos, card de significado dos sonhos, home, detalhe do palpite, edição manual, dezenas fixas, persistência local, conferência com a API da Caixa, compartilhar no WhatsApp e os avisos de probabilidade. Sem monetização, sem conta. Objetivo: validar se as pessoas voltam. Estimativa de 6 a 8 semanas para um desenvolvedor.</p>
 
 <h3 style="margin:14px 0 6px;font-family:var(--font-heading);font-size:12pt;font-weight:600">Fase 2 — Retenção</h3>
 <p style="margin:0 0 10px">Notificações (lembrete no horário escolhido e resultado às 20h), conferência automática em segundo plano, histórico com resumo de gastos e ganhos, perfil completo, estados de erro e offline. Estimativa de 3 a 4 semanas.</p>

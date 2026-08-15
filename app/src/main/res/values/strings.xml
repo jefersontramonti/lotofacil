@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Trevo</string>
+    <string name="abertura_proposta">Palpites para a Lotofácil montados a partir das crenças que você escolher. Signo, atrasados, lua, sonho, moldura — tudo que o povo usa para tentar a sorte, em um volante só.</string>
+    <string name="abertura_aviso_aleatoriedade">Aviso: sorteio é aleatório. Nenhuma crença muda a probabilidade. Jogue por diversão e no seu limite.</string>
+    <string name="abertura_cta_comecar">Começar →</string>
+    <string name="identidade_titulo">Quem está jogando</string>
+    <string name="identidade_subtitulo">Usado pela numerologia do nome e pelo cálculo do signo.</string>
+    <string name="identidade_label_nome">Nome</string>
+    <string name="identidade_placeholder_nome">Seu nome completo</string>
+    <string name="identidade_label_nascimento">Data de nascimento</string>
+    <string name="identidade_placeholder_nascimento">dd/mm/aaaa</string>
+    <string name="identidade_cta_voltar">Voltar</string>
+    <string name="identidade_cta_continuar">Continuar</string>
+    <string name="identidade_progresso_descricao">Passo 2 de 3</string>
+    <string name="identidade_erro_indicador" translatable="false">⚠</string>
+    <string name="identidade_erro_formato">Use o formato dd/mm/aaaa.</string>
+    <string name="identidade_erro_mes">Mês inválido.</string>
+    <string name="identidade_erro_dia">Esse dia não existe nesse mês.</string>
+    <string name="identidade_erro_intervalo">Use uma data entre 01/01/1900 e hoje.</string>
+    <string name="identidade_erro_menor_idade">É preciso ter 18 anos completos para usar o Trevo.</string>
+    <string name="identidade_signo_rotulo">Seu signo</string>
+    <string name="identidade_signo_marcador_neutro" translatable="false">—</string>
+    <string name="identidade_signo_separador_dezenas" translatable="false"> · </string>
+    <string name="identidade_signo_descricao">Seu signo: %1$s. Dezenas regidas: %2$s.</string>
+    <string name="identidade_signo_descricao_neutro">Signo ainda não calculado. Informe uma data de nascimento completa e válida.</string>
+    <string name="signo_capricornio">Capricórnio</string>
+    <string name="signo_aquario">Aquário</string>
+    <string name="signo_peixes">Peixes</string>
+    <string name="signo_aries">Áries</string>
+    <string name="signo_touro">Touro</string>
+    <string name="signo_gemeos">Gêmeos</string>
+    <string name="signo_cancer">Câncer</string>
+    <string name="signo_leao">Leão</string>
+    <string name="signo_virgem">Virgem</string>
+    <string name="signo_libra">Libra</string>
+    <string name="signo_escorpiao">Escorpião</string>
+    <string name="signo_sagitario">Sagitário</string>
+</resources>

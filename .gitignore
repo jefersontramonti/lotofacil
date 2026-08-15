@@ -1,5 +1,8 @@
 .gradle
 build/
+local.properties
+captures/
+.cxx/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/

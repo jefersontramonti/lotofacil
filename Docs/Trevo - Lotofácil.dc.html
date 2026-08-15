@@ -20,6 +20,12 @@ a:hover{color:#b5abfc}
 @keyframes tv-spin{to{transform:rotate(360deg)}}
 @keyframes tv-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes tv-glow{0%,100%{opacity:.35}50%{opacity:.9}}
+@keyframes tv-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes tv-flip{0%{transform:rotateY(0) scale(.9);opacity:0}55%{transform:rotateY(360deg) scale(1.06);opacity:1}100%{transform:rotateY(360deg) scale(1)}}
+@keyframes tv-halo{0%{transform:scale(.7);opacity:.85}100%{transform:scale(1.9);opacity:0}}
+@keyframes tv-pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes tv-card{from{transform:translateY(26px) scale(.94);opacity:0}to{transform:none;opacity:1}}
+@keyframes tv-fade{from{opacity:0}to{opacity:1}}
 </style>
 </helmet>
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;gap:44px;padding:44px 24px;background:radial-gradient(120% 90% at 70% 0%, #1e2136 0%, #161826 60%);font-family:Inter,system-ui,sans-serif">
@@ -150,12 +156,13 @@ a:hover{color:#b5abfc}
 <div style="padding:16.8px 16.8px 0">
 <div style="display:flex;align-items:baseline;gap:8.4px;margin-bottom:8.4px">
 <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9184d9">Com o que você sonhou</div>
-<div style="margin-left:auto;font-size:11px;color:rgba(233,233,237,.68)">{{ sonhoAtual }}</div>
+<div style="margin-left:auto;font-size:11px;color:rgba(233,233,237,.68)">{{ sonhoAtual }} · toque para ver o significado</div>
 </div>
 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5.6px">
 <sc-for list="{{ bichos }}" as="b" hint-placeholder-count="10">
 <div onClick="{{ b.pick }}" style="display:flex;align-items:center;gap:8px;padding:8.4px;border-radius:8px;cursor:pointer;background:#232532;border:1px solid rgba(233,233,237,.12);border-color:{{ b.borda }};background:{{ b.fundo }}">
 <div style="width:22px;height:22px;flex:none;border-radius:6px;background:rgba(233,233,237,.07);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#9184d9">{{ b.grupo }}</div>
+<i class="ph {{ b.icone }}" style="font-size:15px;color:#9184d9;flex:none"></i>
 <div style="font-size:12px;line-height:1.2;color:{{ b.cor }}">{{ b.nome }}</div>
 </div>
 </sc-for>
@@ -232,8 +239,20 @@ a:hover{color:#b5abfc}
 </div>
 
 <div style="padding:11.2px 16.8px 16.8px;background:#161826;box-shadow:0 -1px 0 rgba(233,233,237,.1);display:flex;flex-direction:column;gap:8.4px">
+<div style="display:flex;gap:5.6px">
+<sc-for list="{{ modos }}" as="m" hint-placeholder-count="3">
+<div onClick="{{ m.pick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:8px;cursor:pointer;border:1px solid rgba(233,233,237,.16);border-color:{{ m.borda }};background:{{ m.fundo }}">
+<i class="ph {{ m.icone }}" style="font-size:18px;color:{{ m.cor }}"></i>
+<div style="font-size:11px;color:{{ m.cor }}">{{ m.rotulo }}</div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:11px;line-height:1.4;color:rgba(233,233,237,.6)">{{ modoDesc }}</div>
 <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(233,233,237,.68)"><i class="ph ph-ticket" style="font-size:14px;color:#9184d9"></i>{{ restantesTexto }}</div>
-<sc-if value="{{ temPalpite }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ modoDestino }}">
+<button onClick="{{ abrirRitual }}" style="width:100%;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:16px;color:#9184d9;background:transparent;border:1px solid #9184d9;border-radius:8px" style-hover="background:rgba(145,132,217,.12)" style-active="background:rgba(145,132,217,.22)"><i class="ph ph-hand-heart" style="font-size:19px"></i>Começar o ritual</button>
+</sc-if>
+<sc-if value="{{ mostraGerar }}" hint-placeholder-val="{{ true }}">
 <button onClick="{{ gerar }}" style="width:100%;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:16px;color:#9184d9;background:transparent;border:1px solid #9184d9;border-radius:8px" style-hover="background:rgba(145,132,217,.12)" style-active="background:rgba(145,132,217,.22)"><i class="ph ph-sparkle" style="font-size:19px"></i>Gerar palpite</button>
 </sc-if>
 <sc-if value="{{ semPalpite }}">
@@ -520,6 +539,97 @@ a:hover{color:#b5abfc}
 </div>
 </sc-if>
 
+<sc-if value="{{ isAmuletos }}">
+<div style="flex:1;overflow:auto;display:flex;flex-direction:column;background:radial-gradient(120% 70% at 50% 0%,#262a60 0%,#1c1f3d 45%,#161826 100%)">
+
+<div style="display:flex;align-items:center;gap:8.4px;padding:11.2px 16.8px">
+<div onClick="{{ sairRitual }}" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(233,233,237,.08)"><i class="ph ph-x" style="font-size:17px"></i></div>
+<div style="font-size:15px;font-weight:500">Ritual da sorte</div>
+<div style="margin-left:auto;display:flex;gap:5.6px">
+<sc-for list="{{ trilha }}" as="t" hint-placeholder-count="3">
+<div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:{{ t.borda }};background:{{ t.fundo }}"><i class="{{ t.icone }}" style="font-size:14px;color:{{ t.cor }}"></i></div>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{ ritoEmCurso }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;padding:16.8px">
+<div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#b5abfc">Amuleto {{ amuletoPassoTexto }} · {{ amuletoAtual.conceito }}</div>
+<div style="margin-top:5.6px;font-size:25px;font-weight:500;letter-spacing:-.015em;line-height:1.15">{{ amuletoAtual.nome }}</div>
+<div style="margin-top:4px;font-size:14px;color:rgba(233,233,237,.7)">{{ amuletoAtual.pergunta }}</div>
+
+<div style="display:flex;align-items:center;justify-content:center;padding:22.4px 0">
+<div style="width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(145,132,217,.1);box-shadow:inset 0 0 0 1px rgba(145,132,217,.4);animation:tv-float 3.4s ease-in-out infinite">
+<i class="ph-fill {{ amuletoAtual.icone }}" style="font-size:40px;color:#9184d9"></i>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8.4px">
+<sc-for list="{{ amuletoOpcoes }}" as="o" hint-placeholder-count="4">
+<div onClick="{{ o.escolher }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16.8px 8.4px;border-radius:8px;cursor:pointer;background:#232532;box-shadow:0 0 0 1px #3f424d" style-hover="box-shadow:0 0 0 1px #9184d9;background:#262a60">
+<i class="ph {{ o.i }}" style="font-size:26px;color:#9184d9"></i>
+<div style="font-size:13px;text-align:center;line-height:1.2">{{ o.r }}</div>
+<div style="font-size:20px;font-weight:600;color:rgba(233,233,237,.22)">?</div>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{ temRevelados }}">
+<div style="display:flex;align-items:center;gap:5.6px;margin-top:16.8px;flex-wrap:wrap">
+<span style="font-size:11px;color:rgba(233,233,237,.6)">já revelado</span>
+<sc-for list="{{ revelados }}" as="r" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;background:#423a6a;color:#f5f4ff;font-size:12px"><i class="ph {{ r.icone }}" style="font-size:13px"></i>{{ r.dezena }}</div>
+</sc-for>
+</div>
+</sc-if>
+
+<div style="margin-top:auto;padding-top:16.8px;font-size:11px;line-height:1.5;color:rgba(233,233,237,.58)">A escolha é sua, a dezena é sorteada. Nenhum amuleto altera a probabilidade do sorteio.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ritoRevelando }}">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16.8px">
+<div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+<div style="position:absolute;inset:0;border-radius:50%;border:1px solid #9184d9;animation:tv-halo 1.5s ease-out infinite"></div>
+<div style="width:110px;height:110px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#423a6a,#262a60);box-shadow:inset 0 0 0 1px #9184d9,0 12px 32px rgba(0,0,0,.5);animation:tv-flip 1s cubic-bezier(.3,.9,.2,1) both">
+<div style="font-size:40px;font-weight:600;color:#f5f4ff">{{ revelacao.dezena }}</div>
+</div>
+</div>
+<div style="text-align:center;animation:tv-pop .5s .8s ease-out both">
+<div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#b5abfc">{{ revelacao.nome }}</div>
+<div style="margin-top:3px;font-size:17px;font-weight:500">{{ revelacao.conceito }}</div>
+<div style="margin-top:2px;font-size:12px;color:rgba(233,233,237,.65)">{{ revelacao.frase }}</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ritoFim }}">
+<div style="flex:1;display:flex;flex-direction:column;padding:16.8px">
+<div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#b5abfc">Ritual completo</div>
+<div style="margin-top:5.6px;font-size:25px;font-weight:500;letter-spacing:-.015em">Suas dezenas de sorte</div>
+<div style="display:flex;flex-direction:column;gap:8.4px;margin-top:16.8px">
+<sc-for list="{{ revelados }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:11.2px;padding:11.2px;border-radius:8px;background:#232532;box-shadow:0 0 0 1px #3f424d;animation:tv-rise .35s ease both">
+<i class="ph-fill {{ r.icone }}" style="font-size:22px;color:#9184d9;flex:none"></i>
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:500">{{ r.nome }}</div>
+<div style="font-size:12px;color:rgba(233,233,237,.65)">{{ r.frase }}</div>
+</div>
+<div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#161826;background:#9184d9">{{ r.dezena }}</div>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:16.8px;font-size:13px;line-height:1.5;color:rgba(233,233,237,.7)">Estas dezenas entram no volante. As outras {{ faltamNoVolante }} vêm das crenças e da estatística que você deixou ativas.</div>
+<div style="margin-top:auto;display:flex;gap:8.4px;padding-top:16.8px">
+<button onClick="{{ refazerRitual }}" style="min-height:48px;padding:0 16.8px;cursor:pointer;font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:15px;color:#e9e9ed;background:transparent;border:1px solid rgba(233,233,237,.16);border-radius:8px" style-hover="background:rgba(233,233,237,.07)"><i class="ph ph-arrows-clockwise"></i></button>
+<button onClick="{{ fecharRitual }}" style="flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:15px;color:#9184d9;background:transparent;border:1px solid #9184d9;border-radius:8px" style-hover="background:rgba(145,132,217,.12)" style-active="background:rgba(145,132,217,.22)"><i class="ph ph-sparkle" style="font-size:17px"></i>Montar o palpite final</button>
+</div>
+</div>
+</sc-if>
+
+</div>
+</sc-if>
+
 <sc-if value="{{ isPerfil }}">
 <div style="flex:1;overflow:auto;display:flex;flex-direction:column;padding:11.2px 16.8px 22.4px">
 <h3 style="margin:11.2px 0 22.4px;font-size:25px;font-weight:500;letter-spacing:-.015em">Perfil</h3>
@@ -737,6 +847,44 @@ a:hover{color:#b5abfc}
 </div>
 </sc-if>
 
+<sc-if value="{{ bichoAberto }}">
+<div style="position:absolute;inset:0;z-index:26;display:grid;place-items:center;padding:16.8px;background:rgba(22,24,38,.72);animation:tv-fade .18s ease both">
+<div style="width:100%;border-radius:14px;background:#232532;box-shadow:0 0 0 1px #3f424d,0 18px 44px rgba(0,0,0,.6);overflow:hidden;animation:tv-card .34s cubic-bezier(.2,.9,.2,1) both">
+
+<div style="position:relative;height:132px;display:flex;align-items:center;justify-content:center;background:radial-gradient(90% 120% at 50% 20%,#423a6a 0%,#262a60 55%,#232532 100%)">
+<div style="position:absolute;width:104px;height:104px;border-radius:50%;border:1px solid rgba(145,132,217,.35);animation:tv-halo 2.4s ease-out infinite"></div>
+<i class="{{ bicho.icone }}" style="font-size:56px;color:#d2cefd;animation:tv-pop .4s .1s ease-out both"></i>
+<div style="position:absolute;top:11.2px;left:11.2px;padding:3px 9px;border-radius:6px;background:rgba(22,24,38,.5);font-size:11px;color:#f5f4ff">grupo {{ bicho.grupo }}</div>
+<div onClick="{{ fecharBicho }}" style="position:absolute;top:8.4px;right:8.4px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(22,24,38,.5)"><i class="ph ph-x" style="font-size:15px"></i></div>
+</div>
+
+<div style="padding:16.8px">
+<div style="font-size:25px;font-weight:500;letter-spacing:-.015em;line-height:1.1">{{ bicho.nome }}</div>
+<div style="margin-top:2px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9184d9">O que dizem desse sonho</div>
+<p style="margin:8.4px 0 0;font-size:14px;line-height:1.55;color:rgba(233,233,237,.8)">{{ bicho.sonho }}</p>
+
+<div style="display:flex;align-items:center;gap:8.4px;margin-top:16.8px;padding:11.2px;border-radius:8px;background:#161826;box-shadow:inset 0 0 0 1px rgba(233,233,237,.1)">
+<div style="flex:1;min-width:0">
+<div style="font-size:11px;color:rgba(233,233,237,.65)">Dezenas do grupo</div>
+<div style="font-size:17px;font-weight:500;letter-spacing:.06em;margin-top:2px">{{ bicho.dezenas }}</div>
+</div>
+<i class="ph ph-arrows-left-right" style="font-size:17px;color:#9184d9"></i>
+</div>
+<div style="margin-top:8.4px;font-size:11px;line-height:1.45;color:rgba(233,233,237,.58)">O grupo puxa o próprio número e o espelhado, 26 menos ele. A leitura do sonho é tradição popular — não altera a probabilidade do sorteio.</div>
+
+<div style="display:flex;gap:8.4px;margin-top:16.8px">
+<sc-if value="{{ bicho.naoEscolhido }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ usarBicho }}" style="flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:15px;color:#9184d9;background:transparent;border:1px solid #9184d9;border-radius:8px" style-hover="background:rgba(145,132,217,.12)" style-active="background:rgba(145,132,217,.22)"><i class="ph ph-moon-stars" style="font-size:17px"></i>Foi com isso que sonhei</button>
+</sc-if>
+<sc-if value="{{ bicho.escolhido }}">
+<div style="flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;background:rgba(145,132,217,.12);box-shadow:inset 0 0 0 1px #9184d9;font-size:15px;font-weight:500"><i class="ph-fill ph-check-circle" style="font-size:17px;color:#9184d9"></i>É o seu sonho de hoje</div>
+</sc-if>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{ excluindo }}">
 <div style="position:absolute;inset:0;z-index:40;display:grid;place-items:center;padding:16.8px;background:rgba(41,43,49,.6)">
 <div style="width:100%;display:flex;flex-direction:column;gap:8.4px;padding:16.8px;border-radius:14px;background:#232532;box-shadow:0 16px 40px rgba(0,0,0,.65)">
@@ -879,8 +1027,37 @@ const SIGNOS = [
 ];
 
 // Os 25 grupos do jogo do bicho — o grupo N puxa a dezena N e a espelhada 26−N.
-const BICHOS = ['Avestruz','Águia','Burro','Borboleta','Cachorro','Cabra','Carneiro','Camelo','Cobra','Coelho','Cavalo','Elefante','Galo','Gato','Jacaré','Leão','Macaco','Porco','Pavão','Peru','Touro','Tigre','Urso','Veado','Vaca']
-  .map((nome, i) => ({ nome, grupo: i + 1, nums: [i + 1, 26 - (i + 1)] }));
+// O significado é a leitura popular tradicional, não previsão.
+const BICHOS = [
+  ['Avestruz','ph-bird','Corrida e fuga. Dizem que anuncia uma decisão que você está adiando.'],
+  ['Águia','ph-bird','Visão de cima. Sinal de que uma oportunidade está sendo enxergada de longe.'],
+  ['Burro','ph-horse','Trabalho teimoso. Lido como aviso de esforço que ainda não deu retorno.'],
+  ['Borboleta','ph-butterfly','Transformação. Dizem que algo antigo está terminando para dar lugar a outro.'],
+  ['Cachorro','ph-dog','Lealdade. Sonho associado a amizade verdadeira e proteção próxima.'],
+  ['Cabra','ph-cow','Subida difícil. Lido como aviso de caminho íngreme, mas possível.'],
+  ['Carneiro','ph-cow','Rebanho e fartura. Dizem que fala de sustento e de vida em grupo.'],
+  ['Camelo','ph-horse','Travessia longa. Sinal de paciência exigida antes da recompensa.'],
+  ['Cobra','ph-lightning','O mais comentado nas rodas de jogo. Dizem que avisa de gente falsa por perto.'],
+  ['Coelho','ph-rabbit','Multiplicação. Lido como dinheiro que se reproduz depressa.'],
+  ['Cavalo','ph-horse','Força e pressa. Dizem que anuncia notícia que chega rápido.'],
+  ['Elefante','ph-paw-print','Memória e fortuna. Um dos sonhos mais buscados por quem joga.'],
+  ['Galo','ph-bird','Anúncio. Sinal de que uma novidade vai ser dita em voz alta.'],
+  ['Gato','ph-cat','Independência e mistério. Dizem que pede atenção ao que não está visível.'],
+  ['Jacaré','ph-paw-print','Espera silenciosa. Lido como perigo parado, que não se move ainda.'],
+  ['Leão','ph-cat','Coragem e comando. Sonho associado a respeito conquistado.'],
+  ['Macaco','ph-paw-print','Esperteza. Dizem que fala de saída inteligente para um aperto.'],
+  ['Porco','ph-cow','Dinheiro guardado. Um dos sonhos mais ligados a prosperidade.'],
+  ['Pavão','ph-bird','Beleza mostrada. Lido como reconhecimento que chega de fora.'],
+  ['Peru','ph-bird','Festa e mesa cheia. Dizem que anuncia reunião de família.'],
+  ['Touro','ph-cow','Força bruta. Sinal de teimosia que pode ajudar ou atrapalhar.'],
+  ['Tigre','ph-cat','Ataque certeiro. Lido como momento de agir sem hesitar.'],
+  ['Urso','ph-paw-print','Recolhimento. Dizem que pede descanso antes do próximo passo.'],
+  ['Veado','ph-paw-print','Leveza e alerta. Sonho associado a fuga rápida de um problema.'],
+  ['Vaca','ph-cow','Abundância mansa. Lido como sustento que não falta.'],
+].map(([nome, icone, sonho], i) => ({
+  nome, icone, sonho, grupo: i + 1,
+  nums: [...new Set([i + 1, 26 - (i + 1)])],
+}));
 
 const ULTIMO = [1,2,4,5,7,8,10,12,13,15,17,19,21,23,25];
 const QUENTES = [20,25,11,24,10,13,3,5];
@@ -946,6 +1123,31 @@ const EXPORTS = [
   { id:'img', icone:'ph-image', nome:'Imagem para o celular', desc:'Salva na galeria e mostra na lotérica.' },
   { id:'txt', icone:'ph-copy', nome:'Copiar as dezenas', desc:'Texto simples para colar onde quiser.' },
 ];
+
+// Ritual dos amuletos: o apostador escolhe, o objeto revela a dezena.
+// Cada escolha vira uma dezena forçada no volante, com origem registrada.
+const AMULETOS = [
+  { id:'trevo', nome:'Trevo de quatro folhas', icone:'ph-clover', conceito:'Sorte',
+    pergunta:'Qual folha você escolhe?', frase:'Você escolheu a folha da ',
+    opcoes:[{r:'Sorte',i:'ph-clover'},{r:'Prosperidade',i:'ph-coins'},{r:'Amor',i:'ph-heart'},{r:'Fé',i:'ph-star-four'}] },
+  { id:'ferradura', nome:'Ferradura', icone:'ph-horse', conceito:'Boa fortuna',
+    pergunta:'Em qual ferradura você confia?', frase:'Você confiou na ferradura ',
+    opcoes:[{r:'da esquerda',i:'ph-horse'},{r:'do meio',i:'ph-horse'},{r:'da direita',i:'ph-horse'}] },
+  { id:'aneis', nome:'Anéis de ouro', icone:'ph-diamond', conceito:'Prosperidade',
+    pergunta:'Escolha um anel', frase:'Você escolheu o ',
+    opcoes:[{r:'primeiro anel',i:'ph-diamond'},{r:'segundo anel',i:'ph-diamond'},{r:'terceiro anel',i:'ph-diamond'}] },
+  { id:'moeda', nome:'Moeda da riqueza', icone:'ph-coin', conceito:'Riqueza',
+    pergunta:'Cara ou coroa?', frase:'Você apostou na ',
+    opcoes:[{r:'cara',i:'ph-coin'},{r:'coroa',i:'ph-coin-vertical'}] },
+];
+
+const MODOS = [
+  { id:'mistico',  rotulo:'Místico',   icone:'ph-moon',        desc:'Só crenças: signo, sonho, lua, numerologia.' },
+  { id:'cientista',rotulo:'Cientista', icone:'ph-chart-bar',   desc:'Só estatística: quentes, atrasados, soma, pares.' },
+  { id:'destino',  rotulo:'Destino',   icone:'ph-hand-heart',  desc:'Ritual dos amuletos + crenças + estatística.' },
+];
+const CRENCAS_MISTICAS = ['signo','nascimento','lua','sonho','moldura','nome'];
+const CRENCAS_ESTAT = ['quentes','atrasados','pares','primos','soma','repetidas'];
 
 const PLANOS = [
   { id:'anual',  nome:'Anual',  preco:'R$ 89,90', detalhe:'R$ 7,49 por mês · economiza 37%', selo:'Mais escolhido' },
@@ -1018,8 +1220,9 @@ function signoDe(nasc) {
     const [, , , sm, sd] = SIGNOS[i];
     if (mes === sm && d >= sd) return SIGNOS[(i + 1) % 12];
   }
+  // Dia anterior ao início do signo que começa neste mês: é o signo anterior.
   const idx = SIGNOS.findIndex(s => s[3] === mes);
-  return SIGNOS[idx >= 0 ? idx : 3];
+  return SIGNOS[idx >= 0 ? (idx - 1 + 12) % 12 : 3];
 }
 
 class Component extends DCLogic {
@@ -1027,12 +1230,13 @@ class Component extends DCLogic {
     tela: 'onb', passo: 0,
     nome: 'Marlene', nasc: '14/07/1978',
     sel: ['signo', 'quentes', 'sonho'],
-    sonho: 'Cobra', bichosAbertos: false,
+    sonho: 'Cobra', bichosAbertos: false, bichoAberto: null,
     jogos: [], atualId: null, gerando: false, ritual: RITUAIS[0], salvos: [],
     pro: false, restantes: 1, anuncio: false, adSeg: 15, plano: 'anual', qtd: 15,
     telaAnterior: 'home', resultado: null,
     notifLembrete: true, notifHora: '18:00', notifResultado: true,
     exportando: false, exportado: '',
+    modo: 'destino', amuletoPasso: 0, revelados: [], revelando: null,
     editando: false, editSel: [], fixarNovas: true, fixas: [],
     compartilhando: false, copiado: false, excluirId: null,
   };
@@ -1110,9 +1314,11 @@ class Component extends DCLogic {
   novoJogo(qtd) {
     const s = this.state, f = this.fontes();
     const n15 = qtd || s.qtd || 15;
+    const ativas = this.crencasAtivas();
     const peso = Array(25).fill(1);
-    s.sel.forEach(id => (f[id] ? f[id].nums : []).forEach(n => { peso[n - 1] += 1.35; }));
+    ativas.forEach(id => (f[id] ? f[id].nums : []).forEach(n => { peso[n - 1] += 1.35; }));
     s.fixas.forEach(n => { peso[n - 1] += 50; });
+    if (s.modo === 'destino') s.revelados.forEach(r => { peso[r.dezena - 1] += 60; });
     const nums = peso
       .map((w, i) => ({ n: i + 1, w: w * (0.55 + Math.random() * 0.9) }))
       .sort((a, b) => b.w - a.w).slice(0, n15).map(o => o.n).sort((a, b) => a - b);
@@ -1121,11 +1327,16 @@ class Component extends DCLogic {
       icone: 'ph-push-pin', nome: 'Suas dezenas fixas',
       texto: 'Entram em todo palpite porque você fixou.', nums: lista(fixasHit),
     }] : [];
-    const contribs = baseContribs.concat(s.sel.map(id => {
+    const ritoContribs = s.modo === 'destino' ? s.revelados.map(r => ({
+      icone: r.icone, nome: r.nome,
+      texto: r.frase,
+      nums: pad(r.dezena),
+    })) : [];
+    const contribs = ritoContribs.concat(baseContribs, ativas.map(id => {
       const c = CRENCAS.find(x => x.id === id), hit = f[id].nums.filter(n => nums.includes(n));
       return { icone: c.icone, nome: c.nome, texto: f[id].texto, nums: hit.length ? lista(hit) : 'nenhuma dezena entrou desta vez' };
     }));
-    const cobertura = s.sel.length ? contribs.reduce((a, c) => a + (c.nums.includes('·') || /\d/.test(c.nums) ? 1 : 0), 0) / s.sel.length : 0;
+    const cobertura = ativas.length ? contribs.reduce((a, c) => a + (c.nums.includes('·') || /\d/.test(c.nums) ? 1 : 0), 0) / ativas.length : 0;
     const d = new Date();
     return {
       id: Math.random().toString(36).slice(2),
@@ -1133,9 +1344,45 @@ class Component extends DCLogic {
       forca: Math.round(62 + cobertura * 26 + Math.random() * 9),
       rotulo: 'Palpite ' + (s.jogos.length + 1),
       hora: pad(d.getHours()) + ':' + pad(d.getMinutes()),
-      tags: s.sel.slice(0, 3).map(id => CRENCAS.find(x => x.id === id).nome),
+      tags: [MODOS.find(m => m.id === s.modo).rotulo].concat(
+        ativas.slice(0, 2).map(id => CRENCAS.find(x => x.id === id).nome)),
     };
   }
+
+  crencasAtivas() {
+    const s = this.state;
+    if (s.modo === 'cientista') return s.sel.filter(id => CRENCAS_ESTAT.includes(id));
+    if (s.modo === 'mistico') return s.sel.filter(id => CRENCAS_MISTICAS.includes(id));
+    return s.sel;
+  }
+
+  // Sorteia a dezena que o amuleto revela, entre as que ainda não saíram no ritual.
+  dezenaDoAmuleto() {
+    const s = this.state, f = this.fontes();
+    const usadas = new Set(s.revelados.map(r => r.dezena));
+    const peso = Array.from({ length: 25 }, (_, i) => usadas.has(i + 1) ? 0 : 1);
+    this.crencasAtivas().forEach(id => (f[id] ? f[id].nums : []).forEach(n => {
+      if (!usadas.has(n)) peso[n - 1] += 1.6;
+    }));
+    return peso
+      .map((w, i) => ({ n: i + 1, w: w * (0.4 + Math.random()) }))
+      .sort((a, b) => b.w - a.w)[0].n;
+  }
+
+  escolherAmuleto = (opcao) => {
+    if (this.state.revelando) return;
+    const am = AMULETOS[this.state.amuletoPasso];
+    const dezena = this.dezenaDoAmuleto();
+    this.setState({ revelando: {
+      nome: am.nome, opcao, dezena, conceito: am.conceito, icone: am.icone,
+      frase: am.frase + opcao + '.',
+    } });
+    this._r = setTimeout(() => this.setState(st => ({
+      revelados: [...st.revelados, st.revelando],
+      revelando: null,
+      amuletoPasso: st.amuletoPasso + 1,
+    })), 1400);
+  };
 
   gerar = (qtd) => {
     const s = this.state;
@@ -1155,7 +1402,10 @@ class Component extends DCLogic {
       else {
         clearInterval(this._t);
         const j = this.novoJogo(n);
-        this.setState(st => ({ gerando: false, jogos: [j, ...st.jogos], tela: 'detail', atualId: j.id }));
+        this.setState(st => ({
+          gerando: false, jogos: [j, ...st.jogos], tela: 'detail', atualId: j.id,
+          revelados: [], amuletoPasso: 0,
+        }));
       }
     }, 420);
   };
@@ -1173,7 +1423,7 @@ class Component extends DCLogic {
     }, 420);
   };
 
-  componentWillUnmount() { clearInterval(this._t); clearInterval(this._a); clearTimeout(this._salvando); }
+  componentWillUnmount() { clearInterval(this._t); clearInterval(this._a); clearTimeout(this._salvando); clearTimeout(this._r); }
 
   renderVals() {
     const s = this.state;
@@ -1361,6 +1611,46 @@ class Component extends DCLogic {
       pro: s.pro, naoPro: !s.pro,
       semPalpite: !s.pro && s.restantes <= 0,
       temPalpite: s.pro || s.restantes > 0,
+      isAmuletos: s.tela === 'amuletos',
+      modos: MODOS.map(m => ({
+        ...m,
+        ativo: s.modo === m.id,
+        borda: s.modo === m.id ? '#9184d9' : 'rgba(233,233,237,.16)',
+        fundo: s.modo === m.id ? 'rgba(145,132,217,.12)' : 'transparent',
+        cor: s.modo === m.id ? '#9184d9' : 'rgba(233,233,237,.72)',
+        pick: () => this.setState({ modo: m.id }),
+      })),
+      modoDesc: MODOS.find(m => m.id === s.modo).desc,
+      modoDestino: s.modo === 'destino' && (s.pro || s.restantes > 0),
+      mostraGerar: s.modo !== 'destino' && (s.pro || s.restantes > 0),
+      ctaGerar: s.modo === 'destino' ? 'Começar o ritual' : 'Gerar palpite',
+      ctaIcone: s.modo === 'destino' ? 'ph ph-hand-heart' : 'ph ph-sparkle',
+      abrirRitual: () => {
+        if (!s.pro && s.restantes <= 0) { this.setState(st => ({ telaAnterior: st.tela, tela: 'paywall' })); return; }
+        this.setState({ tela: 'amuletos', amuletoPasso: 0, revelados: [], revelando: null });
+      },
+      amuletoAtual: AMULETOS[Math.min(s.amuletoPasso, AMULETOS.length - 1)],
+      amuletoOpcoes: (AMULETOS[Math.min(s.amuletoPasso, AMULETOS.length - 1)]).opcoes.map(o => ({
+        ...o, escolher: () => this.escolherAmuleto(o.r),
+      })),
+      amuletoPassoTexto: Math.min(s.amuletoPasso + 1, AMULETOS.length) + ' de ' + AMULETOS.length,
+      ritoEmCurso: s.amuletoPasso < AMULETOS.length && !s.revelando,
+      ritoRevelando: !!s.revelando,
+      ritoFim: s.amuletoPasso >= AMULETOS.length,
+      revelacao: s.revelando ? { ...s.revelando, dezena: pad(s.revelando.dezena) } : { dezena: '', nome: '', conceito: '' },
+      revelados: s.revelados.map(r => ({ ...r, dezena: pad(r.dezena) })),
+      trilha: AMULETOS.map((a, i) => ({
+        icone: 'ph ' + a.icone,
+        cor: i < s.amuletoPasso ? '#9184d9' : 'rgba(233,233,237,.28)',
+        fundo: i < s.amuletoPasso ? 'rgba(145,132,217,.14)' : 'transparent',
+        borda: i === s.amuletoPasso ? '1px solid #9184d9' : '1px solid rgba(233,233,237,.12)',
+      })),
+      temRevelados: s.revelados.length > 0,
+      faltamNoVolante: Math.max(0, (s.qtd || 15) - s.revelados.length),
+      sairRitual: () => this.setState({ tela: 'home' }),
+      refazerRitual: () => this.setState({ amuletoPasso: 0, revelados: [], revelando: null }),
+      fecharRitual: () => this.gerar(),
+
       restantesTexto: s.pro ? 'Pro · palpites ilimitados'
         : s.restantes + (s.restantes === 1 ? ' palpite grátis hoje' : ' palpites grátis hoje'),
       anuncio: s.anuncio, adSeg: s.adSeg, adPct: Math.round(((15 - s.adSeg) / 15) * 100) + '%',
@@ -1440,8 +1730,20 @@ class Component extends DCLogic {
         borda: s.sonho === b.nome ? '#9184d9' : 'rgba(233,233,237,.12)',
         fundo: s.sonho === b.nome ? 'rgba(145,132,217,.12)' : '#232532',
         cor: s.sonho === b.nome ? '#d2cefd' : '#e9e9ed',
-        pick: () => this.setState({ sonho: b.nome }),
+        pick: () => this.setState({ bichoAberto: b.nome }),
       })),
+      bichoAberto: !!s.bichoAberto,
+      bicho: (() => {
+        const b = BICHOS.find(x => x.nome === s.bichoAberto) || BICHOS[8];
+        return {
+          ...b, icone: 'ph ' + b.icone,
+          dezenas: lista(b.nums),
+          escolhido: s.sonho === b.nome,
+          naoEscolhido: s.sonho !== b.nome,
+        };
+      })(),
+      fecharBicho: () => this.setState({ bichoAberto: null }),
+      usarBicho: () => this.setState(st => ({ sonho: st.bichoAberto, bichoAberto: null })),
       bichosAbertos: s.bichosAbertos,
       bichosTexto: s.bichosAbertos ? 'Mostrar menos' : 'Ver os 25 grupos',
       bichosIcone: s.bichosAbertos ? 'ph ph-caret-up' : 'ph ph-caret-down',

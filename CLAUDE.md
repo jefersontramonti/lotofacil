@@ -15,6 +15,20 @@ atrasados, fase da lua, sonho traduzido pelo jogo do bicho, moldura do
 volante, entre outras. O app explica de onde veio cada dezena e confere
 o resultado quando o sorteio sai.
 
+Três modos decidem o que alimenta o volante:
+
+- **Místico** — só as crenças (signo, nascimento, lua, sonho, moldura,
+  numerologia).
+- **Cientista** — só as estatísticas (quentes, atrasados, pares, primos,
+  soma, repetidas).
+- **Destino** — as duas mais o **ritual dos amuletos**: trevo de quatro
+  folhas, ferradura e anéis de ouro em sequência, cada um revelando uma
+  dezena depois da escolha do apostador. No modo Destino o botão de
+  gerar dá lugar ao ritual.
+
+O ritual é o diferencial do produto. A escolha é do usuário, a dezena é
+sorteada pelo mesmo motor — e a tela diz isso.
+
 ### Regras invioláveis
 
 Estas regras vêm de restrição legal e de política da Play Store. Nunca
@@ -102,6 +116,33 @@ defende, mais o texto que explica ao usuário de onde elas vieram. Uma
 crença sem dado de origem válido devolve lista vazia e o motivo — nunca
 lança exceção, nunca usa valor padrão silencioso.
 
+O modo filtra quais crenças são efetivamente aplicadas — não as apaga da
+seleção do usuário. Trocar de modo nunca perde a escolha de crenças.
+
+### Ritual dos amuletos
+
+Cada amuleto sorteia sua dezena pelo mesmo motor de pesos, **excluindo as
+já reveladas no ritual**. As dezenas reveladas entram forçadas no volante
+final e aparecem na explicação de origem como fonte própria, ao lado das
+crenças.
+
+Ao montar o palpite, **limpe o ritual**. Se as dezenas reveladas
+sobreviverem ao palpite, todo volante seguinte nasce com as mesmas quatro
+dezenas sem nova escolha — foi um bug real do protótipo.
+
+### Duas regras de domínio que já quebraram uma vez
+
+Os dois erros abaixo foram encontrados no protótipo depois de passarem
+desapercebidos. Ambos precisam de teste próprio:
+
+1. **Dezenas do grupo do bicho são deduplicadas.** O grupo N puxa N e
+   26−N. No grupo 13 as duas coincidem (26−13 = 13): a dezena aparece
+   uma vez só, no card e no peso do motor.
+2. **Signo se calcula pelo dia de início.** Uma data anterior ao início
+   do signo que começa naquele mês pertence ao **signo anterior**.
+   14/07 é Câncer, não Leão. As dezenas do signo alimentam o motor, então
+   um erro aqui contamina o volante inteiro.
+
 ---
 
 ## 5. Convenções de código
@@ -134,6 +175,19 @@ lança exceção, nunca usa valor padrão silencioso.
 - Suporte a fonte do sistema até 200% sem corte.
 - Todo elemento interativo com `contentDescription` para o TalkBack.
   Dezenas anunciam seu estado de marcação.
+- Cada um dos 25 grupos do jogo do bicho tem card próprio: nome, número
+  do grupo, leitura popular do sonho, as dezenas que ele puxa e a
+  confirmação como sonho do dia. A leitura é apresentada como tradição
+  popular, nunca como previsão.
+- As animações do ritual e do card (giro, halo, entrada) são decoração:
+  nenhuma informação pode existir só nelas, e todas respeitam a
+  preferência de movimento reduzido do sistema.
+- `enableEdgeToEdge()` sempre com `statusBarStyle`/`navigationBarStyle`
+  explícitos (`SystemBarStyle.dark(...)`), nunca o padrão. O padrão
+  (`auto`) segue o modo claro/escuro do sistema, mas o tema do Trevo é
+  escuro fixo — sem isso os ícones da status bar ficam pretos sobre o
+  fundo escuro quando o aparelho está em modo claro (achado real em
+  RF-01.1: contraste 1,19:1 contra o mínimo de 3:1 desta seção).
 
 ---
 
@@ -150,6 +204,15 @@ Prioridade de cobertura:
 Todo teste do motor usa semente fixa e afirma saída exata. Teste que
 depende de aleatoriedade real está errado.
 
+Teste instrumentado de Compose (`createComposeRule()`) não hospeda
+insets reais de sistema (status bar, navigation bar) nem o modo
+claro/escuro do aparelho. Mudança de layout que interage com borda de
+tela, barras de sistema, ou que precisa bater com um wireframe, exige
+verificação visual em device/emulador real (screenshot, `uiautomator
+dump`) além do teste verde — em RF-01.1, dois bugs de layout (CTA sob a
+navigation bar; ícones de status bar pretos em modo claro) passaram
+pelos 6 testes instrumentados e só foram achados medindo em device.
+
 ---
 
 ## 8. Dados externos
@@ -164,42 +227,22 @@ mostra o estado de erro ou de offline correspondente.
 
 ---
 
-## 9. Como trabalhar neste repositório
-
-- Uma tarefa por branch, uma branch por requisito (`rf-04-05-editar-volante`).
-- Diff pequeno e revisável. Se a mudança tocar mais de dez arquivos,
-  divida.
-- Cada requisito implementado referencia seu ID (`RF-04.5`) na mensagem
-  de commit.
-- Não altere a estrutura de módulos, o esquema do Room ou as
-  dependências do Gradle sem perguntar.
-- Não adicione biblioteca nova sem justificar. O app precisa ficar
-  abaixo de 25 MB.
-- Migração de Room sempre versionada. Nunca destrua dados do usuário
-  entre versões.
-
----
-
-## 10. Fora de escopo
-
-Registrado para evitar ambiguidade. Não implemente:
-
-- Receber valores de aposta, intermediar pagamento ou custodiar
-  dinheiro de bolão.
-- Registrar aposta junto à Caixa em nome do usuário.
-- Pagar prêmio ou operar premiação própria.
-- Qualquer promessa de aumento de probabilidade.
-- Outras loterias além da Lotofácil na primeira versão.
-
----
 
 ## 11. Documentos de referência
 
-- `docs/escopo.pdf` — escopo do projeto, fases e arquitetura.
-- `docs/requisitos.pdf` — 74 requisitos funcionais e 39 não funcionais,
-  com ID, prioridade MoSCoW e fase. É a fonte da verdade sobre
-  comportamento esperado.
-- `docs/wireframes.pdf` — as 16 telas do protótipo.
+Todos em `../../../Lotofacil/Docs` (D maiúsculo), formato `.dc.html`:
+
+- `Docs/Trevo - Escopo do Projeto.dc.html` — escopo do projeto, fases e
+  arquitetura.
+- `Docs/Trevo - Requisitos.dc.html` — 94 requisitos funcionais (RF) e 44
+  não funcionais (RNF), com ID, prioridade MoSCoW e fase — inclui o
+  RF-11 dos três modos de geração e do ritual dos amuletos. É a fonte
+  da verdade sobre comportamento esperado.
+- `Docs/Trevo - Wireframes.dc.html` — as 20 telas do protótipo.
+- `Docs/Trevo - Lotofácil.dc.html` — protótipo interativo (mockup
+  navegável) que serve de referência de comportamento e regras de
+  negócio (motor de pesos, crenças, modos, ritual dos amuletos,
+  validações).
 
 Quando um requisito e este arquivo divergirem, o requisito vence —
 e avise, para que este arquivo seja corrigido.

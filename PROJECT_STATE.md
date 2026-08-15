@@ -9,14 +9,15 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-01.1 | Tela inicial com proposta + aviso de aleatoriedade | M | F1 | não iniciado | |
-| RF-01.2 | Coletar nome e data de nascimento em campos separados | M | F1 | não iniciado | |
-| RF-01.3 | Validar data dd/mm/aaaa (mês, dia, bissexto, ano 1900–hoje) | M | F1 | não iniciado | |
-| RF-01.4 | Bloquear cadastro de menores de 18 anos | M | F1 | não iniciado | |
-| RF-01.5 | Calcular signo a partir da data válida; marcador neutro se inválida | M | F1 | não iniciado | |
+| RF-01.1 | Tela inicial com proposta + aviso de aleatoriedade | M | F1 | concluído |  |
+| RF-01.2 | Coletar nome e data de nascimento em campos separados | M | F1 | concluído |  |
+| RF-01.3 | Validar data dd/mm/aaaa (mês, dia, bissexto, ano 1900–hoje) | M | F1 | concluído |  |
+| RF-01.4 | Bloquear cadastro de menores de 18 anos | M | F1 | concluído |  |
+| RF-01.5 | Calcular signo a partir da data válida; marcador neutro se inválida | M | F1 | concluído |  |
 | RF-01.6 | Impedir avanço do passo com erro de validação | M | F1 | não iniciado | |
 | RF-01.7 | Apresentar as 12 crenças, seleção múltipla | M | F1 | não iniciado | |
 | RF-01.8 | Limitar seleção a 3 crenças no grátis, cadeado leva ao paywall | M | F3 | não iniciado | |
+| RF-01.9 | Auto-formatar data de nascimento com barras enquanto digita | C | F1 | concluído |  |
 
 ## RF-02 · Motor de geração de palpites
 
@@ -133,50 +134,50 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 ## RNF — Requisitos não funcionais
 
-| ID | Requisito (resumo) | Status |
-|---|---|---|
-| RNF-01.1 | Abertura a frio ≤ 2s (aparelho de entrada, Android 10) | não iniciado |
-| RNF-01.2 | Geração de 15 dezenas < 100ms, sem rede | não iniciado |
-| RNF-01.3 | Desdobramento de 20 dezenas fora da thread principal | não iniciado |
-| RNF-01.4 | Rolagem a 60fps nas listas | não iniciado |
-| RNF-01.5 | APK < 25 MB | não iniciado |
-| RNF-02.1 | Todas as funções exceto busca de resultado operam offline | não iniciado |
-| RNF-02.2 | Nenhum palpite perdido por falha de rede/fechamento/reinício | não iniciado |
-| RNF-02.3 | Conferência pendente enfileirada, roda quando a rede volta | não iniciado |
-| RNF-02.4 | Recuo exponencial na busca de resultado, máx. 5 tentativas | não iniciado |
-| RNF-02.5 | Sessões sem falha > 99%, ANR < 0,47% | não iniciado |
-| RNF-03.1 | Alvo de toque mínimo 48dp | não iniciado |
-| RNF-03.2 | Contraste 4,5:1 (texto corrido) / 3:1 (texto grande e UI) | não iniciado |
-| RNF-03.3 | Fonte do sistema até 200% sem corte | não iniciado |
-| RNF-03.4 | TalkBack em todo elemento interativo; dezenas anunciam estado | não iniciado |
-| RNF-03.5 | Estado de marcação nunca só por cor | não iniciado |
-| RNF-03.6 | Função principal alcançável em ≤ 3 toques da tela inicial | não iniciado |
-| RNF-03.7 | Interface em pt-BR; valores em real; datas dd/mm/aaaa | não iniciado |
-| RNF-04.1 | HTTPS obrigatório, texto claro desabilitado no manifesto | não iniciado |
-| RNF-04.2 | Nenhum dado financeiro coletado/armazenado/transmitido pelo app | não iniciado |
-| RNF-04.3 | Coleta limitada a nome e data de nascimento | não iniciado |
+| ID | Requisito (resumo)                                                | Status |
+|---|-------------------------------------------------------------------|---|
+| RNF-01.1 | Abertura a frio ≤ 2s (aparelho de entrada, Android 10)            | não iniciado |
+| RNF-01.2 | Geração de 15 dezenas < 100ms, sem rede                           | não iniciado |
+| RNF-01.3 | Desdobramento de 20 dezenas fora da thread principal              | não iniciado |
+| RNF-01.4 | Rolagem a 60fps nas listas                                        | não iniciado |
+| RNF-01.5 | APK < 100 MB                                                      | não iniciado |
+| RNF-02.1 | Todas as funções exceto busca de resultado operam offline         | não iniciado |
+| RNF-02.2 | Nenhum palpite perdido por falha de rede/fechamento/reinício      | não iniciado |
+| RNF-02.3 | Conferência pendente enfileirada, roda quando a rede volta        | não iniciado |
+| RNF-02.4 | Recuo exponencial na busca de resultado, máx. 5 tentativas        | não iniciado |
+| RNF-02.5 | Sessões sem falha > 99%, ANR < 0,47%                              | não iniciado |
+| RNF-03.1 | Alvo de toque mínimo 48dp                                         | não iniciado |
+| RNF-03.2 | Contraste 4,5:1 (texto corrido) / 3:1 (texto grande e UI)         | não iniciado |
+| RNF-03.3 | Fonte do sistema até 200% sem corte                               | não iniciado |
+| RNF-03.4 | TalkBack em todo elemento interativo; dezenas anunciam estado     | não iniciado |
+| RNF-03.5 | Estado de marcação nunca só por cor                               | não iniciado |
+| RNF-03.6 | Função principal alcançável em ≤ 3 toques da tela inicial         | não iniciado |
+| RNF-03.7 | Interface em pt-BR; valores em real; datas dd/mm/aaaa             | não iniciado |
+| RNF-04.1 | HTTPS obrigatório, texto claro desabilitado no manifesto          | não iniciado |
+| RNF-04.2 | Nenhum dado financeiro coletado/armazenado/transmitido pelo app   | não iniciado |
+| RNF-04.3 | Coleta limitada a nome e data de nascimento                       | não iniciado |
 | RNF-04.4 | Conformidade LGPD (privacidade, consentimento, exclusão de dados) | não iniciado |
-| RNF-04.5 | Formulário de segurança de dados da Play Store preenchido | não iniciado |
-| RNF-04.6 | Nenhuma permissão além de notificação e rede | não iniciado |
-| RNF-05.1 | minSdk 26, targetSdk exigido pela Play Store na publicação | não iniciado |
-| RNF-05.2 | Layout correto 320–600dp de largura, retrato | não iniciado |
-| RNF-05.3 | Tema escuro padrão, contraste sob alto contraste do sistema | não iniciado |
-| RNF-05.4 | Estado preservado em rotação/mudança de config/background | não iniciado |
-| RNF-06.1 | MVVM estrito; motor de geração sem dependência de Android | não iniciado |
-| RNF-06.2 | Cobertura de testes > 80% no motor, acertos e validações | não iniciado |
-| RNF-06.3 | Geração determinística sob semente fixa | não iniciado |
-| RNF-06.4 | Testes de interface: cadastro, geração, edição, conferência | não iniciado |
-| RNF-06.5 | CI rodando build, lint e testes a cada envio | não iniciado |
-| RNF-06.6 | Migrações Room versionadas, sem perda de dado | não iniciado |
-| RNF-07.1 | Classificação etária 18+ coerente com o questionário | não iniciado |
-| RNF-07.2 | Loja declara que o app não recebe aposta nem paga prêmio | não iniciado |
-| RNF-07.3 | Toda transação pelo Play Billing | não iniciado |
-| RNF-07.4 | Assinatura: preço, periodicidade, teste declarados antes | não iniciado |
-| RNF-07.5 | Parecer jurídico antes da primeira publicação | não iniciado |
-| RNF-08.1 | Log de falhas com stack trace, sem dado pessoal identificável | não iniciado |
+| RNF-04.5 | Formulário de segurança de dados da Play Store preenchido         | não iniciado |
+| RNF-04.6 | Nenhuma permissão além de notificação e rede                      | não iniciado |
+| RNF-05.1 | minSdk 26, targetSdk exigido pela Play Store na publicação        | não iniciado |
+| RNF-05.2 | Layout correto 320–600dp de largura, retrato                      | não iniciado |
+| RNF-05.3 | Tema escuro padrão, contraste sob alto contraste do sistema       | não iniciado |
+| RNF-05.4 | Estado preservado em rotação/mudança de config/background         | não iniciado |
+| RNF-06.1 | MVVM estrito; motor de geração sem dependência de Android         | não iniciado |
+| RNF-06.2 | Cobertura de testes > 80% no motor, acertos e validações          | não iniciado |
+| RNF-06.3 | Geração determinística sob semente fixa                           | não iniciado |
+| RNF-06.4 | Testes de interface: cadastro, geração, edição, conferência       | não iniciado |
+| RNF-06.5 | CI rodando build, lint e testes a cada envio                      | não iniciado |
+| RNF-06.6 | Migrações Room versionadas, sem perda de dado                     | não iniciado |
+| RNF-07.1 | Classificação etária 18+ coerente com o questionário              | não iniciado |
+| RNF-07.2 | Loja declara que o app não recebe aposta nem paga prêmio          | não iniciado |
+| RNF-07.3 | Toda transação pelo Play Billing                                  | não iniciado |
+| RNF-07.4 | Assinatura: preço, periodicidade, teste declarados antes          | não iniciado |
+| RNF-07.5 | Parecer jurídico antes da primeira publicação                     | não iniciado |
+| RNF-08.1 | Log de falhas com stack trace, sem dado pessoal identificável     | não iniciado |
 | RNF-08.2 | Eventos de produto instrumentados (palpite gerado, paywall, etc.) | não iniciado |
-| RNF-08.3 | Falhas da API da Caixa registradas com código e latência | não iniciado |
-| RNF-08.4 | Coleta analítica sujeita a consentimento, desativável | não iniciado |
+| RNF-08.3 | Falhas da API da Caixa registradas com código e latência          | não iniciado |
+| RNF-08.4 | Coleta analítica sujeita a consentimento, desativável             | não iniciado |
 
 ## Fora de escopo (nunca implementar)
 

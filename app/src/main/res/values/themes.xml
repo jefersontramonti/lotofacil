@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tema mínimo do manifesto: evita o flash de fundo claro antes do
+         Compose assumir. A paleta real vive em :core:ui (TrevoTheme). -->
+    <style name="Theme.Trevo" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/nocturne_background</item>
+        <item name="android:statusBarColor">@color/nocturne_background</item>
+        <item name="android:navigationBarColor">@color/nocturne_background</item>
+    </style>
+</resources>
