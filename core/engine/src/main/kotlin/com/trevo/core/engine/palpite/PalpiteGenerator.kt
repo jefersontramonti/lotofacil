@@ -60,6 +60,24 @@ class PalpiteGenerator(
         )
     }
 
+    // RF-02.8: fechamento é só o mesmo motor pedindo mais dezenas — nenhum
+    // cálculo de peso separado, nenhuma lista de combinações de 15 (isso é
+    // RF-04.9/04.10, na tela de desdobramento).
+    fun gerarFechamento(
+        tamanho: TamanhoDeFechamento,
+        crencasAtivas: Set<Crenca>,
+        dados: DadosDeContribuicao,
+        dezenasFixas: Set<Int> = emptySet(),
+        fontes: List<FonteDeCrenca> = FONTES_PADRAO,
+    ): Palpite =
+        gerar(
+            crencasAtivas = crencasAtivas,
+            dados = dados,
+            dezenasFixas = dezenasFixas,
+            quantidade = tamanho.quantidade,
+            fontes = fontes,
+        )
+
     private fun multiplicadorAleatorio(): Double =
         MULTIPLICADOR_ALEATORIO_MINIMO + random.nextDouble() * MULTIPLICADOR_ALEATORIO_AMPLITUDE
 

@@ -1,14 +1,21 @@
 package com.trevo.app.navegacao
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.trevo.app.geracao.GeracaoViewModel
+import com.trevo.app.geracao.TelaGerando
+import com.trevo.app.geracao.movimentoReduzidoAtivado
+import com.trevo.app.home.HomeViewModel
+import com.trevo.app.home.TelaHome
 import com.trevo.app.onboarding.CrencasViewModel
 import com.trevo.app.onboarding.IdentidadeViewModel
 import com.trevo.app.onboarding.TelaAbertura
@@ -62,16 +69,49 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 },
                 onVoltarClick = { navController.popBackStack() },
                 onContinuarClick = {
-                    // O palpite já é gerado com as crenças ativas, pronto
-                    // pra quando a tela de destino (RF-03/home) existir —
-                    // só não é exibido nesta tela (wireframe 1c: o CTA
-                    // leva pra dentro do app, não mostra resultado aqui).
+                    // O palpite é gerado e salvo (assíncrono — ver
+                    // CrencasViewModel.aoGerarPalpite) antes da navegação; a
+                    // Home observa o repositório por Flow, então o card
+                    // aparece assim que a escrita completar. Entre Crenças e
+                    // Home entra a tela de ritual (RF-02.9) — o popUpTo só
+                    // acontece de lá pra Home, então "voltar" durante o
+                    // ritual ainda cai em Crenças.
                     viewModel.aoGerarPalpite(
                         nome = identidadeUiState.nome,
                         nascimentoTexto = identidadeUiState.nascimento,
                         signo = identidadeUiState.signo,
                     )
+                    navController.navigate(Rotas.GERANDO)
                 },
+            )
+        }
+        composable(Rotas.GERANDO) {
+            val viewModel: GeracaoViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+            val context = LocalContext.current
+
+            LaunchedEffect(Unit) {
+                viewModel.iniciar(movimentoReduzido = movimentoReduzidoAtivado(context))
+            }
+            LaunchedEffect(uiState.concluido) {
+                if (uiState.concluido) {
+                    navController.navigate(Rotas.HOME) {
+                        popUpTo(Rotas.ABERTURA) { inclusive = true }
+                    }
+                }
+            }
+
+            TelaGerando(uiState = uiState, movimentoReduzido = movimentoReduzidoAtivado(context))
+        }
+        composable(Rotas.HOME) {
+            val viewModel: HomeViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+
+            TelaHome(
+                uiState = uiState,
+                onExcluirClick = viewModel::aoPedirExclusao,
+                onConfirmarExclusaoClick = viewModel::aoConfirmarExclusao,
+                onCancelarExclusaoClick = viewModel::aoCancelarExclusao,
             )
         }
     }

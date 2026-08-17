@@ -30,8 +30,9 @@ import org.junit.Test
  * cadeado nas demais e conduzindo ao paywall ao tocá-las." Wireframe 1c
  * (Docs/Trevo - Wireframes.dc.html): título, subtítulo com a contagem em
  * negrito, cadeado nas crenças travadas e CTA "Entrar no app" — o palpite
- * gerado não é exibido nesta tela (fica pronto pra tela de destino que
- * RF-03/home ainda não define).
+ * gerado não é exibido nesta tela; "Entrar no app" navega pro ritual de
+ * geração (RF-02.9, `TelaGerando`) e dali pra Home (RF-03, `TelaHome`), que
+ * exibe o palpite salvo.
  */
 class TelaCrencasTest {
     @get:Rule

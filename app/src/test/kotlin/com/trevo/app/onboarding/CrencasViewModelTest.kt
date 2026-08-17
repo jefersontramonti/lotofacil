@@ -1,5 +1,7 @@
 package com.trevo.app.onboarding
 
+import com.trevo.app.MainDispatcherRule
+import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.identidade.Signo
 import com.trevo.core.engine.identidade.ValidadorDataNascimento
@@ -7,6 +9,7 @@ import com.trevo.core.engine.palpite.PalpiteGenerator
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import java.time.Clock
 import java.time.Instant
@@ -14,6 +17,9 @@ import java.time.ZoneId
 import kotlin.random.Random
 
 class CrencasViewModelTest {
+    @get:Rule
+    val regraDoDispatcherPrincipal = MainDispatcherRule()
+
     companion object {
         private val RELOGIO_FIXO: Clock =
             Clock.fixed(Instant.parse("2026-08-13T12:00:00Z"), ZoneId.of("America/Sao_Paulo"))
@@ -23,6 +29,7 @@ class CrencasViewModelTest {
         CrencasViewModel(
             gerador = PalpiteGenerator(Random(semente)),
             validadorDeNascimento = ValidadorDataNascimento(RELOGIO_FIXO),
+            repository = FakePalpiteRepository(RELOGIO_FIXO),
             clock = RELOGIO_FIXO,
         )
 

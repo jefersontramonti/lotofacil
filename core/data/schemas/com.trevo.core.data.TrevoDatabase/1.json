@@ -1,0 +1,61 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "f84a639d7efcffc690aca4e00ea10719",
+    "entities": [
+      {
+        "tableName": "palpites",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dezenas` TEXT NOT NULL, `dezenasFixas` TEXT NOT NULL, `contribuicoes` TEXT NOT NULL, `forca` INTEGER NOT NULL, `criadoEmEpochMillis` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dezenas",
+            "columnName": "dezenas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dezenasFixas",
+            "columnName": "dezenasFixas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contribuicoes",
+            "columnName": "contribuicoes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "forca",
+            "columnName": "forca",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "criadoEmEpochMillis",
+            "columnName": "criadoEmEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f84a639d7efcffc690aca4e00ea10719')"
+    ]
+  }
+}

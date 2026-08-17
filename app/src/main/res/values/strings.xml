@@ -68,4 +68,29 @@
     <string name="crenca_repetidas_desc">Nove costumam voltar</string>
     <string name="crenca_numerologia_nome">Numerologia do nome</string>
     <string name="crenca_numerologia_desc">As letras do seu nome viram dezenas</string>
+    <string name="home_horario_apostas">Apostas até 19h · sorteio às 20h</string>
+    <string name="home_secao_palpites_titulo">Palpites de hoje</string>
+    <plurals name="home_resumo_jogos">
+        <item quantity="one">%1$d jogo · %2$s</item>
+        <item quantity="other">%1$d jogos · %2$s</item>
+    </plurals>
+    <string name="home_palpite_rotulo">Palpite %1$d</string>
+    <string name="home_palpite_forca">força %1$d</string>
+    <string name="home_excluir_descricao">Excluir palpite %1$d</string>
+    <string name="home_excluir_confirmar_titulo">Excluir este palpite?</string>
+    <string name="home_excluir_confirmar_mensagem">Essa ação não pode ser desfeita.</string>
+    <string name="home_excluir_confirmar_cta">Excluir</string>
+    <string name="home_excluir_cancelar_cta">Cancelar</string>
+    <string name="home_vazio_titulo">Nenhum palpite ainda hoje</string>
+    <string name="home_vazio_descricao">Volte às crenças para montar o primeiro volante do dia.</string>
+    <string name="home_disclaimer_aposta">A aposta é feita por você na lotérica ou no app oficial da Caixa — o Trevo só monta o palpite.</string>
+    <string name="home_nav_inicio">Início</string>
+    <string name="home_nav_conferir">Conferir</string>
+    <string name="home_nav_historico">Histórico</string>
+    <string name="home_nav_perfil">Perfil</string>
+    <string name="geracao_frase_1">Cruzando os atrasados…</string>
+    <string name="geracao_frase_2">Consultando a fase da lua…</string>
+    <string name="geracao_frase_3">Traduzindo o sonho…</string>
+    <string name="geracao_frase_4">Montando o seu volante…</string>
+    <string name="geracao_subtitulo">preparando seu palpite</string>
 </resources>

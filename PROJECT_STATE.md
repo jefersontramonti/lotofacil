@@ -30,21 +30,21 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-02.5 | Excluir sem falhar crenças com dado de origem ausente/inválido | M | F1 | concluído | |
 | RF-02.6 | Registrar qual crença contribuiu com quais dezenas | M | F1 | concluído | |
 | RF-02.7 | Calcular índice de força do palpite | S | F1 | concluído | |
-| RF-02.8 | Gerar fechamentos de 16, 18 e 20 dezenas | S | F3 | não iniciado | |
-| RF-02.9 | Animação de ritual na geração (≥3 frases) | C | F1 | não iniciado | |
+| RF-02.8 | Gerar fechamentos de 16, 18 e 20 dezenas | S | F3 | concluído | `PalpiteGenerator.gerarFechamento` + `TamanhoDeFechamento`; sem tela própria — quem consome isso é RF-04 (desdobramentos), ainda não iniciado |
+| RF-02.9 | Animação de ritual na geração (≥3 frases) | C | F1 | concluído | `TelaGerando` (wireframe 1f), 4 frases, entre Crenças e Home; respeita preferência de movimento reduzido do sistema |
 
 ## RF-03 · Home e gestão de palpites
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-03.1 | Concurso corrente, horário de fechamento (19h) e sorteio (20h) | M | F1 | não iniciado | |
+| RF-03.1 | Concurso corrente, horário de fechamento (19h) e sorteio (20h) | M | F1 | em andamento | horário fixo pronto (`TelaHome`); número do concurso bloqueado por RF-05 (API da Caixa, ainda não iniciada) — CLAUDE.md §8 proíbe inventar dado de sorteio |
 | RF-03.2 | Índice de sorte do dia, fase da lua, signo | S | F1 | não iniciado | |
 | RF-03.3 | Seletor dos 25 grupos do jogo do bicho quando sonho ativo | M | F1 | não iniciado | |
-| RF-03.4 | Listar palpites do dia com dezenas, horário, força, crenças | M | F1 | não iniciado | |
+| RF-03.4 | Listar palpites do dia com dezenas, horário, força, crenças | M | F1 | concluído | crenças usadas por palpite ainda não aparecem no card, só dezenas/horário/força |
 | RF-03.5 | Indicar dezenas que mudaram vs. palpite anterior | S | F1 | não iniciado | |
-| RF-03.6 | Total de jogos do dia e custo na lotérica | M | F1 | não iniciado | |
-| RF-03.7 | Estado vazio sem palpites | M | F1 | não iniciado | |
-| RF-03.8 | Excluir palpite com confirmação (lista e detalhe) | M | F1 | não iniciado | |
+| RF-03.6 | Total de jogos do dia e custo na lotérica | M | F1 | concluído | |
+| RF-03.7 | Estado vazio sem palpites | M | F1 | concluído | |
+| RF-03.8 | Excluir palpite com confirmação (lista e detalhe) | M | F1 | em andamento | confirmação pronta na lista (`TelaHome`); não há tela de detalhe ainda (RF-04) |
 | RF-03.9 | Exibir palpites restantes no dia / ilimitado no Pro | M | F3 | não iniciado | |
 
 ## RF-04 · Detalhe, edição e desdobramentos
