@@ -2,11 +2,15 @@ package com.trevo.app.home
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.trevo.app.R
+import com.trevo.core.engine.crenca.FaseDaLua
+import com.trevo.core.engine.crenca.GRUPOS_DO_BICHO
+import com.trevo.core.engine.identidade.Signo
 import com.trevo.core.ui.TrevoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -15,9 +19,9 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * RF-03 (núcleo) — Home. Wireframes 1d ("Home · lista de palpites") e 1e
- * ("Home · limite atingido", reaproveitado aqui só pro estado vazio, já que
- * o anúncio recompensado é RF-09/monetização e não está nesta fatia).
+ * RF-03 — Home. Wireframes 1d ("Home · lista de palpites"), 1e ("Home ·
+ * limite atingido", reaproveitado só pro estado vazio — anúncio
+ * recompensado é RF-09, fora desta fatia) e 1t ("Card do sonho").
  */
 class TelaHomeTest {
     @get:Rule
@@ -42,11 +46,17 @@ class TelaHomeTest {
             horario = "09:41",
         )
 
+    private val grupoCobra = GRUPOS_DO_BICHO.first { it.numero == 9 }
+
     private fun mostrarTelaHome(
         uiState: HomeUiState = HomeUiState(carregando = false),
         onExcluirClick: (Long) -> Unit = {},
         onConfirmarExclusaoClick: () -> Unit = {},
         onCancelarExclusaoClick: () -> Unit = {},
+        onAlternarListaDeGruposClick: () -> Unit = {},
+        onGrupoClick: (Int) -> Unit = {},
+        onFecharDialogoSonhoClick: () -> Unit = {},
+        onConfirmarSonhoClick: (Int) -> Unit = {},
     ) {
         composeTestRule.setContent {
             TrevoTheme {
@@ -55,6 +65,10 @@ class TelaHomeTest {
                     onExcluirClick = onExcluirClick,
                     onConfirmarExclusaoClick = onConfirmarExclusaoClick,
                     onCancelarExclusaoClick = onCancelarExclusaoClick,
+                    onAlternarListaDeGruposClick = onAlternarListaDeGruposClick,
+                    onGrupoClick = onGrupoClick,
+                    onFecharDialogoSonhoClick = onFecharDialogoSonhoClick,
+                    onConfirmarSonhoClick = onConfirmarSonhoClick,
                 )
             }
         }
@@ -159,6 +173,176 @@ class TelaHomeTest {
     }
 
     @Test
+    fun comDezenasNovasExibeALinhaDeDiff() {
+        val palpiteComDiff = palpiteDeExemplo.copy(dezenasNovas = listOf(3, 9))
+
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, palpitesHoje = listOf(palpiteComDiff)))
+
+        composeTestRule
+            .onNodeWithText(
+                context.resources.getQuantityString(R.plurals.home_diff_dezenas_novas, 2, 2, "03 · 09"),
+            ).assertIsDisplayed()
+    }
+
+    @Test
+    fun semPerfilNaoExibeSaudacaoNemIndiceDeSorte() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, nome = null))
+
+        composeTestRule.onNodeWithText(context.getString(R.string.home_sorte_titulo)).assertDoesNotExist()
+    }
+
+    @Test
+    fun comPerfilExibeSaudacaoComOPrimeiroNomeEOIndiceDeSorte() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    nome = "Marlene Silva",
+                    indiceDeSorte = 74,
+                    faseDaLua = FaseDaLua.CRESCENTE_INICIAL,
+                    signo = Signo.CANCER,
+                    diaDaSemanaAbreviado = "seg",
+                ),
+        )
+
+        composeTestRule.onNodeWithText(context.getString(R.string.home_saudacao, "Marlene")).assertIsDisplayed()
+        composeTestRule.onNodeWithText("74").assertIsDisplayed()
+        composeTestRule.onNodeWithText(context.getString(R.string.fase_lua_crescente_inicial)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(context.getString(R.string.signo_cancer)).assertIsDisplayed()
+    }
+
+    @Test
+    fun semCrencaSonhoAtivaNaoExibeOSeletorDeGrupos() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, crencaSonhoAtiva = false))
+
+        composeTestRule.onNodeWithText(context.getString(R.string.home_sonho_titulo)).assertDoesNotExist()
+    }
+
+    @Test
+    fun comCrencaSonhoAtivaExibeAPreviaDosGrupos() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    crencaSonhoAtiva = true,
+                    gruposDoSonhoPreview = GRUPOS_DO_BICHO.take(4),
+                ),
+        )
+
+        composeTestRule.onNodeWithText(context.getString(R.string.home_sonho_titulo)).assertIsDisplayed()
+        GRUPOS_DO_BICHO.take(4).forEach { grupo ->
+            composeTestRule.onNodeWithTag(tagGrupoDoBicho(grupo.numero)).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun tocarVerOs25GruposDisparaOnAlternarListaDeGruposClick() {
+        var alternado = false
+
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    crencaSonhoAtiva = true,
+                    gruposDoSonhoPreview = GRUPOS_DO_BICHO.take(4),
+                ),
+            onAlternarListaDeGruposClick = { alternado = true },
+        )
+
+        composeTestRule.onNodeWithTag(TAG_BOTAO_VER_GRUPOS).performClick()
+
+        assertTrue(alternado)
+    }
+
+    @Test
+    fun comListaExpandidaExibeOsGruposCompletos() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    crencaSonhoAtiva = true,
+                    gruposDoSonhoPreview = GRUPOS_DO_BICHO.take(4),
+                    listaDeGruposExpandida = true,
+                ),
+        )
+
+        composeTestRule.onNodeWithTag(tagGrupoDoBicho(25)).assertIsDisplayed()
+    }
+
+    @Test
+    fun tocarUmGrupoDisparaOnGrupoClickComONumeroCorreto() {
+        var numeroTocado: Int? = null
+
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    crencaSonhoAtiva = true,
+                    gruposDoSonhoPreview = listOf(grupoCobra),
+                ),
+            onGrupoClick = { numeroTocado = it },
+        )
+
+        composeTestRule.onNodeWithTag(tagGrupoDoBicho(grupoCobra.numero)).performClick()
+
+        assertEquals(grupoCobra.numero, numeroTocado)
+    }
+
+    @Test
+    fun comGrupoAbertoExibeNomeLeituraDezenasEODisclaimerObrigatorio() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, grupoAbertoNoDialog = grupoCobra))
+
+        composeTestRule.onNodeWithText(grupoCobra.nome).assertIsDisplayed()
+        composeTestRule.onNodeWithText(grupoCobra.leituraPopular).assertIsDisplayed()
+        composeTestRule.onNodeWithText("09 · 17").assertIsDisplayed()
+        composeTestRule.onNodeWithText(context.getString(R.string.home_sonho_card_disclaimer)).assertIsDisplayed()
+    }
+
+    @Test
+    fun confirmarNoCartaoDoSonhoDisparaOnConfirmarSonhoClickComONumeroDoGrupo() {
+        var numeroConfirmado: Int? = null
+
+        mostrarTelaHome(
+            uiState = HomeUiState(carregando = false, grupoAbertoNoDialog = grupoCobra),
+            onConfirmarSonhoClick = { numeroConfirmado = it },
+        )
+
+        composeTestRule.onNodeWithText(context.getString(R.string.home_sonho_card_confirmar_cta)).performClick()
+
+        assertEquals(grupoCobra.numero, numeroConfirmado)
+    }
+
+    @Test
+    fun grupoJaConfirmadoHojeExibeOEstadoConfirmadoEmVezDoCta() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    grupoAbertoNoDialog = grupoCobra,
+                    grupoDoSonhoConfirmadoHoje = grupoCobra.numero,
+                ),
+        )
+
+        composeTestRule.onNodeWithText(context.getString(R.string.home_sonho_card_confirmado)).assertIsDisplayed()
+    }
+
+    @Test
+    fun fecharODialogoDoSonhoDisparaOnFecharDialogoSonhoClick() {
+        var fechado = false
+
+        mostrarTelaHome(
+            uiState = HomeUiState(carregando = false, grupoAbertoNoDialog = grupoCobra),
+            onFecharDialogoSonhoClick = { fechado = true },
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription(context.getString(R.string.home_sonho_card_fechar_descricao))
+            .performClick()
+
+        assertTrue(fechado)
+    }
+
+    @Test
     fun nenhumaStringDaTelaDeHomePrometeAumentoDeChance() {
         val stringsDaTela =
             buildMap {
@@ -167,6 +351,7 @@ class TelaHomeTest {
                 put("home_vazio_titulo", context.getString(R.string.home_vazio_titulo))
                 put("home_vazio_descricao", context.getString(R.string.home_vazio_descricao))
                 put("home_disclaimer_aposta", context.getString(R.string.home_disclaimer_aposta))
+                put("home_sonho_card_disclaimer", context.getString(R.string.home_sonho_card_disclaimer))
             }
 
         stringsDaTela.forEach { (nomeRecurso, valor) ->

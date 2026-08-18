@@ -38,14 +38,18 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
 | RF-03.1 | Concurso corrente, horário de fechamento (19h) e sorteio (20h) | M | F1 | em andamento | horário fixo pronto (`TelaHome`); número do concurso bloqueado por RF-05 (API da Caixa, ainda não iniciada) — CLAUDE.md §8 proíbe inventar dado de sorteio |
-| RF-03.2 | Índice de sorte do dia, fase da lua, signo | S | F1 | não iniciado | |
-| RF-03.3 | Seletor dos 25 grupos do jogo do bicho quando sonho ativo | M | F1 | não iniciado | |
+| RF-03.2 | Índice de sorte do dia, fase da lua, signo | S | F1 | concluído | índice de sorte é fórmula decorativa nova (sem base em nenhum doc — protótipo só tinha valor mockado); lua/signo usam cálculo já existente do RF-02 |
+| RF-03.3 | Seletor dos 25 grupos do jogo do bicho quando sonho ativo | M | F1 | concluído | prévia de 4 + expansão inline pros 25; gated por `Crenca.SONHO` no perfil salvo |
 | RF-03.4 | Listar palpites do dia com dezenas, horário, força, crenças | M | F1 | concluído | crenças usadas por palpite ainda não aparecem no card, só dezenas/horário/força |
-| RF-03.5 | Indicar dezenas que mudaram vs. palpite anterior | S | F1 | não iniciado | |
+| RF-03.5 | Indicar dezenas que mudaram vs. palpite anterior | S | F1 | concluído | |
 | RF-03.6 | Total de jogos do dia e custo na lotérica | M | F1 | concluído | |
 | RF-03.7 | Estado vazio sem palpites | M | F1 | concluído | |
 | RF-03.8 | Excluir palpite com confirmação (lista e detalhe) | M | F1 | em andamento | confirmação pronta na lista (`TelaHome`); não há tela de detalhe ainda (RF-04) |
 | RF-03.9 | Exibir palpites restantes no dia / ilimitado no Pro | M | F3 | não iniciado | |
+| RF-03.10 | Tocar grupo abre card com nome, número, leitura, dezenas | M | F1 | concluído | `DialogoCartaoDoSonho`, wireframe 1t |
+| RF-03.11 | Leitura escrita pros 25 grupos, tradição popular | M | F1 | concluído | conteúdo portado do protótipo de referência (`GRUPOS_DO_BICHO`) |
+| RF-03.12 | Confirmar grupo como sonho do dia, indicar já escolhido | M | F1 | em andamento | confirmação e persistência (DataStore) prontas; ainda não alimenta uma geração real porque a Home não tem botão de gerar (RF-11 não existe) |
+| RF-03.13 | Card informa que a leitura não altera a probabilidade | M | F1 | concluído | |
 
 ## RF-04 · Detalhe, edição e desdobramentos
 

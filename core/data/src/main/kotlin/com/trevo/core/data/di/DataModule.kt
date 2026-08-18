@@ -1,11 +1,16 @@
 package com.trevo.core.data.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import com.trevo.core.data.TrevoDatabase
 import com.trevo.core.data.palpite.PalpiteDao
 import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.palpite.PalpiteRepositoryImpl
+import com.trevo.core.data.preferencias.PreferenciasRepository
+import com.trevo.core.data.preferencias.PreferenciasRepositoryImpl
+import com.trevo.core.data.preferencias.preferenciasDataStore
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -27,6 +32,12 @@ object DataModule {
 
     @Provides
     fun fornecerPalpiteDao(banco: TrevoDatabase): PalpiteDao = banco.palpiteDao()
+
+    @Provides
+    @Singleton
+    fun fornecerPreferenciasDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<Preferences> = context.preferenciasDataStore
 }
 
 @Module
@@ -34,4 +45,7 @@ object DataModule {
 abstract class DataBindsModule {
     @Binds
     abstract fun ligarPalpiteRepository(impl: PalpiteRepositoryImpl): PalpiteRepository
+
+    @Binds
+    abstract fun ligarPreferenciasRepository(impl: PreferenciasRepositoryImpl): PreferenciasRepository
 }

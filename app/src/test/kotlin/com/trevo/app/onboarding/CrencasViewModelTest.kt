@@ -2,10 +2,14 @@ package com.trevo.app.onboarding
 
 import com.trevo.app.MainDispatcherRule
 import com.trevo.app.palpite.FakePalpiteRepository
+import com.trevo.app.preferencias.FakePreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.identidade.Signo
 import com.trevo.core.engine.identidade.ValidadorDataNascimento
 import com.trevo.core.engine.palpite.PalpiteGenerator
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -13,9 +17,11 @@ import org.junit.Rule
 import org.junit.Test
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.random.Random
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CrencasViewModelTest {
     @get:Rule
     val regraDoDispatcherPrincipal = MainDispatcherRule()
@@ -30,6 +36,7 @@ class CrencasViewModelTest {
             gerador = PalpiteGenerator(Random(semente)),
             validadorDeNascimento = ValidadorDataNascimento(RELOGIO_FIXO),
             repository = FakePalpiteRepository(RELOGIO_FIXO),
+            preferenciasRepository = FakePreferenciasRepository(),
             clock = RELOGIO_FIXO,
         )
 
@@ -151,4 +158,29 @@ class CrencasViewModelTest {
 
         assertTrue(primeiroPalpite != null && segundoPalpite != null)
     }
+
+    @Test
+    fun gerarPalpiteSalvaOPerfilComNomeNascimentoSignoECrencasAtivas() =
+        runTest {
+            val preferencias = FakePreferenciasRepository()
+            val viewModel =
+                CrencasViewModel(
+                    gerador = PalpiteGenerator(Random(1)),
+                    validadorDeNascimento = ValidadorDataNascimento(RELOGIO_FIXO),
+                    repository = FakePalpiteRepository(RELOGIO_FIXO),
+                    preferenciasRepository = preferencias,
+                    clock = RELOGIO_FIXO,
+                )
+            viewModel.aoTocarCrenca(Crenca.SIGNO)
+            viewModel.aoTocarCrenca(Crenca.LUA)
+
+            viewModel.aoGerarPalpite(nome = "Marlene", nascimentoTexto = "14/07/1978", signo = Signo.CANCER)
+            advanceUntilIdle()
+
+            val perfil = preferencias.perfilSalvo.value
+            assertEquals("Marlene", perfil?.nome)
+            assertEquals(LocalDate.of(1978, 7, 14), perfil?.nascimento)
+            assertEquals(Signo.CANCER, perfil?.signo)
+            assertEquals(setOf(Crenca.SIGNO, Crenca.LUA), perfil?.crencasAtivas)
+        }
 }

@@ -3,6 +3,7 @@ package com.trevo.app.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trevo.core.data.palpite.PalpiteRepository
+import com.trevo.core.data.preferencias.PreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.crenca.DadosDeContribuicao
 import com.trevo.core.engine.identidade.ResultadoDataNascimento
@@ -25,6 +26,7 @@ class CrencasViewModel
         private val gerador: PalpiteGenerator,
         private val validadorDeNascimento: ValidadorDataNascimento,
         private val repository: PalpiteRepository,
+        private val preferenciasRepository: PreferenciasRepository,
         private val clock: Clock,
     ) : ViewModel() {
         private val estado = MutableStateFlow(CrencasUiState())
@@ -55,9 +57,19 @@ class CrencasViewModel
                 )
             val palpite = gerador.gerar(crencasAtivas = estado.value.selecionadas, dados = dados)
             estado.value = estado.value.copy(palpiteGerado = palpite)
-            // Salva assíncrono: a Home observa o repositório por Flow, então
-            // navegar pra lá antes do insert terminar não perde o palpite —
-            // o card aparece assim que a escrita completar (RF-03/home).
-            viewModelScope.launch { repository.salvar(palpite) }
+            // Salva assíncrono: a Home observa repositório e preferências por
+            // Flow, então navegar pra lá antes de terminar não perde nada —
+            // os dados aparecem assim que a escrita completar (RF-03/home).
+            // Este é o único ponto de gravação do perfil (RF-03.2/03.3): não
+            // existe tela de edição ainda, só o que o onboarding coletou.
+            viewModelScope.launch {
+                repository.salvar(palpite)
+                preferenciasRepository.salvarPerfil(
+                    nome = nome,
+                    nascimento = nascimento,
+                    signo = signo,
+                    crencasAtivas = estado.value.selecionadas,
+                )
+            }
         }
     }

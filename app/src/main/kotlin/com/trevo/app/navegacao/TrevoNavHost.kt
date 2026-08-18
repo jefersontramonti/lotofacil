@@ -112,6 +112,10 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 onExcluirClick = viewModel::aoPedirExclusao,
                 onConfirmarExclusaoClick = viewModel::aoConfirmarExclusao,
                 onCancelarExclusaoClick = viewModel::aoCancelarExclusao,
+                onAlternarListaDeGruposClick = viewModel::aoAlternarListaDeGrupos,
+                onGrupoClick = viewModel::aoAbrirGrupo,
+                onFecharDialogoSonhoClick = viewModel::aoFecharDialogDoSonho,
+                onConfirmarSonhoClick = viewModel::aoConfirmarSonho,
             )
         }
     }

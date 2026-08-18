@@ -93,4 +93,28 @@
     <string name="geracao_frase_3">Traduzindo o sonho…</string>
     <string name="geracao_frase_4">Montando o seu volante…</string>
     <string name="geracao_subtitulo">preparando seu palpite</string>
+    <string name="home_saudacao">Boa sorte, %1$s</string>
+    <string name="home_sorte_titulo">Índice de sorte de hoje</string>
+    <plurals name="home_diff_dezenas_novas">
+        <item quantity="one">⇄ %1$d dezena nova: %2$s</item>
+        <item quantity="other">⇄ %1$d dezenas novas: %2$s</item>
+    </plurals>
+    <string name="home_sonho_titulo">Com o que você sonhou</string>
+    <string name="home_sonho_ver_todos">Ver os 25 grupos ▾</string>
+    <string name="home_sonho_ver_menos">Ver menos ▴</string>
+    <string name="home_sonho_card_grupo_rotulo">grupo %1$d</string>
+    <string name="home_sonho_card_kicker">O que dizem desse sonho</string>
+    <string name="home_sonho_card_dezenas_titulo">Dezenas do grupo</string>
+    <string name="home_sonho_card_disclaimer">A leitura é tradição popular — não altera a probabilidade do sorteio.</string>
+    <string name="home_sonho_card_confirmar_cta">☾ Foi com isso que sonhei</string>
+    <string name="home_sonho_card_confirmado">✓ Sonho confirmado hoje</string>
+    <string name="home_sonho_card_fechar_descricao">Fechar</string>
+    <string name="fase_lua_nova">Lua nova</string>
+    <string name="fase_lua_crescente_inicial">Lua crescente</string>
+    <string name="fase_lua_quarto_crescente">Quarto crescente</string>
+    <string name="fase_lua_crescente_gibosa">Quase cheia</string>
+    <string name="fase_lua_cheia">Lua cheia</string>
+    <string name="fase_lua_minguante_gibosa">Minguando</string>
+    <string name="fase_lua_quarto_minguante">Quarto minguante</string>
+    <string name="fase_lua_minguante_final">Lua minguante</string>
 </resources>
