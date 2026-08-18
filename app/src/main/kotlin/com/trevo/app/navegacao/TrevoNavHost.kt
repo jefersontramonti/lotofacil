@@ -8,9 +8,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.trevo.app.detalhe.DesdobramentosViewModel
+import com.trevo.app.detalhe.DetalheViewModel
+import com.trevo.app.detalhe.TelaDesdobramentos
+import com.trevo.app.detalhe.TelaDetalhe
 import com.trevo.app.geracao.GeracaoViewModel
 import com.trevo.app.geracao.TelaGerando
 import com.trevo.app.geracao.movimentoReduzidoAtivado
@@ -112,10 +118,50 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 onExcluirClick = viewModel::aoPedirExclusao,
                 onConfirmarExclusaoClick = viewModel::aoConfirmarExclusao,
                 onCancelarExclusaoClick = viewModel::aoCancelarExclusao,
+                onPalpiteClick = { id -> navController.navigate(Rotas.detalhe(id)) },
                 onAlternarListaDeGruposClick = viewModel::aoAlternarListaDeGrupos,
                 onGrupoClick = viewModel::aoAbrirGrupo,
                 onFecharDialogoSonhoClick = viewModel::aoFecharDialogDoSonho,
                 onConfirmarSonhoClick = viewModel::aoConfirmarSonho,
+            )
+        }
+        composable(
+            Rotas.DETALHE,
+            arguments = listOf(navArgument("palpiteId") { type = NavType.LongType }),
+        ) { entrada ->
+            val viewModel: DetalheViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+            val palpiteId = entrada.arguments?.getLong("palpiteId") ?: 0L
+
+            TelaDetalhe(
+                uiState = uiState,
+                onVoltarClick = { navController.popBackStack() },
+                onEditarClick = viewModel::aoEntrarNoModoEdicao,
+                onRefazerClick = viewModel::aoRefazer,
+                onExcluirClick = viewModel::aoPedirExclusao,
+                onConfirmarExclusaoClick = {
+                    viewModel.aoConfirmarExclusao()
+                    navController.popBackStack()
+                },
+                onCancelarExclusaoClick = viewModel::aoCancelarExclusao,
+                onDezenaClick = viewModel::aoTocarDezenaNaEdicao,
+                onAlternarGuardarFixasClick = viewModel::aoAlternarGuardarComoFixas,
+                onCancelarEdicaoClick = viewModel::aoCancelarEdicao,
+                onSalvarEdicaoClick = viewModel::aoSalvarEdicao,
+                onLimparFixasClick = viewModel::aoLimparFixas,
+                onVerDesdobramentosClick = { navController.navigate(Rotas.desdobramentos(palpiteId)) },
+            )
+        }
+        composable(
+            Rotas.DESDOBRAMENTOS,
+            arguments = listOf(navArgument("palpiteId") { type = NavType.LongType }),
+        ) {
+            val viewModel: DesdobramentosViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+
+            TelaDesdobramentos(
+                uiState = uiState,
+                onVoltarClick = { navController.popBackStack() },
             )
         }
     }

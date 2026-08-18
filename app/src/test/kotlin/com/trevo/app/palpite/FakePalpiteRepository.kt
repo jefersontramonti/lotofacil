@@ -39,4 +39,14 @@ class FakePalpiteRepository(
     ) = estado.map { salvos ->
         salvos.filter { it.criadoEm.atZone(zona).toLocalDate() == dia }.sortedByDescending { it.criadoEm }
     }
+
+    override fun observarPalpitePorId(id: Long) = estado.map { salvos -> salvos.firstOrNull { it.id == id } }
+
+    override suspend fun atualizar(
+        id: Long,
+        palpite: Palpite,
+        criadoEm: Instant,
+    ) {
+        estado.value = estado.value.map { if (it.id == id) PalpiteSalvo(id, palpite, criadoEm) else it }
+    }
 }

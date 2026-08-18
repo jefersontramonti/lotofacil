@@ -67,6 +67,7 @@ fun TelaHome(
     onExcluirClick: (Long) -> Unit,
     onConfirmarExclusaoClick: () -> Unit,
     onCancelarExclusaoClick: () -> Unit,
+    onPalpiteClick: (Long) -> Unit = {},
     onAlternarListaDeGruposClick: () -> Unit = {},
     onGrupoClick: (Int) -> Unit = {},
     onFecharDialogoSonhoClick: () -> Unit = {},
@@ -102,6 +103,7 @@ fun TelaHome(
             SecaoPalpites(
                 uiState = uiState,
                 onExcluirClick = onExcluirClick,
+                onPalpiteClick = onPalpiteClick,
             )
             Text(
                 text = stringResource(id = R.string.home_disclaimer_aposta),
@@ -270,15 +272,38 @@ private fun SecaoSonho(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = stringResource(id = R.string.home_sonho_titulo), style = MaterialTheme.typography.titleMedium)
-        val grupos = if (uiState.listaDeGruposExpandida) GRUPOS_DO_BICHO else uiState.gruposDoSonhoPreview
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            grupos.forEach { grupo ->
-                CartaoDePreviaDoGrupo(
-                    grupo = grupo,
-                    confirmadoHoje = uiState.grupoDoSonhoConfirmadoHoje == grupo.numero,
-                    onClick = { onGrupoClick(grupo.numero) },
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(id = R.string.home_sonho_titulo),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f),
+            )
+            val nomeDoSonhoAtual = GRUPOS_DO_BICHO.firstOrNull { it.numero == uiState.grupoDoSonhoConfirmadoHoje }?.nome
+            if (nomeDoSonhoAtual != null) {
+                Text(
+                    text = stringResource(id = R.string.home_sonho_atual, nomeDoSonhoAtual),
+                    style = MaterialTheme.typography.bodySmall,
                 )
+            }
+        }
+        val grupos = if (uiState.listaDeGruposExpandida) GRUPOS_DO_BICHO else uiState.gruposDoSonhoPreview
+        // Wireframe 1d: grid-template-columns:1fr 1fr — 2 colunas fixas, não
+        // um wrap que varia conforme o texto de cada item.
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            grupos.chunked(2).forEach { linha ->
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    linha.forEach { grupo ->
+                        CartaoDePreviaDoGrupo(
+                            grupo = grupo,
+                            confirmadoHoje = uiState.grupoDoSonhoConfirmadoHoje == grupo.numero,
+                            onClick = { onGrupoClick(grupo.numero) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    if (linha.size == 1) {
+                        Box(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
         val idDoTextoDeExpandir =
@@ -327,6 +352,7 @@ private fun CartaoDePreviaDoGrupo(
 private fun SecaoPalpites(
     uiState: HomeUiState,
     onExcluirClick: (Long) -> Unit,
+    onPalpiteClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -344,7 +370,11 @@ private fun SecaoPalpites(
             EstadoVazio()
         } else {
             uiState.palpitesHoje.forEach { palpite ->
-                CartaoPalpite(palpite = palpite, onExcluirClick = { onExcluirClick(palpite.id) })
+                CartaoPalpite(
+                    palpite = palpite,
+                    onExcluirClick = { onExcluirClick(palpite.id) },
+                    onClick = { onPalpiteClick(palpite.id) },
+                )
             }
         }
     }
@@ -384,6 +414,7 @@ private fun EstadoVazio(modifier: Modifier = Modifier) {
 private fun CartaoPalpite(
     palpite: PalpiteItemUiState,
     onExcluirClick: () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val descricaoExcluir = stringResource(id = R.string.home_excluir_descricao, palpite.numeroDoDia)
@@ -393,6 +424,7 @@ private fun CartaoPalpite(
                 .fillMaxWidth()
                 .background(color = NocturneSurface, shape = RoundedCornerShape(8.dp))
                 .border(border = BorderStroke(1.dp, NocturneOutline), shape = RoundedCornerShape(8.dp))
+                .clickable(role = Role.Button, onClick = onClick)
                 .padding(12.dp)
                 .testTag(tagCartaoPalpite(palpite.id)),
         verticalArrangement = Arrangement.spacedBy(8.dp),

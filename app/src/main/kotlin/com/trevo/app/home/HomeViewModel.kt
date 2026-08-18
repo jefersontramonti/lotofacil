@@ -26,7 +26,10 @@ import java.util.Locale
 import javax.inject.Inject
 
 private val FORMATO_HORARIO = DateTimeFormatter.ofPattern("HH:mm")
-private const val QUANTIDADE_DE_GRUPOS_NA_PREVIA = 4
+
+// Docs/Trevo - Lotofácil.dc.html (protótipo de referência, linha 2322):
+// `BICHOS.slice(0, 10)` — a prévia recolhida mostra os 10 primeiros grupos.
+private const val QUANTIDADE_DE_GRUPOS_NA_PREVIA = 10
 
 @HiltViewModel
 class HomeViewModel

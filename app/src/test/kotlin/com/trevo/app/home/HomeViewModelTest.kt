@@ -217,7 +217,7 @@ class HomeViewModelTest {
             assertEquals("Marlene Silva", viewModel.uiState.value.nome)
             assertEquals(Signo.CANCER, viewModel.uiState.value.signo)
             assertTrue(viewModel.uiState.value.crencaSonhoAtiva)
-            assertEquals(GRUPOS_DO_BICHO.take(4), viewModel.uiState.value.gruposDoSonhoPreview)
+            assertEquals(GRUPOS_DO_BICHO.take(10), viewModel.uiState.value.gruposDoSonhoPreview)
         }
 
     @Test

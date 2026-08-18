@@ -37,7 +37,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-03.1 | Concurso corrente, horário de fechamento (19h) e sorteio (20h) | M | F1 | em andamento | horário fixo pronto (`TelaHome`); número do concurso bloqueado por RF-05 (API da Caixa, ainda não iniciada) — CLAUDE.md §8 proíbe inventar dado de sorteio |
+| RF-03.1 | Concurso corrente, horário de fechamento (19h) e sorteio (20h) | M | F1 | em andamento | horário corrigido pra 20h/21h (`TelaHome`) — o resumo "(19h)/(20h)" no próprio texto do requisito está errado contra `Docs/tabelavalores.md` (fonte oficial: apostas até 20h, sorteio às 21h, seg-sáb); avise pra corrigir o requisito. Número do concurso bloqueado por RF-05 (API da Caixa, ainda não iniciada) — CLAUDE.md §8 proíbe inventar dado de sorteio |
 | RF-03.2 | Índice de sorte do dia, fase da lua, signo | S | F1 | concluído | índice de sorte é fórmula decorativa nova (sem base em nenhum doc — protótipo só tinha valor mockado); lua/signo usam cálculo já existente do RF-02 |
 | RF-03.3 | Seletor dos 25 grupos do jogo do bicho quando sonho ativo | M | F1 | concluído | prévia de 4 + expansão inline pros 25; gated por `Crenca.SONHO` no perfil salvo |
 | RF-03.4 | Listar palpites do dia com dezenas, horário, força, crenças | M | F1 | concluído | crenças usadas por palpite ainda não aparecem no card, só dezenas/horário/força |
@@ -55,16 +55,16 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-04.1 | Volante em grade 5×5, marcadas distinguíveis | M | F1 | não iniciado | |
-| RF-04.2 | Listar crença + explicação + dezenas que ela trouxe | M | F1 | não iniciado | |
-| RF-04.3 | Estatísticas: soma, pares/ímpares, moldura/miolo, custo | S | F1 | não iniciado | |
-| RF-04.4 | Probabilidade real de 15 acertos do fechamento escolhido | M | F1 | não iniciado | |
-| RF-04.5 | Editar manualmente as dezenas na grade | M | F1 | não iniciado | |
-| RF-04.6 | Bloquear salvar edição com contagem divergente do fechamento | M | F1 | não iniciado | |
-| RF-04.7 | Guardar dezenas manuais como fixas permanentes; exibir e limpar | M | F1 | não iniciado | |
-| RF-04.8 | Refazer o palpite mantendo crenças e fixas | M | F1 | não iniciado | |
-| RF-04.9 | Qtde de jogos de 15 equivalentes + custo total (fechamento >15) | S | F3 | não iniciado | |
-| RF-04.10 | Listar combinações do desdobramento (limitado em tela) | S | F3 | não iniciado | |
+| RF-04.1 | Volante em grade 5×5, marcadas distinguíveis | M | F1 | concluído | `GradeDeDezenas` (novo, reutilizado em RF-04.5) |
+| RF-04.2 | Listar crença + explicação + dezenas que ela trouxe | M | F1 | concluído | explicação reaproveita as strings estáticas `crenca_X_desc` (já usadas em `TelaCrencas`) em vez de persistir a explicação dinâmica de `ContribuicaoDeCrenca` — evita migração do Room; ver nota no plano da sessão |
+| RF-04.3 | Estatísticas: soma, pares/ímpares, moldura/miolo, custo | S | F1 | concluído | moldura/miolo reaproveita `DEZENAS_DA_MOLDURA` de `FonteMoldura.kt` |
+| RF-04.4 | Probabilidade real de 15 acertos do fechamento escolhido | M | F1 | concluído | `probabilidadeDe15Acertos` (novo, `:core:engine`) |
+| RF-04.5 | Editar manualmente as dezenas na grade | M | F1 | concluído | |
+| RF-04.6 | Bloquear salvar edição com contagem divergente do fechamento | M | F1 | concluído | |
+| RF-04.7 | Guardar dezenas manuais como fixas permanentes; exibir e limpar | M | F1 | concluído | |
+| RF-04.8 | Refazer o palpite mantendo crenças e fixas | M | F1 | concluído | |
+| RF-04.9 | Qtde de jogos de 15 equivalentes + custo total (fechamento >15) | S | F3 | concluído | `coeficienteBinomial` bate exatamente com `Docs/tabelavalores.md` pros 6 tamanhos oficiais |
+| RF-04.10 | Listar combinações do desdobramento (limitado em tela) | S | F3 | concluído | `combinacoesDe15` (sequence preguiçosa) + `TelaDesdobramentos`, limite de 24. Hoje nenhum palpite real passa de 15 dezenas (Home/Crenças sempre geram 15 — o seletor de fechamento de RF-04 mostra 16/18/20 com 🔒, que é RF-09/Pro, ainda não existe), então a tela é alcançável só via dados de teste até RF-09/RF-11 existirem |
 
 ## RF-05 · Resultados e conferência
 

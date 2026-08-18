@@ -33,4 +33,13 @@ class PalpiteRepositoryImpl
                     .toEpochMilli() - 1
             return dao.observarEntre(inicioDoDia, fimDoDia).map { entidades -> entidades.map { it.paraDominio() } }
         }
+
+        override fun observarPalpitePorId(id: Long): Flow<PalpiteSalvo?> =
+            dao.observarPorId(id).map { entidade -> entidade?.paraDominio() }
+
+        override suspend fun atualizar(
+            id: Long,
+            palpite: Palpite,
+            criadoEm: Instant,
+        ) = dao.atualizar(palpite.paraEntity(id = id, criadoEm = criadoEm))
     }

@@ -5,7 +5,11 @@ import com.trevo.core.engine.crenca.GrupoDoBicho
 import com.trevo.core.engine.identidade.Signo
 import java.math.BigDecimal
 
-val CUSTO_POR_JOGO: BigDecimal = BigDecimal("3.00")
+// Docs/tabelavalores.md — tabela oficial de preços da Lotofácil. Jogo de
+// 15 dezenas custa R$ 3,50; fechamentos maiores multiplicam por C(n,15)
+// jogos de 15 equivalentes (RF-04.9) e batem exatamente com a tabela
+// (ex.: 18 dezenas = C(18,15) × 3,50 = 816 × 3,50 = R$ 2.856,00).
+val CUSTO_POR_JOGO: BigDecimal = BigDecimal("3.50")
 
 data class PalpiteItemUiState(
     val id: Long,

@@ -236,6 +236,40 @@ class TelaHomeTest {
     }
 
     @Test
+    fun semSonhoConfirmadoHojeNaoExibeALinhaDeSonhoAtual() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    crencaSonhoAtiva = true,
+                    gruposDoSonhoPreview = GRUPOS_DO_BICHO.take(10),
+                    grupoDoSonhoConfirmadoHoje = null,
+                ),
+        )
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.home_sonho_atual, grupoCobra.nome))
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun comSonhoConfirmadoHojeExibeONomeDoGrupoNaLinhaDeSonhoAtual() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    crencaSonhoAtiva = true,
+                    gruposDoSonhoPreview = GRUPOS_DO_BICHO.take(10),
+                    grupoDoSonhoConfirmadoHoje = grupoCobra.numero,
+                ),
+        )
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.home_sonho_atual, grupoCobra.nome))
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun tocarVerOs25GruposDisparaOnAlternarListaDeGruposClick() {
         var alternado = false
 

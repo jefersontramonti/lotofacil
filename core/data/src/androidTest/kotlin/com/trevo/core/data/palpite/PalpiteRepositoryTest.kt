@@ -80,4 +80,27 @@ class PalpiteRepositoryTest {
             val salvos = repositorio.observarPalpitesDoDia(LocalDate.of(2026, 8, 17), zona).first()
             assertTrue(salvos.isEmpty())
         }
+
+    @Test
+    fun observarPalpitePorIdDevolveOPalpiteCorrespondenteOuNuloSeNaoExistir() =
+        runTest {
+            val id = repositorio.salvar(palpiteDeExemplo)
+
+            assertEquals(palpiteDeExemplo, repositorio.observarPalpitePorId(id).first()?.palpite)
+            assertEquals(null, repositorio.observarPalpitePorId(id + 999).first())
+        }
+
+    @Test
+    fun atualizarSubstituiODezenasEContribuicoesMasPreservaOCriadoEmPassado() =
+        runTest {
+            val id = repositorio.salvar(palpiteDeExemplo)
+            val palpiteRefeito = palpiteDeExemplo.copy(dezenas = (11..25).toList(), forca = 40)
+            val criadoEmOriginal = repositorio.observarPalpitePorId(id).first()!!.criadoEm
+
+            repositorio.atualizar(id, palpiteRefeito, criadoEmOriginal)
+
+            val atualizado = repositorio.observarPalpitePorId(id).first()
+            assertEquals(palpiteRefeito, atualizado?.palpite)
+            assertEquals(criadoEmOriginal, atualizado?.criadoEm)
+        }
 }

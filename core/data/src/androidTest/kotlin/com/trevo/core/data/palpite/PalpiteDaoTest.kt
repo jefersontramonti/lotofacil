@@ -63,4 +63,25 @@ class PalpiteDaoTest {
             val restantes = dao.observarEntre(inicioEpochMillis = 0, fimEpochMillis = Long.MAX_VALUE).first()
             assertEquals(listOf("2"), restantes.map { it.dezenas })
         }
+
+    @Test
+    fun observarPorIdDevolveOPalpiteCorrespondenteOuNuloSeNaoExistir() =
+        runTest {
+            val id = dao.inserir(entidade(criadoEmEpochMillis = 1_000, dezenas = "1,2,3"))
+
+            assertEquals("1,2,3", dao.observarPorId(id).first()?.dezenas)
+            assertEquals(null, dao.observarPorId(id + 999).first())
+        }
+
+    @Test
+    fun atualizarSubstituiOsCamposMasMantemOMesmoId() =
+        runTest {
+            val id = dao.inserir(entidade(criadoEmEpochMillis = 1_000, dezenas = "1,2,3"))
+
+            dao.atualizar(entidade(criadoEmEpochMillis = 1_000, dezenas = "4,5,6").copy(id = id))
+
+            val atualizado = dao.observarPorId(id).first()
+            assertEquals(id, atualizado?.id)
+            assertEquals("4,5,6", atualizado?.dezenas)
+        }
 }

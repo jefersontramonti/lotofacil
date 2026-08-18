@@ -6,4 +6,10 @@ object Rotas {
     const val CRENCAS = "crencas"
     const val GERANDO = "gerando"
     const val HOME = "home"
+    const val DETALHE = "detalhe/{palpiteId}"
+    const val DESDOBRAMENTOS = "desdobramentos/{palpiteId}"
+
+    fun detalhe(palpiteId: Long) = "detalhe/$palpiteId"
+
+    fun desdobramentos(palpiteId: Long) = "desdobramentos/$palpiteId"
 }
