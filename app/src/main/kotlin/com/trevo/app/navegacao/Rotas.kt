@@ -6,6 +6,7 @@ object Rotas {
     const val CRENCAS = "crencas"
     const val GERANDO = "gerando"
     const val HOME = "home"
+    const val CONFERENCIA = "conferencia"
     const val DETALHE = "detalhe/{palpiteId}"
     const val DESDOBRAMENTOS = "desdobramentos/{palpiteId}"
 

@@ -37,7 +37,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-03.1 | Concurso corrente, horário de fechamento (19h) e sorteio (20h) | M | F1 | em andamento | horário corrigido pra 20h/21h (`TelaHome`) — o resumo "(19h)/(20h)" no próprio texto do requisito está errado contra `Docs/tabelavalores.md` (fonte oficial: apostas até 20h, sorteio às 21h, seg-sáb); avise pra corrigir o requisito. Número do concurso bloqueado por RF-05 (API da Caixa, ainda não iniciada) — CLAUDE.md §8 proíbe inventar dado de sorteio |
+| RF-03.1 | Concurso corrente, horário de fechamento (19h) e sorteio (20h) | M | F1 | em andamento | horário corrigido pra 20h/21h (`TelaHome`) — o resumo "(19h)/(20h)" no próprio texto do requisito está errado contra `Docs/tabelavalores.md` (fonte oficial: apostas até 20h, sorteio às 21h, seg-sáb); avise pra corrigir o requisito. Número do concurso corrente ainda não aparece na Home — RF-05 já traz o número real via API, mas a Home em si não foi conectada a isso nesta fatia; CLAUDE.md §8 proíbe inventar dado de sorteio, então isso só é exibível com o resultado já buscado |
 | RF-03.2 | Índice de sorte do dia, fase da lua, signo | S | F1 | concluído | índice de sorte é fórmula decorativa nova (sem base em nenhum doc — protótipo só tinha valor mockado); lua/signo usam cálculo já existente do RF-02 |
 | RF-03.3 | Seletor dos 25 grupos do jogo do bicho quando sonho ativo | M | F1 | concluído | prévia de 4 + expansão inline pros 25; gated por `Crenca.SONHO` no perfil salvo |
 | RF-03.4 | Listar palpites do dia com dezenas, horário, força, crenças | M | F1 | concluído | crenças usadas por palpite ainda não aparecem no card, só dezenas/horário/força |
@@ -56,6 +56,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
 | RF-04.1 | Volante em grade 5×5, marcadas distinguíveis | M | F1 | concluído | `GradeDeDezenas` (novo, reutilizado em RF-04.5) |
+| — | Barra de navegação inferior (Início/Conferir/Histórico/Perfil) — achado da auditoria de fidelidade contra os wireframes/protótipo (RF-05) | — | — | concluído | `BarraDeNavegacaoInferior` (`:core:ui`, usa `NavigationBar`/`NavigationBarItem` do Material 3) + `BarraDeNavegacaoDoApp` (`:app`, ícones Phosphor via `com.adamglin:phosphor-icon`). Estado ativo por `NavController.currentBackStackEntryAsState()` em `TrevoNavHost` (Scaffold), não por flag manual em cada tela. Aparece em Home/Detalhe/Desdobramentos/Conferência; ausente em onboarding, ritual/geração e modais — segue exatamente o `abas` do protótipo (`Trevo - Lotofácil.dc.html`, ~linha 2161). Histórico/Perfil ficam visíveis mas inertes até RF-06/RF-07 existirem |
 | RF-04.2 | Listar crença + explicação + dezenas que ela trouxe | M | F1 | concluído | explicação reaproveita as strings estáticas `crenca_X_desc` (já usadas em `TelaCrencas`) em vez de persistir a explicação dinâmica de `ContribuicaoDeCrenca` — evita migração do Room; ver nota no plano da sessão |
 | RF-04.3 | Estatísticas: soma, pares/ímpares, moldura/miolo, custo | S | F1 | concluído | moldura/miolo reaproveita `DEZENAS_DA_MOLDURA` de `FonteMoldura.kt` |
 | RF-04.4 | Probabilidade real de 15 acertos do fechamento escolhido | M | F1 | concluído | `probabilidadeDe15Acertos` (novo, `:core:engine`) |
@@ -70,16 +71,16 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-05.1 | Buscar resultado oficial na API da Caixa | M | F1 | não iniciado | |
-| RF-05.2 | Armazenar resultados localmente (consulta offline) | M | F1 | não iniciado | |
-| RF-05.3 | Conferir automaticamente todos os palpites do concurso | M | F2 | não iniciado | |
-| RF-05.4 | Exibir acertos, faixa premiada e valor do prêmio por palpite | M | F1 | não iniciado | |
-| RF-05.5 | Destacar no volante: acerto, marcada não sorteada, sorteada não marcada | M | F1 | não iniciado | |
-| RF-05.6 | Total ganho e total gasto no concurso | M | F1 | não iniciado | |
-| RF-05.7 | Estado de espera (concurso ainda não sorteado) | M | F1 | não iniciado | |
-| RF-05.8 | Estado offline, com aviso de que a conferência ocorrerá depois | M | F2 | não iniciado | |
-| RF-05.9 | Estado de falha do serviço com nova tentativa | M | F2 | não iniciado | |
-| RF-05.10 | Entrada manual das dezenas sorteadas (fallback) | C | F2 | não iniciado | |
+| RF-05.1 | Buscar resultado oficial na API da Caixa | M | F1 | concluído | `ResultadoApi`/`ResultadoRepositoryImpl` (`:core:data`), API real da Caixa (`servicebus2.caixa.gov.br`), verificado com chamada de rede real no emulador |
+| RF-05.2 | Armazenar resultados localmente (consulta offline) | M | F1 | concluído | tabela `resultados` (Room, migração `MIGRATION_1_2` versão 1→2, testada com `MigrationTestHelper`) |
+| RF-05.3 | Conferir automaticamente todos os palpites do concurso | M | F2 | concluído | roda ao entrar na `TelaConferencia` (`ConferenciaViewModel.aoEntrar`), não em background/WorkManager — ver pendência de RNF-02.3 |
+| RF-05.4 | Exibir acertos, faixa premiada e valor do prêmio por palpite | M | F1 | concluído | `conferir()` (`:core:engine`) + `TelaConferencia` |
+| RF-05.5 | Destacar no volante: acerto, marcada não sorteada, sorteada não marcada | M | F1 | concluído | `estadosDasDezenas()` (`:core:engine`, as 25 dezenas); a tela de Conferência em si usa o resumo compacto por palpite do wireframe 1j (cheia=acerto/tracejada=miss), igual ao protótipo — a grade 5×5 completa com os 3 estados fica reservada pra quando `TelaDetalhe` ganhar essa integração |
+| RF-05.6 | Total ganho e total gasto no concurso | M | F1 | concluído | `ConferenciaUiState.Sucesso.totalGanho/totalGasto` |
+| RF-05.7 | Estado de espera (concurso ainda não sorteado) | M | F1 | concluído | compara `dataApuracao` do resultado mais recente salvo com a data de criação dos palpites de hoje — nunca calcula número de concurso offline; verificado com chamada real (resultado do concurso anterior, hoje ainda não sorteado) |
+| RF-05.8 | Estado offline, com aviso de que a conferência ocorrerá depois | M | F2 | concluído | `IOException` → `ConferenciaUiState.SemConexao` |
+| RF-05.9 | Estado de falha do serviço com nova tentativa | M | F2 | concluído | qualquer outra exceção → `ConferenciaUiState.Falha`; botão "Tentar de novo" chama `aoTentarNovamente()` |
+| RF-05.10 | Entrada manual das dezenas sorteadas (fallback) | C | F2 | concluído | diálogo com `GradeDeDezenas` em modo seleção (15 dezenas), acessível a partir de `SemConexao`/`Falha`; resultado manual não tem `faixasDePremio` (nunca inventa valor de prêmio) |
 
 ## RF-06 · Histórico
 
@@ -147,8 +148,8 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RNF-01.5 | APK < 100 MB                                                      | não iniciado |
 | RNF-02.1 | Todas as funções exceto busca de resultado operam offline         | não iniciado |
 | RNF-02.2 | Nenhum palpite perdido por falha de rede/fechamento/reinício      | não iniciado |
-| RNF-02.3 | Conferência pendente enfileirada, roda quando a rede volta        | não iniciado |
-| RNF-02.4 | Recuo exponencial na busca de resultado, máx. 5 tentativas        | não iniciado |
+| RNF-02.3 | Conferência pendente enfileirada, roda quando a rede volta        | não iniciado — decisão consciente de RF-05: retry manual (RF-05.8/05.9) cobre o requisito funcional explícito; fila automática via WorkManager fica pra outra fatia |
+| RNF-02.4 | Recuo exponencial na busca de resultado, máx. 5 tentativas        | concluído — `RecuoExponencial.kt` (`:core:data`), testado |
 | RNF-02.5 | Sessões sem falha > 99%, ANR < 0,47%                              | não iniciado |
 | RNF-03.1 | Alvo de toque mínimo 48dp                                         | não iniciado |
 | RNF-03.2 | Contraste 4,5:1 (texto corrido) / 3:1 (texto grande e UI)         | não iniciado |
@@ -157,7 +158,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RNF-03.5 | Estado de marcação nunca só por cor                               | não iniciado |
 | RNF-03.6 | Função principal alcançável em ≤ 3 toques da tela inicial         | não iniciado |
 | RNF-03.7 | Interface em pt-BR; valores em real; datas dd/mm/aaaa             | não iniciado |
-| RNF-04.1 | HTTPS obrigatório, texto claro desabilitado no manifesto          | não iniciado |
+| RNF-04.1 | HTTPS obrigatório, texto claro desabilitado no manifesto          | concluído — `android:usesCleartextTraffic="false"` + base url HTTPS |
 | RNF-04.2 | Nenhum dado financeiro coletado/armazenado/transmitido pelo app   | não iniciado |
 | RNF-04.3 | Coleta limitada a nome e data de nascimento                       | não iniciado |
 | RNF-04.4 | Conformidade LGPD (privacidade, consentimento, exclusão de dados) | não iniciado |
@@ -172,7 +173,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RNF-06.3 | Geração determinística sob semente fixa                           | não iniciado |
 | RNF-06.4 | Testes de interface: cadastro, geração, edição, conferência       | não iniciado |
 | RNF-06.5 | CI rodando build, lint e testes a cada envio                      | não iniciado |
-| RNF-06.6 | Migrações Room versionadas, sem perda de dado                     | não iniciado |
+| RNF-06.6 | Migrações Room versionadas, sem perda de dado                     | concluído para v1→v2 (`MIGRATION_1_2`, testada com `MigrationTestHelper`); reavaliar a cada nova migração |
 | RNF-07.1 | Classificação etária 18+ coerente com o questionário              | não iniciado |
 | RNF-07.2 | Loja declara que o app não recebe aposta nem paga prêmio          | não iniciado |
 | RNF-07.3 | Toda transação pelo Play Billing                                  | não iniciado |

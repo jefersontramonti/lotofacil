@@ -88,6 +88,7 @@
     <string name="home_nav_conferir">Conferir</string>
     <string name="home_nav_historico">Histórico</string>
     <string name="home_nav_perfil">Perfil</string>
+    <string name="nav_item_descricao_ativo">%1$s, selecionado</string>
     <string name="geracao_frase_1">Cruzando os atrasados…</string>
     <string name="geracao_frase_2">Consultando a fase da lua…</string>
     <string name="geracao_frase_3">Traduzindo o sonho…</string>
@@ -157,4 +158,34 @@
     <string name="desdobramentos_jogos_titulo">Jogos</string>
     <string name="desdobramentos_custo_titulo">Custo</string>
     <string name="desdobramentos_mostrando">Mostrando %1$d de %2$d jogos.</string>
+    <string name="conferencia_titulo">Conferência</string>
+    <string name="conferencia_voltar_descricao">Voltar</string>
+    <string name="conferencia_carregando">Conferindo seus palpites…</string>
+    <string name="conferencia_concurso_titulo">Concurso %1$d · dezenas sorteadas</string>
+    <string name="conferencia_resultado_manual_titulo">Resultado informado manualmente · dezenas sorteadas</string>
+    <string name="conferencia_ganho_titulo">Você ganhou</string>
+    <string name="conferencia_gasto_titulo">Você gastou</string>
+    <plurals name="conferencia_acertos">
+        <item quantity="one">%1$d acerto</item>
+        <item quantity="other">%1$d acertos</item>
+    </plurals>
+    <string name="conferencia_sem_premio">sem prêmio</string>
+    <string name="conferencia_premio_indisponivel">resultado manual, sem valor de prêmio</string>
+    <string name="conferencia_premio_rotulo">Prêmio</string>
+    <string name="conferencia_disclaimer_oficial">A conferência oficial e o pagamento do prêmio são feitos pela Caixa.</string>
+    <string name="conferencia_legenda_bolas">Bola cheia = acerto, tracejada = marcada que não saiu.</string>
+    <string name="conferencia_vazio_titulo">Nenhum palpite hoje</string>
+    <string name="conferencia_vazio_descricao">Gere um palpite pra conferir contra o resultado.</string>
+    <string name="conferencia_espera_titulo">O concurso ainda não foi sorteado</string>
+    <string name="conferencia_espera_descricao">Assim que o resultado sair, a conferência acontece automaticamente.</string>
+    <string name="conferencia_sem_conexao_titulo">Sem conexão</string>
+    <string name="conferencia_sem_conexao_descricao">Seus palpites continuam salvos no aparelho e a conferência acontece assim que a internet voltar.</string>
+    <string name="conferencia_falha_titulo">O resultado não chegou</string>
+    <string name="conferencia_falha_descricao">O serviço da Caixa não respondeu. Costuma acontecer logo depois do sorteio.</string>
+    <string name="conferencia_tentar_novamente_cta">Tentar de novo</string>
+    <string name="conferencia_informar_manualmente_cta">Informar resultado manualmente</string>
+    <string name="conferencia_informar_manualmente_titulo">Informe as 15 dezenas sorteadas</string>
+    <string name="conferencia_informar_manualmente_contagem">%1$d de 15 dezenas</string>
+    <string name="conferencia_informar_manualmente_confirmar_cta">Confirmar</string>
+    <string name="conferencia_informar_manualmente_cancelar_cta">Cancelar</string>
 </resources>

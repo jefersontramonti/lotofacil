@@ -52,6 +52,8 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
+    implementation(libs.phosphor.icon)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
 

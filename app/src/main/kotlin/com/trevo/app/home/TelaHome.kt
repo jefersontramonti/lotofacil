@@ -11,11 +11,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -82,8 +86,14 @@ fun TelaHome(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .safeDrawingPadding()
-                    .verticalScroll(rememberScrollState())
+                    // A barra de navegação inferior (fora desta Composable,
+                    // ver TrevoNavHost) já cobre o inset de baixo — pedir de
+                    // novo aqui dobraria o espaço reservado.
+                    .windowInsetsPadding(
+                        WindowInsets.safeDrawing.only(
+                            WindowInsetsSides.Top + WindowInsetsSides.Horizontal,
+                        ),
+                    ).verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -109,8 +119,6 @@ fun TelaHome(
                 text = stringResource(id = R.string.home_disclaimer_aposta),
                 style = MaterialTheme.typography.bodySmall,
             )
-            HorizontalDivider(color = NocturneOutline)
-            BarraDeNavegacao()
         }
     }
 
@@ -474,16 +482,6 @@ private fun CartaoPalpite(
                 style = MaterialTheme.typography.bodySmall,
             )
         }
-    }
-}
-
-@Composable
-private fun BarraDeNavegacao(modifier: Modifier = Modifier) {
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(text = stringResource(id = R.string.home_nav_inicio), style = MaterialTheme.typography.labelMedium)
-        Text(text = stringResource(id = R.string.home_nav_conferir), style = MaterialTheme.typography.labelMedium)
-        Text(text = stringResource(id = R.string.home_nav_historico), style = MaterialTheme.typography.labelMedium)
-        Text(text = stringResource(id = R.string.home_nav_perfil), style = MaterialTheme.typography.labelMedium)
     }
 }
 
