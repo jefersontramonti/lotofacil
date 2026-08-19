@@ -25,6 +25,8 @@ import com.trevo.app.detalhe.TelaDetalhe
 import com.trevo.app.geracao.GeracaoViewModel
 import com.trevo.app.geracao.TelaGerando
 import com.trevo.app.geracao.movimentoReduzidoAtivado
+import com.trevo.app.historico.HistoricoViewModel
+import com.trevo.app.historico.TelaHistorico
 import com.trevo.app.home.HomeViewModel
 import com.trevo.app.home.TelaHome
 import com.trevo.app.onboarding.CrencasViewModel
@@ -151,6 +153,15 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onVoltarClick = { navController.popBackStack() },
                     onTentarNovamenteClick = viewModel::aoTentarNovamente,
                     onInformarResultadoManualmente = viewModel::aoInformarResultadoManualmente,
+                )
+            }
+            composable(Rotas.HISTORICO) {
+                val viewModel: HistoricoViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsState()
+
+                TelaHistorico(
+                    uiState = uiState,
+                    onVerMaisClick = viewModel::aoVerMaisClick,
                 )
             }
             composable(

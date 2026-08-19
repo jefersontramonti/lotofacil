@@ -12,6 +12,10 @@ interface ResultadoRepository {
 
     fun observarUltimoResultadoSalvo(): Flow<Resultado?>
 
+    // RF-06.1 — todo resultado já buscado, mais recente primeiro. O
+    // histórico casa cada um com os palpites do dia correspondente.
+    fun observarTodosOsResultados(): Flow<List<Resultado>>
+
     // RF-05.10 — fallback manual quando a API está fora do ar por muito
     // tempo. Sem faixasDePremio: valor de prêmio não existe sem a API.
     suspend fun salvarResultadoManual(dezenas: Set<Int>)

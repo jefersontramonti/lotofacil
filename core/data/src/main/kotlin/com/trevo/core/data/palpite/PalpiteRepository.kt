@@ -18,6 +18,9 @@ interface PalpiteRepository {
 
     fun observarPalpitePorId(id: Long): Flow<PalpiteSalvo?>
 
+    // RF-06.1 — todo palpite já salvo, mais recente primeiro.
+    fun observarTodosOsPalpites(): Flow<List<PalpiteSalvo>>
+
     // `criadoEm` vem de quem chama (já tem o PalpiteSalvo carregado) — o
     // repositório não faz uma leitura extra só pra preservar o horário
     // original do palpite editado/refeito.

@@ -3,6 +3,7 @@ package com.trevo.app.palpite
 import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.palpite.PalpiteSalvo
 import com.trevo.core.engine.palpite.Palpite
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +30,17 @@ class FakePalpiteRepository(
         return id
     }
 
+    // Só pra teste: semeia um palpite numa data específica, sem depender do
+    // relógio fixo do repositório — usado pra montar histórico multi-dia.
+    fun salvarComData(
+        palpite: Palpite,
+        criadoEm: Instant,
+    ): Long {
+        val id = proximoId++
+        estado.value = estado.value + PalpiteSalvo(id = id, palpite = palpite, criadoEm = criadoEm)
+        return id
+    }
+
     override suspend fun excluir(id: Long) {
         estado.value = estado.value.filterNot { it.id == id }
     }
@@ -41,6 +53,9 @@ class FakePalpiteRepository(
     }
 
     override fun observarPalpitePorId(id: Long) = estado.map { salvos -> salvos.firstOrNull { it.id == id } }
+
+    override fun observarTodosOsPalpites(): Flow<List<PalpiteSalvo>> =
+        estado.map { salvos -> salvos.sortedByDescending { it.criadoEm } }
 
     override suspend fun atualizar(
         id: Long,

@@ -188,4 +188,25 @@
     <string name="conferencia_informar_manualmente_contagem">%1$d de 15 dezenas</string>
     <string name="conferencia_informar_manualmente_confirmar_cta">Confirmar</string>
     <string name="conferencia_informar_manualmente_cancelar_cta">Cancelar</string>
+    <string name="historico_titulo">Histórico</string>
+    <plurals name="historico_resumo">
+        <item quantity="one">%1$d palpite em %2$d concursos</item>
+        <item quantity="other">%1$d palpites em %2$d concursos</item>
+    </plurals>
+    <string name="historico_gastou_titulo">Gastou</string>
+    <string name="historico_ganhou_titulo">Ganhou</string>
+    <string name="historico_saldo_titulo">Saldo</string>
+    <string name="historico_retorno">retorno de %1$d%% do que apostou</string>
+    <string name="historico_media">média de %1$s por concurso</string>
+    <string name="historico_faixas_titulo">Faixas atingidas</string>
+    <string name="historico_faixas_melhor">melhor: %1$d acertos</string>
+    <string name="historico_faixa_rotulo">%1$d ac.</string>
+    <string name="historico_concurso_titulo">Concurso %1$d · %2$s</string>
+    <string name="historico_concurso_manual_titulo">Resultado manual · %1$s</string>
+    <plurals name="historico_ver_mais_cta">
+        <item quantity="one">Ver mais %1$d concurso anterior</item>
+        <item quantity="other">Ver mais %1$d concursos anteriores</item>
+    </plurals>
+    <string name="historico_vazio_titulo">Nada conferido ainda</string>
+    <string name="historico_vazio_descricao">Depois do primeiro sorteio conferido, seus palpites e o que eles renderam aparecem aqui.</string>
 </resources>

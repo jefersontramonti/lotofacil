@@ -7,6 +7,7 @@ object Rotas {
     const val GERANDO = "gerando"
     const val HOME = "home"
     const val CONFERENCIA = "conferencia"
+    const val HISTORICO = "historico"
     const val DETALHE = "detalhe/{palpiteId}"
     const val DESDOBRAMENTOS = "desdobramentos/{palpiteId}"
 

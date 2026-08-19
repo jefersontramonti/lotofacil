@@ -37,6 +37,9 @@ class PalpiteRepositoryImpl
         override fun observarPalpitePorId(id: Long): Flow<PalpiteSalvo?> =
             dao.observarPorId(id).map { entidade -> entidade?.paraDominio() }
 
+        override fun observarTodosOsPalpites(): Flow<List<PalpiteSalvo>> =
+            dao.observarTodos().map { entidades -> entidades.map { it.paraDominio() } }
+
         override suspend fun atualizar(
             id: Long,
             palpite: Palpite,

@@ -23,12 +23,13 @@ import com.trevo.core.ui.ItemDeNavegacao
 // Onboarding, ritual, geração e folhas/diálogos modais nunca aparecem
 // aqui — não são navegação persistente por abas.
 val ROTAS_COM_BARRA_DE_NAVEGACAO =
-    setOf(Rotas.HOME, Rotas.CONFERENCIA, Rotas.DETALHE, Rotas.DESDOBRAMENTOS)
+    setOf(Rotas.HOME, Rotas.CONFERENCIA, Rotas.HISTORICO, Rotas.DETALHE, Rotas.DESDOBRAMENTOS)
 
 private fun abaAtivaPara(rota: String?): String? =
     when (rota) {
         Rotas.HOME, Rotas.DETALHE, Rotas.DESDOBRAMENTOS -> "inicio"
         Rotas.CONFERENCIA -> "conferencia"
+        Rotas.HISTORICO -> "historico"
         else -> null
     }
 
@@ -46,6 +47,7 @@ fun BarraDeNavegacaoDoApp(
 
     val inicioAtivo = abaAtiva == "inicio"
     val conferirAtivo = abaAtiva == "conferencia"
+    val historicoAtivo = abaAtiva == "historico"
 
     BarraDeNavegacaoInferior(
         itens =
@@ -88,11 +90,27 @@ fun BarraDeNavegacaoDoApp(
                 ),
                 ItemDeNavegacao(
                     rotulo = rotuloHistorico,
-                    descricaoDoEstado = rotuloHistorico,
-                    icone = PhosphorIcons.Regular.ClockCounterClockwise,
-                    ativo = false,
-                    // RF-06 ainda não existe — aba visível, sem destino.
-                    onClick = {},
+                    descricaoDoEstado =
+                        if (historicoAtivo) {
+                            stringResource(id = R.string.nav_item_descricao_ativo, rotuloHistorico)
+                        } else {
+                            rotuloHistorico
+                        },
+                    icone =
+                        if (historicoAtivo) {
+                            PhosphorIcons.Fill.ClockCounterClockwise
+                        } else {
+                            PhosphorIcons.Regular.ClockCounterClockwise
+                        },
+                    ativo = historicoAtivo,
+                    onClick = {
+                        if (!historicoAtivo) {
+                            navController.navigate(Rotas.HISTORICO) {
+                                launchSingleTop = true
+                                popUpTo(Rotas.HOME)
+                            }
+                        }
+                    },
                 ),
                 ItemDeNavegacao(
                     rotulo = rotuloPerfil,

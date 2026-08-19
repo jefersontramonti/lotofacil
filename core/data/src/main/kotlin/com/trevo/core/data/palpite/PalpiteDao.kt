@@ -28,4 +28,9 @@ interface PalpiteDao {
 
     @Query("SELECT * FROM palpites WHERE id = :id")
     fun observarPorId(id: Long): Flow<PalpiteEntity?>
+
+    // RF-06 — histórico precisa de todos os palpites já salvos, não só os
+    // de um dia, pra casar cada um com o resultado do seu concurso.
+    @Query("SELECT * FROM palpites ORDER BY criadoEmEpochMillis DESC")
+    fun observarTodos(): Flow<List<PalpiteEntity>>
 }

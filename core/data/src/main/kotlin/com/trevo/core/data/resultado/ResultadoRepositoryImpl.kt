@@ -24,6 +24,9 @@ class ResultadoRepositoryImpl
         override fun observarUltimoResultadoSalvo(): Flow<Resultado?> =
             dao.observarUltimo().map { entidade -> entidade?.paraDominio() }
 
+        override fun observarTodosOsResultados(): Flow<List<Resultado>> =
+            dao.observarTodos().map { entidades -> entidades.map { it.paraDominio() } }
+
         override suspend fun salvarResultadoManual(dezenas: Set<Int>) {
             val resultado =
                 Resultado(

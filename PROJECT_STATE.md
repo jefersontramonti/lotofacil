@@ -86,12 +86,12 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-06.1 | Listar concursos conferidos, mais recente primeiro, com palpites | M | F2 | não iniciado | |
-| RF-06.2 | Total gasto/ganho, saldo, retorno %, média por concurso | M | F2 | não iniciado | |
-| RF-06.3 | Distribuição de faixas 11–15 e melhor resultado | S | F2 | não iniciado | |
-| RF-06.4 | Paginação incremental ("carregar mais") | M | F2 | não iniciado | |
-| RF-06.5 | Estado vazio sem concurso conferido | M | F2 | não iniciado | |
-| RF-06.6 | Limitar histórico grátis aos 3 concursos mais recentes | S | F3 | não iniciado | |
+| RF-06.1 | Listar concursos conferidos, mais recente primeiro, com palpites | M | F2 | concluído | `HistoricoViewModel` casa cada dia com palpites (`observarTodosOsPalpites`) contra todo resultado já buscado (`observarTodosOsResultados` — a tabela `resultados` só acumula, nunca substitui, então já é um histórico real desde o RF-05); dia sem resultado casado fica de fora — nunca inventa a associação (CLAUDE.md §8) |
+| RF-06.2 | Total gasto/ganho, saldo, retorno %, média por concurso | M | F2 | concluído | custo real por palpite (`coeficienteBinomial` + `CUSTO_POR_JOGO`, não um valor fixo por jogo); saldo negativo exibido sem eufemismo (RF-10.4), verificado no emulador |
+| RF-06.3 | Distribuição de faixas 11–15 e melhor resultado | S | F2 | concluído | |
+| RF-06.4 | Paginação incremental ("carregar mais") | M | F2 | concluído | revela 3 concursos por vez, igual ao protótipo — client-side sobre a lista local (todos os concursos já vêm do Room), não paginação de rede |
+| RF-06.5 | Estado vazio sem concurso conferido | M | F2 | concluído | |
+| RF-06.6 | Limitar histórico grátis aos 3 concursos mais recentes | S | F3 | não iniciado | depende do RF-09 (Trevo Pro), que ainda não existe — sem estado "é assinante" pra gatear, igual à pendência já registrada em RF-01.8 |
 
 ## RF-07 · Perfil e notificações
 
