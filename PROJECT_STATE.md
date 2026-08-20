@@ -48,7 +48,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-03.9 | Exibir palpites restantes no dia / ilimitado no Pro | M | F3 | não iniciado | |
 | RF-03.10 | Tocar grupo abre card com nome, número, leitura, dezenas | M | F1 | concluído | `DialogoCartaoDoSonho`, wireframe 1t |
 | RF-03.11 | Leitura escrita pros 25 grupos, tradição popular | M | F1 | concluído | conteúdo portado do protótipo de referência (`GRUPOS_DO_BICHO`) |
-| RF-03.12 | Confirmar grupo como sonho do dia, indicar já escolhido | M | F1 | em andamento | confirmação e persistência (DataStore) prontas; ainda não alimenta uma geração real porque a Home não tem botão de gerar (RF-11 não existe) |
+| RF-03.12 | Confirmar grupo como sonho do dia, indicar já escolhido | M | F1 | concluído | confirmação e persistência (DataStore) prontas; agora alimenta geração real — `HomeViewModel.aoGerarClick`/`RitualViewModel` leem `observarGrupoDoSonhoDeHoje` pro `DadosDeContribuicao` (RF-11) |
 | RF-03.13 | Card informa que a leitura não altera a probabilidade | M | F1 | concluído | |
 
 ## RF-04 · Detalhe, edição e desdobramentos
@@ -65,7 +65,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-04.7 | Guardar dezenas manuais como fixas permanentes; exibir e limpar | M | F1 | concluído | |
 | RF-04.8 | Refazer o palpite mantendo crenças e fixas | M | F1 | concluído | |
 | RF-04.9 | Qtde de jogos de 15 equivalentes + custo total (fechamento >15) | S | F3 | concluído | `coeficienteBinomial` bate exatamente com `Docs/tabelavalores.md` pros 6 tamanhos oficiais |
-| RF-04.10 | Listar combinações do desdobramento (limitado em tela) | S | F3 | concluído | `combinacoesDe15` (sequence preguiçosa) + `TelaDesdobramentos`, limite de 24. Hoje nenhum palpite real passa de 15 dezenas (Home/Crenças sempre geram 15 — o seletor de fechamento de RF-04 mostra 16/18/20 com 🔒, que é RF-09/Pro, ainda não existe), então a tela é alcançável só via dados de teste até RF-09/RF-11 existirem |
+| RF-04.10 | Listar combinações do desdobramento (limitado em tela) | S | F3 | concluído | `combinacoesDe15` (sequence preguiçosa) + `TelaDesdobramentos`, limite de 24. Nenhum palpite real passa de 15 dezenas ainda — Home/Crenças sempre geram 15, e o ritual (RF-11.9) já tem o seletor de fechamento funcional mas com 16/18/20 bloqueados (🔒), que é RF-09/Pro, ainda não existe — então a tela só é alcançável via dados de teste até RF-09 existir |
 
 ## RF-05 · Resultados e conferência
 
@@ -75,7 +75,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-05.2 | Armazenar resultados localmente (consulta offline) | M | F1 | concluído | tabela `resultados` (Room, migração `MIGRATION_1_2` versão 1→2, testada com `MigrationTestHelper`) |
 | RF-05.3 | Conferir automaticamente todos os palpites do concurso | M | F2 | concluído | roda ao entrar na `TelaConferencia` (`ConferenciaViewModel.aoEntrar`), não em background/WorkManager — ver pendência de RNF-02.3 |
 | RF-05.4 | Exibir acertos, faixa premiada e valor do prêmio por palpite | M | F1 | concluído | `conferir()` (`:core:engine`) + `TelaConferencia` |
-| RF-05.5 | Destacar no volante: acerto, marcada não sorteada, sorteada não marcada | M | F1 | concluído | `estadosDasDezenas()` (`:core:engine`, as 25 dezenas); a tela de Conferência em si usa o resumo compacto por palpite do wireframe 1j (cheia=acerto/tracejada=miss), igual ao protótipo — a grade 5×5 completa com os 3 estados fica reservada pra quando `TelaDetalhe` ganhar essa integração |
+| RF-05.5 | Destacar no volante: acerto, marcada não sorteada, sorteada não marcada | M | F1 | concluído | `estadosDasDezenas()` (`:core:engine`, as 25 dezenas); a tela de Conferência em si usa o resumo compacto por palpite do wireframe 1j (cheia=acerto/tracejada=miss), igual ao protótipo — a grade 5×5 completa com os 3 estados fica reservada pra quando `TelaDetalhe` ganhar essa integração. Achado numa verificação contra 1j/1k: a legenda ("Bola cheia = acerto, tracejada = marcada que não saiu") prometia um contorno tracejado que o código nunca desenhava — as duas bolas só se distinguiam pela cor de fundo, o que também violava RNF-03.5 (marcação nunca só por cor). Corrigido com `Modifier.bordaCircularTracejada` (Canvas + `PathEffect.dashPathEffect`, `TelaConferencia.kt`) |
 | RF-05.6 | Total ganho e total gasto no concurso | M | F1 | concluído | `ConferenciaUiState.Sucesso.totalGanho/totalGasto` |
 | RF-05.7 | Estado de espera (concurso ainda não sorteado) | M | F1 | concluído | compara `dataApuracao` do resultado mais recente salvo com a data de criação dos palpites de hoje — nunca calcula número de concurso offline; verificado com chamada real (resultado do concurso anterior, hoje ainda não sorteado) |
 | RF-05.8 | Estado offline, com aviso de que a conferência ocorrerá depois | M | F2 | concluído | `IOException` → `ConferenciaUiState.SemConexao` |
@@ -97,14 +97,33 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-07.1 | Editar nome/nascimento a qualquer momento, mesma validação | M | F2 | não iniciado | |
-| RF-07.2 | Alterar crenças em tela dedicada, acessível pelo perfil | M | F2 | não iniciado | |
-| RF-07.3 | Ligar/desligar lembrete antes do fechamento das apostas | M | F2 | não iniciado | |
-| RF-07.4 | Horário livre do lembrete, atalhos, padrão 18h | M | F2 | não iniciado | |
-| RF-07.5 | Alertar se horário escolhido ≥ 19h (após fechamento) | M | F2 | não iniciado | |
-| RF-07.6 | Ligar/desligar notificação de resultado, independente | M | F2 | não iniciado | |
-| RF-07.7 | Pedir permissão de notificação só ao ativar o primeiro aviso | M | F2 | não iniciado | |
-| RF-07.8 | Exibir estado da assinatura, link para gerenciar na Play Store | M | F3 | não iniciado | |
+| RF-07.1 | Editar nome/nascimento a qualquer momento, mesma validação | M | F2 | concluído | `TelaPerfil`/`PerfilViewModel` reaproveitam `ValidadorDataNascimento`/`VerificadorDeIdade`/`formatarDataNascimento`/`signoDe` do RF-01 (mesma fonte de validação, não um parser paralelo); grava a cada alteração — nome sempre, nascimento/signo só quando a data é válida e maior de idade, nunca sobrescrevendo o valor salvo com um estado inválido/incompleto |
+| RF-07.2 | Alterar crenças em tela dedicada, acessível pelo perfil | M | F2 | concluído | reaproveita `TelaCrencas` do onboarding (mesmos cartões, mesmo limite de 3 no grátis) via `EditarCrencasViewModel` novo, rota `perfil_crencas`; `textoContinuar` virou parâmetro pra trocar "Entrar no app" por "Salvar" sem duplicar a tela |
+| RF-07.3 | Ligar/desligar lembrete antes do fechamento das apostas | M | F2 | concluído | `LembreteFechamentoWorker` (WorkManager + Hilt) dispara e se reagenda pro dia seguinte sozinho; toggle liga/desliga o agendamento na hora via `NotificacoesScheduler`, sem esperar o worker rodar |
+| RF-07.4 | Horário livre do lembrete, atalhos, padrão 18h | M | F2 | concluído | chip do horário atual (abre `TimePicker` livre) + 3 atalhos fixos (17h/18h/18h30); padrão 18h como no wireframe |
+| RF-07.5 | Alertar se horário escolhido ≥ fechamento das apostas | M | F2 | concluído | wireframe 1m e o texto do requisito dizem "19h", mas RF-03.1 já tinha corrigido esse número pra 20h contra `Docs/tabelavalores.md` (fonte oficial: apostas até 20h, sorteio às 21h) — RF-07 segue a correção já aplicada em `TelaHome`, não o número desatualizado do wireframe; mesma razão vale pro aviso de resultado (RF-07.6): o wireframe diz "20h", mas o sorteio só sai às 21h, então o aviso foi pra 21h30 |
+| RF-07.6 | Ligar/desligar notificação de resultado, independente | M | F2 | concluído | `ResultadoSorteioWorker`, horário fixo 21h30 (não configurável, ver nota de RF-07.5); só notifica se `buscarUltimoResultado()` devolver o resultado de hoje — nunca reavisa sobre um concurso já visto (CLAUDE.md §8) |
+| RF-07.7 | Pedir permissão de notificação só ao ativar o primeiro aviso | M | F2 | concluído | evento one-shot do ViewModel (`PerfilEvento.PedirPermissaoDeNotificacao`) disparado só dentro do toggle-liga, nunca num `LaunchedEffect(Unit)` de abertura de tela; `TrevoNavHost` decide se precisa pedir (`ContextCompat.checkSelfPermission`, Android 13+) |
+| RF-07.8 | Exibir estado da assinatura, link para gerenciar na Play Store | M | F3 | não iniciado | depende do RF-09 (Trevo Pro/Play Billing), que ainda não existe — mesma pendência de RF-01.8/RF-06.6; o cartão "Assinatura" já existe na tela mostrando o único estado real hoje (grátis), sem link nem estado Pro inventado |
+
+## RF-11 · Modos de geração e ritual dos amuletos
+
+| ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
+|---|---|---|---|---|---|
+| RF-11.1 | Três modos na home (Místico/Cientista/Destino) com descrição curta | M | F1 | concluído | `SecaoModoDeGeracao` (`TelaHome`), seleção transiente em `HomeViewModel` (`modoSelecionado`, não persistida — reabrir a Home volta pro Místico) |
+| RF-11.2 | Filtrar crenças efetivamente aplicadas por modo | M | F1 | concluído | `crencasAtivasNoModo` (`:core:engine`) já existia (sem UI até agora); `HomeViewModel.aoGerarClick` e `RitualViewModel` agora chamam de verdade |
+| RF-11.3 | Destino troca o botão de gerar pelo que inicia o ritual | M | F1 | concluído | `TrevoNavHost` decide no `onCtaPrincipalClick` da Home: Destino navega pra `Rotas.RITUAL`, os outros dois chamam `aoGerarClick` direto |
+| RF-11.4 | Amuletos em sequência (8 amuletos, 4/3/3/2/3/3/3/3 opções), com conceito/pergunta/opções | M | F1 | concluído | `Amuleto`/`OpcaoDeAmuleto` (`:core:engine`), ordem fixa `ORDEM_DO_RITUAL`: trevo → ferradura → anéis → moedas → bola de cristal → dados → elefante → estrela (24 opções ao todo); textos em `AmuletoTextos.kt`. Conjunto corrigido depois de divergir do protótipo (`Docs/Trevo - Lotofácil.dc.html`, array `AMULETOS`) — a primeira versão desta fatia só tinha 3 amuletos (faltava a moeda) — e depois expandido pra 8 a pedido explícito do usuário, com o protótipo e o Requisitos atualizados juntos pra não ficarem desalinhados do código |
+| RF-11.5 | Nunca revelar a dezena antes da escolha; opção nunca insinua qual dezena esconde | M | F1 | concluído | a dezena só existe a partir de `RitualViewModel.aoEscolherOpcao`; rótulos das opções são só posição/identidade (ex.: "do meio"), nunca número |
+| RF-11.6 | Revelação com giro/halo, mostrando amuleto/conceito/frase | S | F1 | concluído | `CirculoDeRevelacao` (`TelaRitual`), halo animado; respeita movimento reduzido do sistema igual a `TelaGerando` |
+| RF-11.7 | Sortear a dezena pelo motor de pesos, excluindo já reveladas | M | F1 | concluído | `PalpiteGenerator.sortearDezenaDoRitual` — mesma fórmula de peso de `gerar()` (refatorada pra dois helpers privados compartilhados, sem duplicar a fórmula), testado que nunca repete entre 3 sorteios sucessivos |
+| RF-11.8 | Trilha de progresso e dezenas já reveladas visíveis durante o ritual | S | F1 | concluído | 8 chips no cabeçalho, um por amuleto (preenchido = feito) + lista "já revelado" na tela de escolha |
+| RF-11.9 | Resumo final: cada amuleto com dezena/frase, contagem do resto, refazer ou montar | M | F1 | concluído | `TelaResumoDoRitual`; "↻" chama `aoRefazerRitualClick` (reseta o estado local, sem tocar em nada persistido). A pedido do usuário, o resumo também ganhou o seletor de fechamento (RF-02.8: 15/16/18/20) — `RitualViewModel.aoEscolherTamanho`/`RitualUiState.Resumo.tamanho`, 16/18/20 sempre bloqueados (🔒) porque `isPro` é hardcoded `false` (mesmo padrão de `CrencasUiState.isPro`/RF-01.8, RF-09 ainda não existe); a máquina já está pronta ponta a ponta — `PalpiteGenerator.gerar` já aceita a quantidade escolhida com as 8 dezenas do ritual forçadas via `dezenasFixas` — falta só o Pro de verdade pra destravar. Bug relatado pelo usuário: nem `TelaEscolhaDoAmuleto` nem `TelaResumoDoRitual` tinham `verticalScroll` (única tela do app sem isso — Home/Detalhe/Conferência/Perfil já usavam), então dava pra travar sem conseguir ver o resto do conteúdo, principalmente depois do seletor de fechamento deixar o resumo mais alto. Corrigido em ambas |
+| RF-11.10 | Forçar dezenas reveladas no volante final; registrar como fonte própria na origem | M | F1 | concluído | as 8 dezenas entram via `dezenasFixas` (mesmo mecanismo de RF-02.2/RF-04.7 — reaproveitado, não duplicado; as outras 7 do palpite de 15 vêm das crenças/estatística); `Palpite.ritual: List<RevelacaoDoAmuleto>` é metadado à parte pra exibição, persistido em `PalpiteEntity.ritual` (migração `MIGRATION_2_3`); aparece em "De onde vieram as dezenas" (`TelaDetalhe`) ao lado das crenças |
+| RF-11.11 | Limpar o ritual após a montagem, sem reaproveitar dezenas do anterior | M | F1 | concluído | `RitualViewModel` não persiste nada — sair da rota (fechar ou montar) destrói o ViewModel e com ele qualquer revelação em andamento; é a mesma causa-raiz do bug do protótipo que CLAUDE.md §4 documenta, resolvida por nunca reter o estado em vez de limpar explicitamente algo compartilhado |
+| RF-11.12 | Tela do ritual explicita que a escolha é do usuário mas a dezena é sorteada, sem alterar probabilidade | M | F1 | concluído | `ritual_disclaimer_escolha` fixo na tela de escolha de cada amuleto |
+| RF-11.13 | Identificar o modo nas etiquetas do palpite na home | S | F1 | concluído | tag do modo no `CartaoPalpite`; `null` pros palpites de antes do RF-11 ou gerados pelo onboarding (nunca inventa um modo retroativo) |
+| RF-11.14 | Comparar desempenho histórico entre os modos (média de acertos) | C | F4 | não iniciado | fase 4 (Escala) e prioridade C — adiado deliberadamente; exigiria cruzar `Palpite.modo` com conferência (RF-05/RF-06), série temporal ainda não modelada |
 
 ## RF-08 · Compartilhamento e exportação
 
@@ -173,7 +192,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RNF-06.3 | Geração determinística sob semente fixa                           | não iniciado |
 | RNF-06.4 | Testes de interface: cadastro, geração, edição, conferência       | não iniciado |
 | RNF-06.5 | CI rodando build, lint e testes a cada envio                      | não iniciado |
-| RNF-06.6 | Migrações Room versionadas, sem perda de dado                     | concluído para v1→v2 (`MIGRATION_1_2`, testada com `MigrationTestHelper`); reavaliar a cada nova migração |
+| RNF-06.6 | Migrações Room versionadas, sem perda de dado                     | concluído para v1→v2 e v2→v3 (`MIGRATION_1_2`/`MIGRATION_2_3`, testadas com `MigrationTestHelper`); reavaliar a cada nova migração |
 | RNF-07.1 | Classificação etária 18+ coerente com o questionário              | não iniciado |
 | RNF-07.2 | Loja declara que o app não recebe aposta nem paga prêmio          | não iniciado |
 | RNF-07.3 | Toda transação pelo Play Billing                                  | não iniciado |

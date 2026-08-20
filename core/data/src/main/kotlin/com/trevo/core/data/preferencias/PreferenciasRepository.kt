@@ -21,4 +21,8 @@ interface PreferenciasRepository {
     )
 
     fun observarGrupoDoSonhoDeHoje(hoje: LocalDate): Flow<Int?>
+
+    suspend fun salvarPreferenciasDeNotificacao(preferencias: PreferenciasDeNotificacao)
+
+    fun observarPreferenciasDeNotificacao(): Flow<PreferenciasDeNotificacao>
 }

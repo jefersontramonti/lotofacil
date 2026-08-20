@@ -5,8 +5,10 @@ import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.app.preferencias.FakePreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.crenca.GRUPOS_DO_BICHO
+import com.trevo.core.engine.crenca.ModoDeGeracao
 import com.trevo.core.engine.identidade.Signo
 import com.trevo.core.engine.palpite.Palpite
+import com.trevo.core.engine.palpite.PalpiteGenerator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -21,6 +23,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.random.Random
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
@@ -46,7 +49,7 @@ class HomeViewModelTest {
     private fun novoViewModel(
         repository: FakePalpiteRepository = FakePalpiteRepository(RELOGIO_FIXO),
         preferenciasRepository: FakePreferenciasRepository = FakePreferenciasRepository(),
-    ) = HomeViewModel(repository, preferenciasRepository, RELOGIO_FIXO)
+    ) = HomeViewModel(repository, preferenciasRepository, PalpiteGenerator(Random(1)), RELOGIO_FIXO)
 
     @Test
     fun estadoComecaSemPalpitesQuandoORepositorioEstaVazio() =
@@ -270,5 +273,72 @@ class HomeViewModelTest {
 
             assertEquals(9, viewModel.uiState.value.grupoDoSonhoConfirmadoHoje)
             assertNull(viewModel.uiState.value.grupoAbertoNoDialog)
+        }
+
+    @Test
+    fun modoPadraoEMisticoESelecionarModoTrocaOEstado() =
+        runTest {
+            val viewModel = novoViewModel()
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            assertEquals(ModoDeGeracao.MISTICO, viewModel.uiState.value.modoSelecionado)
+
+            viewModel.aoSelecionarModo(ModoDeGeracao.DESTINO)
+            advanceUntilIdle()
+
+            assertEquals(ModoDeGeracao.DESTINO, viewModel.uiState.value.modoSelecionado)
+        }
+
+    @Test
+    fun gerarNoModoMisticoSalvaUmPalpiteComOModoRegistrado() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val preferencias = FakePreferenciasRepository()
+            val viewModel = novoViewModel(repository = repository, preferenciasRepository = preferencias)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            preferencias.salvarPerfil(
+                "Marlene",
+                LocalDate.of(1978, 7, 14),
+                Signo.CANCER,
+                setOf(Crenca.SIGNO, Crenca.QUENTES),
+            )
+            advanceUntilIdle()
+
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+
+            assertEquals(1, viewModel.uiState.value.palpitesHoje.size)
+            assertEquals(
+                ModoDeGeracao.MISTICO,
+                viewModel.uiState.value.palpitesHoje
+                    .first()
+                    .modo,
+            )
+        }
+
+    @Test
+    fun gerarNoModoMisticoIgnoraCrencasCientistasNaSelecao() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val preferencias = FakePreferenciasRepository()
+            val viewModel = novoViewModel(repository = repository, preferenciasRepository = preferencias)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            preferencias.salvarPerfil(
+                "Marlene",
+                LocalDate.of(1978, 7, 14),
+                Signo.CANCER,
+                setOf(Crenca.QUENTES, Crenca.ATRASADOS),
+            )
+            advanceUntilIdle()
+
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+
+            val palpiteSalvo =
+                repository.todos.value
+                    .first()
+                    .palpite
+            assertTrue(palpiteSalvo.contribuicoes.isEmpty())
         }
 }

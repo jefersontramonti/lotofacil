@@ -1,5 +1,10 @@
 package com.trevo.app.navegacao
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -9,6 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.trevo.app.R
 import com.trevo.app.conferencia.ConferenciaViewModel
 import com.trevo.app.conferencia.TelaConferencia
 import com.trevo.app.detalhe.DesdobramentosViewModel
@@ -34,6 +42,14 @@ import com.trevo.app.onboarding.IdentidadeViewModel
 import com.trevo.app.onboarding.TelaAbertura
 import com.trevo.app.onboarding.TelaCrencas
 import com.trevo.app.onboarding.TelaIdentidade
+import com.trevo.app.perfil.EditarCrencasViewModel
+import com.trevo.app.perfil.PerfilEvento
+import com.trevo.app.perfil.PerfilViewModel
+import com.trevo.app.perfil.TelaPerfil
+import com.trevo.app.ritual.RitualEvento
+import com.trevo.app.ritual.RitualViewModel
+import com.trevo.app.ritual.TelaRitual
+import com.trevo.core.engine.crenca.ModoDeGeracao
 
 @Composable
 fun TrevoNavHost(modifier: Modifier = Modifier) {
@@ -140,6 +156,43 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onGrupoClick = viewModel::aoAbrirGrupo,
                     onFecharDialogoSonhoClick = viewModel::aoFecharDialogDoSonho,
                     onConfirmarSonhoClick = viewModel::aoConfirmarSonho,
+                    onSelecionarModoClick = viewModel::aoSelecionarModo,
+                    onCtaPrincipalClick = {
+                        // RF-11.3 — só o modo Destino abre o ritual; Místico e
+                        // Cientista geram direto por HomeViewModel.aoGerarClick.
+                        if (uiState.modoSelecionado == ModoDeGeracao.DESTINO) {
+                            navController.navigate(Rotas.RITUAL)
+                        } else {
+                            viewModel.aoGerarClick()
+                        }
+                    },
+                )
+            }
+            composable(Rotas.RITUAL) {
+                val viewModel: RitualViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsState()
+                val context = LocalContext.current
+
+                LaunchedEffect(viewModel) {
+                    viewModel.eventos.collect { evento ->
+                        when (evento) {
+                            RitualEvento.PalpiteMontado -> navController.popBackStack()
+                        }
+                    }
+                }
+
+                TelaRitual(
+                    uiState = uiState,
+                    onFecharClick = { navController.popBackStack() },
+                    onEscolherOpcao = viewModel::aoEscolherOpcao,
+                    onRevelacaoTerminou = viewModel::aoRevelacaoTerminou,
+                    onRefazerClick = viewModel::aoRefazerRitualClick,
+                    onEscolherTamanhoClick = viewModel::aoEscolherTamanho,
+                    onTamanhoBloqueadoClick = {
+                        // RF-01.8/RF-09 (paywall) registram o destino aqui
+                    },
+                    onMontarPalpiteClick = viewModel::aoMontarPalpiteClick,
+                    movimentoReduzido = movimentoReduzidoAtivado(context),
                 )
             }
             composable(Rotas.CONFERENCIA) {
@@ -162,6 +215,61 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 TelaHistorico(
                     uiState = uiState,
                     onVerMaisClick = viewModel::aoVerMaisClick,
+                )
+            }
+            composable(Rotas.PERFIL) {
+                val viewModel: PerfilViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsState()
+                val context = LocalContext.current
+
+                // RF-07.7: a permissão de notificação (Android 13+) só é
+                // pedida aqui, disparada pelo evento do primeiro toggle
+                // ligado — nunca no LaunchedEffect(Unit) de abertura da tela.
+                val lancadorDePermissao =
+                    rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+                LaunchedEffect(viewModel) {
+                    viewModel.eventos.collect { evento ->
+                        when (evento) {
+                            PerfilEvento.PedirPermissaoDeNotificacao -> {
+                                val jaConcedida =
+                                    Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                                        ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.POST_NOTIFICATIONS,
+                                        ) ==
+                                        PackageManager.PERMISSION_GRANTED
+                                if (!jaConcedida) lancadorDePermissao.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }
+                    }
+                }
+
+                TelaPerfil(
+                    uiState = uiState,
+                    onNomeChange = viewModel::aoAlterarNome,
+                    onNascimentoChange = viewModel::aoAlterarNascimento,
+                    onCrencasClick = { navController.navigate(Rotas.PERFIL_CRENCAS) },
+                    onAlternarLembreteFechamento = viewModel::aoAlternarLembreteFechamento,
+                    onEscolherHorarioLembrete = viewModel::aoEscolherHorarioLembrete,
+                    onAlternarNotificacaoResultado = viewModel::aoAlternarNotificacaoResultado,
+                )
+            }
+            composable(Rotas.PERFIL_CRENCAS) {
+                val viewModel: EditarCrencasViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsState()
+
+                TelaCrencas(
+                    uiState = uiState,
+                    onCrencaClick = viewModel::aoTocarCrenca,
+                    onCrencaBloqueadaClick = {
+                        // RF-01.8/RF-09 (paywall) registram o destino aqui
+                    },
+                    onVoltarClick = { navController.popBackStack() },
+                    onContinuarClick = {
+                        viewModel.aoSalvarClick()
+                        navController.popBackStack()
+                    },
+                    textoContinuar = stringResource(id = R.string.crencas_cta_salvar),
                 )
             }
             composable(

@@ -1,0 +1,125 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "92194e8f258f61b5e52e7d0b1eb6a110",
+    "entities": [
+      {
+        "tableName": "palpites",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dezenas` TEXT NOT NULL, `dezenasFixas` TEXT NOT NULL, `contribuicoes` TEXT NOT NULL, `forca` INTEGER NOT NULL, `criadoEmEpochMillis` INTEGER NOT NULL, `modo` TEXT, `ritual` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dezenas",
+            "columnName": "dezenas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dezenasFixas",
+            "columnName": "dezenasFixas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contribuicoes",
+            "columnName": "contribuicoes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "forca",
+            "columnName": "forca",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "criadoEmEpochMillis",
+            "columnName": "criadoEmEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modo",
+            "columnName": "modo",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ritual",
+            "columnName": "ritual",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "resultados",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `numero` INTEGER, `dataApuracaoIso` TEXT NOT NULL, `dezenasSorteadas` TEXT NOT NULL, `faixas` TEXT NOT NULL, `acumulado` INTEGER NOT NULL, `origem` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numero",
+            "columnName": "numero",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "dataApuracaoIso",
+            "columnName": "dataApuracaoIso",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dezenasSorteadas",
+            "columnName": "dezenasSorteadas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "faixas",
+            "columnName": "faixas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "acumulado",
+            "columnName": "acumulado",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "origem",
+            "columnName": "origem",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '92194e8f258f61b5e52e7d0b1eb6a110')"
+    ]
+  }
+}

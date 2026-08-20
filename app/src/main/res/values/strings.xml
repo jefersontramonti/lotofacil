@@ -43,6 +43,7 @@
     </plurals>
     <string name="crencas_cta_voltar">Voltar</string>
     <string name="crencas_cta_entrar_no_app">Entrar no app</string>
+    <string name="crencas_cta_salvar">Salvar</string>
     <string name="crencas_cadeado_indicador" translatable="false">🔒</string>
     <string name="crenca_signo_nome">Signo</string>
     <string name="crenca_signo_desc">Dezenas regidas pelo seu signo</string>
@@ -84,6 +85,114 @@
     <string name="home_vazio_titulo">Nenhum palpite ainda hoje</string>
     <string name="home_vazio_descricao">Volte às crenças para montar o primeiro volante do dia.</string>
     <string name="home_disclaimer_aposta">A aposta é feita por você na lotérica ou no app oficial da Caixa — o Trevo só monta o palpite.</string>
+    <string name="modo_mistico">Místico</string>
+    <string name="modo_cientista">Cientista</string>
+    <string name="modo_destino">Destino</string>
+    <string name="modo_mistico_icone" translatable="false">◐</string>
+    <string name="modo_cientista_icone" translatable="false">▤</string>
+    <string name="modo_destino_icone" translatable="false">✦</string>
+    <string name="modo_mistico_desc">Signo, nascimento, lua, sonho e moldura</string>
+    <string name="modo_cientista_desc">Quentes, atrasados, pares, primos, soma e repetidas</string>
+    <string name="modo_destino_desc">Ritual dos amuletos + crenças + estatística</string>
+    <string name="home_gerar_cta">Gerar palpite</string>
+    <string name="home_comecar_ritual_cta">✦ Começar o ritual</string>
+    <string name="home_palpite_modo_etiqueta">%1$s</string>
+    <string name="amuleto_trevo_nome">Trevo da Sorte</string>
+    <string name="amuleto_trevo_conceito">Sorte</string>
+    <string name="amuleto_trevo_pergunta">Qual folha você escolhe?</string>
+    <string name="amuleto_trevo_emoji" translatable="false">🍀</string>
+    <string name="amuleto_ferradura_nome">Ferradura da Fortuna</string>
+    <string name="amuleto_ferradura_conceito">Boa fortuna</string>
+    <string name="amuleto_ferradura_pergunta">Em qual ferradura você confia?</string>
+    <string name="amuleto_ferradura_emoji" translatable="false">🐎</string>
+    <string name="amuleto_aneis_nome">Anéis de Ouro</string>
+    <string name="amuleto_aneis_conceito">Prosperidade</string>
+    <string name="amuleto_aneis_pergunta">Escolha um anel</string>
+    <string name="amuleto_aneis_emoji" translatable="false">💍</string>
+    <string name="amuleto_moedas_nome">Moedas da Prosperidade</string>
+    <string name="amuleto_moedas_conceito">Riqueza</string>
+    <string name="amuleto_moedas_pergunta">Cara ou coroa?</string>
+    <string name="amuleto_moedas_emoji" translatable="false">🪙</string>
+    <string name="amuleto_bola_de_cristal_nome">Bola de Cristal</string>
+    <string name="amuleto_bola_de_cristal_conceito">Presságio</string>
+    <string name="amuleto_bola_de_cristal_pergunta">Que sinal você vê na bola?</string>
+    <string name="amuleto_bola_de_cristal_emoji" translatable="false">🔮</string>
+    <string name="amuleto_dados_nome">Dados do Destino</string>
+    <string name="amuleto_dados_conceito">Acaso</string>
+    <string name="amuleto_dados_pergunta">Escolha um dado para lançar</string>
+    <string name="amuleto_dados_emoji" translatable="false">🎲</string>
+    <string name="amuleto_elefante_nome">Elefante da Fortuna</string>
+    <string name="amuleto_elefante_conceito">Fortuna</string>
+    <string name="amuleto_elefante_pergunta">Qual tromba você toca?</string>
+    <string name="amuleto_elefante_emoji" translatable="false">🐘</string>
+    <string name="amuleto_estrela_nome">Estrela da Sorte</string>
+    <string name="amuleto_estrela_conceito">Guia</string>
+    <string name="amuleto_estrela_pergunta">Qual estrela brilha mais para você?</string>
+    <string name="amuleto_estrela_emoji" translatable="false">⭐</string>
+    <string name="opcao_trevo_sorte">Sorte</string>
+    <string name="opcao_trevo_prosperidade">Prosperidade</string>
+    <string name="opcao_trevo_amor">Amor</string>
+    <string name="opcao_trevo_fe">Fé</string>
+    <string name="opcao_ferradura_esquerda">da esquerda</string>
+    <string name="opcao_ferradura_meio">do meio</string>
+    <string name="opcao_ferradura_direita">da direita</string>
+    <string name="opcao_aneis_primeiro">primeiro anel</string>
+    <string name="opcao_aneis_segundo">segundo anel</string>
+    <string name="opcao_aneis_terceiro">terceiro anel</string>
+    <string name="opcao_moedas_cara">cara</string>
+    <string name="opcao_moedas_coroa">coroa</string>
+    <string name="opcao_bola_de_cristal_luz">luz</string>
+    <string name="opcao_bola_de_cristal_nevoa">névoa</string>
+    <string name="opcao_bola_de_cristal_faisca">faísca</string>
+    <string name="opcao_dados_vermelho">vermelho</string>
+    <string name="opcao_dados_dourado">dourado</string>
+    <string name="opcao_dados_preto">preto</string>
+    <string name="opcao_elefante_erguida">erguida</string>
+    <string name="opcao_elefante_ao_centro">ao centro</string>
+    <string name="opcao_elefante_curvada">curvada</string>
+    <string name="opcao_estrela_norte">do norte</string>
+    <string name="opcao_estrela_oriente">do oriente</string>
+    <string name="opcao_estrela_guia">guia</string>
+    <string name="frase_escolha_trevo_sorte">Você escolheu a folha da Sorte.</string>
+    <string name="frase_escolha_trevo_prosperidade">Você escolheu a folha da Prosperidade.</string>
+    <string name="frase_escolha_trevo_amor">Você escolheu a folha do Amor.</string>
+    <string name="frase_escolha_trevo_fe">Você escolheu a folha da Fé.</string>
+    <string name="frase_escolha_ferradura_esquerda">Você confiou na ferradura da esquerda.</string>
+    <string name="frase_escolha_ferradura_meio">Você confiou na ferradura do meio.</string>
+    <string name="frase_escolha_ferradura_direita">Você confiou na ferradura da direita.</string>
+    <string name="frase_escolha_aneis_primeiro">Você escolheu o primeiro anel.</string>
+    <string name="frase_escolha_aneis_segundo">Você escolheu o segundo anel.</string>
+    <string name="frase_escolha_aneis_terceiro">Você escolheu o terceiro anel.</string>
+    <string name="frase_escolha_moedas_cara">Você apostou na cara.</string>
+    <string name="frase_escolha_moedas_coroa">Você apostou na coroa.</string>
+    <string name="frase_escolha_bola_de_cristal_luz">Você viu luz na bola de cristal.</string>
+    <string name="frase_escolha_bola_de_cristal_nevoa">Você viu névoa na bola de cristal.</string>
+    <string name="frase_escolha_bola_de_cristal_faisca">Você viu faísca na bola de cristal.</string>
+    <string name="frase_escolha_dados_vermelho">Você lançou o dado vermelho.</string>
+    <string name="frase_escolha_dados_dourado">Você lançou o dado dourado.</string>
+    <string name="frase_escolha_dados_preto">Você lançou o dado preto.</string>
+    <string name="frase_escolha_elefante_erguida">Você tocou a tromba erguida.</string>
+    <string name="frase_escolha_elefante_ao_centro">Você tocou a tromba ao centro.</string>
+    <string name="frase_escolha_elefante_curvada">Você tocou a tromba curvada.</string>
+    <string name="frase_escolha_estrela_norte">Você escolheu a estrela do norte.</string>
+    <string name="frase_escolha_estrela_oriente">Você escolheu a estrela do oriente.</string>
+    <string name="frase_escolha_estrela_guia">Você escolheu a estrela guia.</string>
+    <string name="ritual_titulo">Ritual da sorte</string>
+    <string name="ritual_fechar_descricao">Fechar o ritual</string>
+    <string name="ritual_amuleto_progresso">Amuleto %1$d de %2$d · %3$s</string>
+    <string name="ritual_ja_revelado">já revelado</string>
+    <string name="ritual_disclaimer_escolha">A escolha é sua, a dezena é sorteada. Nenhum amuleto altera a probabilidade do sorteio.</string>
+    <string name="ritual_opcao_indicador" translatable="false">?</string>
+    <string name="ritual_resumo_kicker">Ritual completo</string>
+    <string name="ritual_resumo_titulo">Suas dezenas de sorte</string>
+    <plurals name="ritual_resumo_nota">
+        <item quantity="one">Estas dezenas entram no volante. A outra %1$d vem das crenças e da estatística que você deixou ativas.</item>
+        <item quantity="other">Estas dezenas entram no volante. As outras %1$d vêm das crenças e da estatística que você deixou ativas.</item>
+    </plurals>
+    <string name="ritual_resumo_refazer_descricao">Refazer o ritual</string>
+    <string name="ritual_resumo_montar_cta">✦ Montar o palpite final</string>
+    <string name="ritual_fechamento_titulo">Fechamento</string>
+    <string name="ritual_fechamento_bloqueado_descricao">Fechamento de %1$d dezenas, disponível no Pro</string>
     <string name="home_nav_inicio">Início</string>
     <string name="home_nav_conferir">Conferir</string>
     <string name="home_nav_historico">Histórico</string>
@@ -209,4 +318,33 @@
     </plurals>
     <string name="historico_vazio_titulo">Nada conferido ainda</string>
     <string name="historico_vazio_descricao">Depois do primeiro sorteio conferido, seus palpites e o que eles renderam aparecem aqui.</string>
+    <string name="perfil_titulo">Perfil</string>
+    <string name="perfil_label_nome">Nome</string>
+    <string name="perfil_label_nascimento">Nascimento</string>
+    <string name="perfil_signo_nota">Signo: %1$s · dezenas %2$s</string>
+    <string name="perfil_signo_nota_neutro">Informe uma data de nascimento válida para calcular o signo.</string>
+    <string name="perfil_erro_indicador" translatable="false">⚠</string>
+    <string name="perfil_crencas_titulo">Suas crenças</string>
+    <string name="perfil_crencas_icone_indicador" translatable="false">◇</string>
+    <string name="perfil_chevron_indicador" translatable="false">›</string>
+    <plurals name="perfil_crencas_subtitulo">
+        <item quantity="one">%1$d ativa</item>
+        <item quantity="other">%1$d ativas</item>
+    </plurals>
+    <string name="perfil_notificacoes_titulo">Notificações</string>
+    <string name="perfil_lembrete_titulo">Lembrete antes do fechamento</string>
+    <string name="perfil_lembrete_descricao">As apostas encerram às 20h.</string>
+    <string name="perfil_lembrete_switch_descricao">Lembrete antes do fechamento</string>
+    <string name="perfil_lembrete_aviso_horario">Você será avisado às %1$s.</string>
+    <string name="perfil_lembrete_alerta_apos_fechamento">Esse horário já é depois do fechamento das apostas.</string>
+    <string name="perfil_horario_customizado_descricao">%1$s, escolher outro horário</string>
+    <string name="perfil_horario_dialogo_titulo">Horário do lembrete</string>
+    <string name="perfil_horario_dialogo_confirmar">Confirmar</string>
+    <string name="perfil_horario_dialogo_cancelar">Cancelar</string>
+    <string name="perfil_resultado_titulo">Resultado do sorteio</string>
+    <string name="perfil_resultado_descricao">Aviso às 21h30 com a conferência.</string>
+    <string name="perfil_resultado_switch_descricao">Notificação de resultado do sorteio</string>
+    <string name="perfil_assinatura_titulo">Assinatura</string>
+    <string name="perfil_assinatura_gratuito_titulo">Plano gratuito</string>
+    <string name="perfil_assinatura_gratuito_descricao">Assine o Trevo Pro para crenças e palpites ilimitados</string>
 </resources>

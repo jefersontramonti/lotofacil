@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -43,12 +44,14 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.trevo.app.R
 import com.trevo.core.engine.crenca.FaseDaLua
 import com.trevo.core.engine.crenca.GRUPOS_DO_BICHO
 import com.trevo.core.engine.crenca.GrupoDoBicho
+import com.trevo.core.engine.crenca.ModoDeGeracao
 import com.trevo.core.engine.crenca.dezenasDoGrupoDoBicho
 import com.trevo.core.engine.identidade.Signo
 import com.trevo.core.ui.NocturneAccent
@@ -63,7 +66,10 @@ fun tagBotaoExcluirPalpite(id: Long): String = "palpite_${id}_excluir"
 
 fun tagGrupoDoBicho(numero: Int): String = "grupo_do_bicho_$numero"
 
+fun tagModo(modo: ModoDeGeracao): String = "modo_${modo.name.lowercase()}"
+
 const val TAG_BOTAO_VER_GRUPOS = "botao_ver_todos_os_grupos"
+const val TAG_BOTAO_CTA_PRINCIPAL = "home_cta_principal"
 
 @Composable
 fun TelaHome(
@@ -76,6 +82,8 @@ fun TelaHome(
     onGrupoClick: (Int) -> Unit = {},
     onFecharDialogoSonhoClick: () -> Unit = {},
     onConfirmarSonhoClick: (Int) -> Unit = {},
+    onSelecionarModoClick: (ModoDeGeracao) -> Unit = {},
+    onCtaPrincipalClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -118,6 +126,11 @@ fun TelaHome(
             Text(
                 text = stringResource(id = R.string.home_disclaimer_aposta),
                 style = MaterialTheme.typography.bodySmall,
+            )
+            SecaoModoDeGeracao(
+                modoSelecionado = uiState.modoSelecionado,
+                onSelecionarModoClick = onSelecionarModoClick,
+                onCtaPrincipalClick = onCtaPrincipalClick,
             )
         }
     }
@@ -418,6 +431,99 @@ private fun EstadoVazio(modifier: Modifier = Modifier) {
     }
 }
 
+// RF-11.1/RF-11.2/RF-11.3 — três modos, descrição curta do selecionado, CTA
+// que troca de "Gerar palpite" pra "Começar o ritual" no Destino (wireframe 1d).
+@Composable
+private fun SecaoModoDeGeracao(
+    modoSelecionado: ModoDeGeracao,
+    onSelecionarModoClick: (ModoDeGeracao) -> Unit,
+    onCtaPrincipalClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            ModoDeGeracao.entries.forEach { modo ->
+                ChipDeModo(
+                    modo = modo,
+                    selecionado = modo == modoSelecionado,
+                    onClick = { onSelecionarModoClick(modo) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+        Text(text = stringResource(id = descricaoDoModo(modoSelecionado)), style = MaterialTheme.typography.bodySmall)
+        val textoCta =
+            if (modoSelecionado ==
+                ModoDeGeracao.DESTINO
+            ) {
+                R.string.home_comecar_ritual_cta
+            } else {
+                R.string.home_gerar_cta
+            }
+        Text(
+            text = stringResource(id = textoCta),
+            style = MaterialTheme.typography.titleSmall,
+            textAlign = TextAlign.Center,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
+                    .clickable(role = Role.Button, onClick = onCtaPrincipalClick)
+                    .testTag(TAG_BOTAO_CTA_PRINCIPAL)
+                    .padding(14.dp),
+        )
+    }
+}
+
+@Composable
+private fun ChipDeModo(
+    modo: ModoDeGeracao,
+    selecionado: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val cor = if (selecionado) NocturneAccent else NocturneOutline
+    Column(
+        modifier =
+            modifier
+                .border(border = BorderStroke(if (selecionado) 2.dp else 1.dp, cor), shape = RoundedCornerShape(8.dp))
+                .selectable(selected = selecionado, onClick = onClick, role = Role.RadioButton)
+                .semantics(mergeDescendants = true) {}
+                .testTag(tagModo(modo))
+                .padding(vertical = 8.dp, horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = stringResource(id = iconeDoModo(modo)))
+        Text(
+            text = stringResource(id = nomeDoModo(modo)),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = if (selecionado) FontWeight.Bold else FontWeight.Normal,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+private fun nomeDoModo(modo: ModoDeGeracao): Int =
+    when (modo) {
+        ModoDeGeracao.MISTICO -> R.string.modo_mistico
+        ModoDeGeracao.CIENTISTA -> R.string.modo_cientista
+        ModoDeGeracao.DESTINO -> R.string.modo_destino
+    }
+
+private fun iconeDoModo(modo: ModoDeGeracao): Int =
+    when (modo) {
+        ModoDeGeracao.MISTICO -> R.string.modo_mistico_icone
+        ModoDeGeracao.CIENTISTA -> R.string.modo_cientista_icone
+        ModoDeGeracao.DESTINO -> R.string.modo_destino_icone
+    }
+
+private fun descricaoDoModo(modo: ModoDeGeracao): Int =
+    when (modo) {
+        ModoDeGeracao.MISTICO -> R.string.modo_mistico_desc
+        ModoDeGeracao.CIENTISTA -> R.string.modo_cientista_desc
+        ModoDeGeracao.DESTINO -> R.string.modo_destino_desc
+    }
+
 @Composable
 private fun CartaoPalpite(
     palpite: PalpiteItemUiState,
@@ -437,12 +543,32 @@ private fun CartaoPalpite(
                 .testTag(tagCartaoPalpite(palpite.id)),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
             Text(
                 text = stringResource(id = R.string.home_palpite_rotulo, palpite.numeroDoDia),
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f),
             )
+            // RF-11.13 — etiqueta do modo, ausente pros palpites de antes do RF-11.
+            palpite.modo?.let { modo ->
+                Text(
+                    text =
+                        stringResource(
+                            id = R.string.home_palpite_modo_etiqueta,
+                            stringResource(id = nomeDoModo(modo)),
+                        ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = NocturneAccent,
+                    modifier =
+                        Modifier
+                            .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(50))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                )
+            }
             Text(text = palpite.horario, style = MaterialTheme.typography.bodySmall)
             Text(
                 text = "🗑",

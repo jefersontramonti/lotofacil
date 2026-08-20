@@ -59,6 +59,9 @@ fun TelaCrencas(
     onCrencaBloqueadaClick: () -> Unit,
     onVoltarClick: () -> Unit,
     onContinuarClick: () -> Unit,
+    // RF-07.2 reaproveita esta tela como "Suas crenças" a partir do Perfil —
+    // lá o CTA final é "Salvar", não "Entrar no app" do onboarding.
+    textoContinuar: String = stringResource(id = R.string.crencas_cta_entrar_no_app),
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -98,7 +101,7 @@ fun TelaCrencas(
                     modifier = Modifier.weight(1f),
                 )
                 BotaoPrimario(
-                    texto = stringResource(id = R.string.crencas_cta_entrar_no_app),
+                    texto = textoContinuar,
                     onClick = onContinuarClick,
                     modifier = Modifier.weight(1f),
                 )

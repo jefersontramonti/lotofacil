@@ -40,4 +40,29 @@ class TrevoDatabaseMigrationTest {
 
         db.close()
     }
+
+    // RF-11 — a versão 3 só acrescenta `modo`/`ritual` em `palpites`; este
+    // teste garante que um palpite da versão 2 (sem essas colunas) sobrevive
+    // com os padrões neutros (`modo` NULL, `ritual` vazio), nunca um valor
+    // de modo/ritual inventado (CLAUDE.md §8).
+    @Test
+    fun migra2Para3AdicionaModoERitualSemPerderPalpitesExistentes() {
+        var db = helper.createDatabase(NOME_DO_BANCO_DE_TESTE, 2)
+        db.execSQL(
+            "INSERT INTO palpites (dezenas, dezenasFixas, contribuicoes, forca, criadoEmEpochMillis) " +
+                "VALUES ('1,2,3', '', '', 50, 1000)",
+        )
+        db.close()
+
+        db = helper.runMigrationsAndValidate(NOME_DO_BANCO_DE_TESTE, 3, true, MIGRATION_2_3)
+
+        val cursor = db.query("SELECT dezenas, modo, ritual FROM palpites")
+        assertTrue(cursor.moveToFirst())
+        assertEquals("1,2,3", cursor.getString(0))
+        assertTrue(cursor.isNull(1))
+        assertEquals("", cursor.getString(2))
+        cursor.close()
+
+        db.close()
+    }
 }

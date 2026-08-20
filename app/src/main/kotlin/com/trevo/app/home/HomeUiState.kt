@@ -2,6 +2,7 @@ package com.trevo.app.home
 
 import com.trevo.core.engine.crenca.FaseDaLua
 import com.trevo.core.engine.crenca.GrupoDoBicho
+import com.trevo.core.engine.crenca.ModoDeGeracao
 import com.trevo.core.engine.identidade.Signo
 import java.math.BigDecimal
 
@@ -20,6 +21,8 @@ data class PalpiteItemUiState(
     // RF-03.5: dezenas que não estavam no palpite anterior do dia. `null`
     // quando este é o palpite mais antigo do dia (não há anterior).
     val dezenasNovas: List<Int>? = null,
+    // RF-11.13 — `null` pros palpites de antes do RF-11/gerados pelo onboarding.
+    val modo: ModoDeGeracao? = null,
 )
 
 data class HomeUiState(
@@ -39,6 +42,10 @@ data class HomeUiState(
     val listaDeGruposExpandida: Boolean = false,
     val grupoDoSonhoConfirmadoHoje: Int? = null,
     val grupoAbertoNoDialog: GrupoDoBicho? = null,
+    // RF-11.1 — seleção transiente, não persistida: reabrir a Home volta
+    // pro modo padrão. RF-11.2: só as crenças filtradas por `modoSelecionado`
+    // entram no próximo palpite gerado por aqui.
+    val modoSelecionado: ModoDeGeracao = ModoDeGeracao.MISTICO,
 ) {
     val totalDeJogos: Int get() = palpitesHoje.size
 

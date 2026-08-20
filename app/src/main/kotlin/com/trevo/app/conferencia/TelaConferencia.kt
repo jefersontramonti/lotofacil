@@ -31,7 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -39,11 +42,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.trevo.app.R
 import com.trevo.app.detalhe.GradeDeDezenas
 import com.trevo.core.ui.BotaoPrimario
+import com.trevo.core.ui.BotaoVoltar
 import com.trevo.core.ui.NocturneAccent
 import com.trevo.core.ui.NocturneOutline
 import com.trevo.core.ui.NocturneSurface
@@ -127,13 +132,7 @@ private fun Cabecalho(
 ) {
     val descricaoVoltar = stringResource(id = R.string.conferencia_voltar_descricao)
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "←",
-            modifier =
-                Modifier
-                    .clickable(role = Role.Button, onClick = onVoltarClick)
-                    .semantics { contentDescription = descricaoVoltar },
-        )
+        BotaoVoltar(onClick = onVoltarClick, descricao = descricaoVoltar)
         Text(
             text = stringResource(id = R.string.conferencia_titulo),
             style = MaterialTheme.typography.titleLarge,
@@ -428,8 +427,17 @@ private fun LinhaDeDezenas(
                     Modifier
                         .size(28.dp)
                         .background(if (cheia) NocturneAccent else Color.Transparent, RoundedCornerShape(50))
-                        .border(BorderStroke(1.dp, NocturneOutline), RoundedCornerShape(50))
-                        .semantics { contentDescription = descricao },
+                        // RF-05.5/conferencia_legenda_bolas: cheia = acerto,
+                        // tracejada = marcada que não saiu — a borda, não só
+                        // o preenchimento, precisa diferenciar os dois
+                        // estados (RNF-03.5: marcação nunca só por cor).
+                        .then(
+                            if (cheia) {
+                                Modifier.border(BorderStroke(1.dp, NocturneOutline), RoundedCornerShape(50))
+                            } else {
+                                Modifier.bordaCircularTracejada(cor = NocturneOutline)
+                            },
+                        ).semantics { contentDescription = descricao },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = "%02d".format(dezena), style = MaterialTheme.typography.labelSmall)
@@ -437,6 +445,23 @@ private fun LinhaDeDezenas(
         }
     }
 }
+
+private fun Modifier.bordaCircularTracejada(
+    cor: Color,
+    largura: Dp = 1.dp,
+): Modifier =
+    drawBehind {
+        val larguraPx = largura.toPx()
+        drawCircle(
+            color = cor,
+            radius = (size.minDimension - larguraPx) / 2f,
+            style =
+                Stroke(
+                    width = larguraPx,
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()), 0f),
+                ),
+        )
+    }
 
 private fun formatarReais(valor: BigDecimal): String =
     NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(valor)

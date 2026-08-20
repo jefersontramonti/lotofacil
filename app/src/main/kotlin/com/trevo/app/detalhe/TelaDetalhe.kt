@@ -39,8 +39,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.trevo.app.R
+import com.trevo.app.ritual.emojiDoAmuleto
+import com.trevo.app.ritual.fraseDaEscolha
+import com.trevo.app.ritual.nomeDoAmuleto
 import com.trevo.core.engine.crenca.Crenca
+import com.trevo.core.engine.crenca.RevelacaoDoAmuleto
 import com.trevo.core.ui.BotaoPrimario
+import com.trevo.core.ui.BotaoVoltar
 import com.trevo.core.ui.NocturneAccent
 import com.trevo.core.ui.NocturneOutline
 import com.trevo.core.ui.NocturneSurface
@@ -151,13 +156,7 @@ private fun Cabecalho(
 ) {
     val descricaoVoltar = stringResource(id = R.string.detalhe_voltar_descricao)
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "←",
-            modifier =
-                Modifier
-                    .clickable(role = Role.Button, onClick = onVoltarClick)
-                    .semantics { contentDescription = descricaoVoltar },
-        )
+        BotaoVoltar(onClick = onVoltarClick, descricao = descricaoVoltar)
         Text(
             text = stringResource(id = R.string.home_palpite_rotulo, uiState.numeroDoDia),
             style = MaterialTheme.typography.titleLarge,
@@ -222,6 +221,9 @@ private fun SecaoVisualizacao(
         }
         HorizontalDivider(color = NocturneOutline)
         Text(text = stringResource(id = R.string.detalhe_origem_titulo), style = MaterialTheme.typography.titleMedium)
+        // RF-11.10 — o ritual dos amuletos aparece como fonte própria, ao
+        // lado das crenças, na mesma seção "De onde vieram as dezenas".
+        uiState.origensDoRitual.forEach { revelacao -> CartaoDeOrigemDoRitual(revelacao) }
         uiState.origens.forEach { origem -> CartaoDeOrigem(origem) }
         HorizontalDivider(color = NocturneOutline)
         Text(
@@ -324,6 +326,39 @@ private fun CartaoDeOrigem(
                     style = MaterialTheme.typography.labelSmall,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CartaoDeOrigemDoRitual(
+    revelacao: RevelacaoDoAmuleto,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(color = NocturneSurface, shape = RoundedCornerShape(8.dp))
+                .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
+                .padding(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(id = emojiDoAmuleto(revelacao.amuleto)),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(id = nomeDoAmuleto(revelacao.amuleto)),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Text(
+                text = stringResource(id = fraseDaEscolha(revelacao.opcao)),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(text = "%02d".format(revelacao.dezena), style = MaterialTheme.typography.labelSmall)
         }
     }
 }

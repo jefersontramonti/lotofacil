@@ -1,6 +1,7 @@
 package com.trevo.app.preferencias
 
 import com.trevo.core.data.preferencias.PerfilSalvo
+import com.trevo.core.data.preferencias.PreferenciasDeNotificacao
 import com.trevo.core.data.preferencias.PreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.identidade.Signo
@@ -13,6 +14,8 @@ import java.time.LocalDate
 class FakePreferenciasRepository : PreferenciasRepository {
     private val perfil = MutableStateFlow<PerfilSalvo?>(null)
     val perfilSalvo: StateFlow<PerfilSalvo?> = perfil.asStateFlow()
+
+    private val preferenciasDeNotificacao = MutableStateFlow(PreferenciasDeNotificacao())
 
     private data class SonhoConfirmado(
         val grupo: Int,
@@ -41,4 +44,11 @@ class FakePreferenciasRepository : PreferenciasRepository {
 
     override fun observarGrupoDoSonhoDeHoje(hoje: LocalDate) =
         sonhoDoDia.map { confirmado -> confirmado?.takeIf { it.data == hoje }?.grupo }
+
+    override suspend fun salvarPreferenciasDeNotificacao(preferencias: PreferenciasDeNotificacao) {
+        preferenciasDeNotificacao.value = preferencias
+    }
+
+    override fun observarPreferenciasDeNotificacao(): StateFlow<PreferenciasDeNotificacao> =
+        preferenciasDeNotificacao.asStateFlow()
 }

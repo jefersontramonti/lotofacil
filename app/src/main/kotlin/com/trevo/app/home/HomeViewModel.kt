@@ -7,14 +7,19 @@ import com.trevo.core.data.palpite.PalpiteSalvo
 import com.trevo.core.data.preferencias.PerfilSalvo
 import com.trevo.core.data.preferencias.PreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
+import com.trevo.core.engine.crenca.DadosDeContribuicao
 import com.trevo.core.engine.crenca.GRUPOS_DO_BICHO
+import com.trevo.core.engine.crenca.ModoDeGeracao
+import com.trevo.core.engine.crenca.crencasAtivasNoModo
 import com.trevo.core.engine.crenca.faseDaLuaEm
 import com.trevo.core.engine.crenca.indiceDeSorteDoDia
+import com.trevo.core.engine.palpite.PalpiteGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -37,16 +42,21 @@ class HomeViewModel
     constructor(
         private val repository: PalpiteRepository,
         private val preferenciasRepository: PreferenciasRepository,
+        private val gerador: PalpiteGenerator,
         private val clock: Clock,
     ) : ViewModel() {
         private val palpiteParaConfirmarExclusao = MutableStateFlow<Long?>(null)
         private val numeroDoGrupoAbertoNoDialog = MutableStateFlow<Int?>(null)
         private val listaDeGruposExpandida = MutableStateFlow(false)
 
+        // RF-11.1 — seleção de modo é transiente (não sobrevive a reabrir a Home).
+        private val modoSelecionado = MutableStateFlow(ModoDeGeracao.MISTICO)
+
         private data class EstadoLocal(
             val idParaExcluir: Long?,
             val numeroDoGrupoAberto: Int?,
             val listaExpandida: Boolean,
+            val modo: ModoDeGeracao,
         )
 
         private val estadoLocal =
@@ -54,8 +64,9 @@ class HomeViewModel
                 palpiteParaConfirmarExclusao,
                 numeroDoGrupoAbertoNoDialog,
                 listaDeGruposExpandida,
-            ) { idParaExcluir, numeroDoGrupoAberto, listaExpandida ->
-                EstadoLocal(idParaExcluir, numeroDoGrupoAberto, listaExpandida)
+                modoSelecionado,
+            ) { idParaExcluir, numeroDoGrupoAberto, listaExpandida, modo ->
+                EstadoLocal(idParaExcluir, numeroDoGrupoAberto, listaExpandida, modo)
             }
 
         val uiState: StateFlow<HomeUiState> =
@@ -93,6 +104,7 @@ class HomeViewModel
                 listaDeGruposExpandida = local.listaExpandida,
                 grupoDoSonhoConfirmadoHoje = grupoConfirmado,
                 grupoAbertoNoDialog = local.numeroDoGrupoAberto?.let { grupoDoBichoDeNumero(it) },
+                modoSelecionado = local.modo,
             )
         }
 
@@ -118,6 +130,7 @@ class HomeViewModel
                     // ZonedDateTime, disponível desde a API 26.
                     horario = ZonedDateTime.ofInstant(salvo.criadoEm, clock.zone).format(FORMATO_HORARIO),
                     dezenasNovas = anterior?.let { salvo.palpite.dezenas.filterNot { d -> d in it.palpite.dezenas } },
+                    modo = salvo.palpite.modo,
                 )
             }
         }
@@ -151,5 +164,36 @@ class HomeViewModel
         fun aoConfirmarSonho(numero: Int) {
             viewModelScope.launch { preferenciasRepository.confirmarGrupoDoSonho(numero, LocalDate.now(clock)) }
             numeroDoGrupoAbertoNoDialog.value = null
+        }
+
+        fun aoSelecionarModo(modo: ModoDeGeracao) {
+            modoSelecionado.value = modo
+        }
+
+        // RF-11.1/RF-11.2/RF-11.3 — Místico e Cientista geram direto por
+        // aqui; Destino troca este botão pelo ritual (ver TrevoNavHost), que
+        // chama PalpiteRepository.salvar diretamente ao final, não este método.
+        fun aoGerarClick() {
+            viewModelScope.launch {
+                val perfil = preferenciasRepository.observarPerfil().first() ?: return@launch
+                val hoje = LocalDate.now(clock)
+                val grupoDoSonho = preferenciasRepository.observarGrupoDoSonhoDeHoje(hoje).first()
+                val dados =
+                    DadosDeContribuicao(
+                        hoje = hoje,
+                        nascimento = perfil.nascimento,
+                        signo = perfil.signo,
+                        nome = perfil.nome,
+                        grupoDoSonho = grupoDoSonho,
+                    )
+                val modo = modoSelecionado.value
+                val palpite =
+                    gerador.gerar(
+                        crencasAtivas = crencasAtivasNoModo(modo, perfil.crencasAtivas),
+                        dados = dados,
+                        modo = modo,
+                    )
+                repository.salvar(palpite)
+            }
         }
     }

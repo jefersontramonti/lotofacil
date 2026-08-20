@@ -99,6 +99,8 @@ class DetalheViewModel
                 dezenasFixas = palpite.dezenasFixas,
                 forca = palpite.forca,
                 origens = palpite.contribuicoes.map { (crenca, dezenas) -> OrigemDeDezenasUiState(crenca, dezenas) },
+                origensDoRitual = palpite.ritual,
+                modo = palpite.modo,
                 soma = palpite.dezenas.sum(),
                 pares = pares,
                 impares = quantidadeDeDezenas - pares,
@@ -191,6 +193,8 @@ class DetalheViewModel
                         dados = dados,
                         dezenasFixas = palpiteAtual.palpite.dezenasFixas.toSet(),
                         quantidade = palpiteAtual.palpite.dezenas.size,
+                        modo = palpiteAtual.palpite.modo,
+                        ritual = palpiteAtual.palpite.ritual,
                     )
                 repository.atualizar(palpiteId, palpiteRefeito, palpiteAtual.criadoEm)
             }

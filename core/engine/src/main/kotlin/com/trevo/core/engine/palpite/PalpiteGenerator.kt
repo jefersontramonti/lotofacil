@@ -5,6 +5,8 @@ import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.crenca.DadosDeContribuicao
 import com.trevo.core.engine.crenca.FONTES_PADRAO
 import com.trevo.core.engine.crenca.FonteDeCrenca
+import com.trevo.core.engine.crenca.ModoDeGeracao
+import com.trevo.core.engine.crenca.RevelacaoDoAmuleto
 import kotlin.random.Random
 
 private const val PESO_BASE = 1.0
@@ -21,6 +23,8 @@ class PalpiteGenerator(
         dezenasFixas: Set<Int> = emptySet(),
         quantidade: Int = 15,
         fontes: List<FonteDeCrenca> = FONTES_PADRAO,
+        modo: ModoDeGeracao? = null,
+        ritual: List<RevelacaoDoAmuleto> = emptyList(),
     ): Palpite {
         require(quantidade in 1..25) { "quantidade deve estar entre 1 e 25, era $quantidade" }
         require(dezenasFixas.all { it in 1..25 }) { "dezenasFixas devem estar entre 1 e 25" }
@@ -28,13 +32,8 @@ class PalpiteGenerator(
             "dezenasFixas (${dezenasFixas.size}) não pode ultrapassar quantidade ($quantidade)"
         }
 
-        val contribuicoes: Map<Crenca, ContribuicaoDeCrenca> =
-            fontes.filter { it.crenca in crencasAtivas }.associate { it.crenca to it.contribuir(dados) }
-
-        val peso = DoubleArray(26) { PESO_BASE }
-        contribuicoes.values.forEach { contribuicao ->
-            contribuicao.dezenas.forEach { dezena -> if (dezena in 1..25) peso[dezena] += PESO_POR_CRENCA }
-        }
+        val contribuicoes = contribuicoesAtivas(crencasAtivas, dados, fontes)
+        val peso = pesosDe(contribuicoes)
 
         // Dezenas fixas entram sempre (RF-02.2) — reservadas antes do
         // sorteio ponderado, nunca dependentes do peso pra aparecer.
@@ -57,7 +56,39 @@ class PalpiteGenerator(
             dezenasFixas = dezenasFixas.sorted(),
             contribuicoes = contribuicoesNoResultado,
             forca = calcularForca(crencasAtivas, contribuicoesNoResultado),
+            modo = modo,
+            ritual = ritual,
         )
+    }
+
+    // RF-11.7 — mesmo motor de pesos de gerar() (mesmas fontes, mesma
+    // fórmula), mas devolve uma única dezena. `dezenasExcluidas` são as já
+    // reveladas no ritual — nunca repete uma dezena entre amuletos.
+    fun sortearDezenaDoRitual(
+        crencasAtivas: Set<Crenca>,
+        dados: DadosDeContribuicao,
+        dezenasExcluidas: Set<Int>,
+        fontes: List<FonteDeCrenca> = FONTES_PADRAO,
+    ): Int {
+        val peso = pesosDe(contribuicoesAtivas(crencasAtivas, dados, fontes))
+        return (1..25)
+            .filterNot { it in dezenasExcluidas }
+            .maxBy { dezena -> peso[dezena] * multiplicadorAleatorio() }
+    }
+
+    private fun contribuicoesAtivas(
+        crencasAtivas: Set<Crenca>,
+        dados: DadosDeContribuicao,
+        fontes: List<FonteDeCrenca>,
+    ): Map<Crenca, ContribuicaoDeCrenca> =
+        fontes.filter { it.crenca in crencasAtivas }.associate { it.crenca to it.contribuir(dados) }
+
+    private fun pesosDe(contribuicoes: Map<Crenca, ContribuicaoDeCrenca>): DoubleArray {
+        val peso = DoubleArray(26) { PESO_BASE }
+        contribuicoes.values.forEach { contribuicao ->
+            contribuicao.dezenas.forEach { dezena -> if (dezena in 1..25) peso[dezena] += PESO_POR_CRENCA }
+        }
+        return peso
     }
 
     // RF-02.8: fechamento é só o mesmo motor pedindo mais dezenas — nenhum

@@ -3,7 +3,6 @@ package com.trevo.app.detalhe
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,11 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.trevo.app.R
+import com.trevo.core.ui.BotaoVoltar
 import com.trevo.core.ui.NocturneOutline
 import com.trevo.core.ui.NocturneSurface
 import java.math.BigDecimal
@@ -60,13 +57,7 @@ fun TelaDesdobramentos(
         ) {
             val descricaoVoltar = stringResource(id = R.string.detalhe_voltar_descricao)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "←",
-                    modifier =
-                        Modifier
-                            .clickable(role = Role.Button, onClick = onVoltarClick)
-                            .semantics { contentDescription = descricaoVoltar },
-                )
+                BotaoVoltar(onClick = onVoltarClick, descricao = descricaoVoltar)
                 Text(
                     text = stringResource(id = R.string.desdobramentos_titulo),
                     style = MaterialTheme.typography.titleLarge,

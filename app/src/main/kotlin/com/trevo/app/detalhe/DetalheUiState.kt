@@ -1,6 +1,8 @@
 package com.trevo.app.detalhe
 
 import com.trevo.core.engine.crenca.Crenca
+import com.trevo.core.engine.crenca.ModoDeGeracao
+import com.trevo.core.engine.crenca.RevelacaoDoAmuleto
 import java.math.BigDecimal
 
 data class OrigemDeDezenasUiState(
@@ -16,6 +18,10 @@ data class DetalheUiState(
     val dezenasFixas: List<Int> = emptyList(),
     val forca: Int = 0,
     val origens: List<OrigemDeDezenasUiState> = emptyList(),
+    // RF-11.10 — o ritual dos amuletos, como fonte própria, ao lado das
+    // crenças em `origens`. Vazio pra palpites fora do modo Destino.
+    val origensDoRitual: List<RevelacaoDoAmuleto> = emptyList(),
+    val modo: ModoDeGeracao? = null,
     val soma: Int = 0,
     val pares: Int = 0,
     val impares: Int = 0,

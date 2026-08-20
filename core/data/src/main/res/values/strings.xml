@@ -1,0 +1,10 @@
+<resources>
+    <string name="notificacao_canal_lembrete_nome">Lembrete de fechamento</string>
+    <string name="notificacao_canal_lembrete_descricao">Avisa antes das apostas da Lotofácil encerrarem.</string>
+    <string name="notificacao_canal_resultado_nome">Resultado do sorteio</string>
+    <string name="notificacao_canal_resultado_descricao">Avisa quando o resultado do concurso sai.</string>
+    <string name="notificacao_lembrete_titulo">As apostas fecham logo</string>
+    <string name="notificacao_lembrete_texto">Não esqueça de fazer sua aposta na lotérica ou no app oficial da Caixa.</string>
+    <string name="notificacao_resultado_titulo">O resultado saiu</string>
+    <string name="notificacao_resultado_texto">Toque para conferir seus palpites de hoje.</string>
+</resources>

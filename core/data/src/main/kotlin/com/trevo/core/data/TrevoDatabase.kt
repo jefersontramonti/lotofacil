@@ -9,7 +9,7 @@ import com.trevo.core.data.palpite.PalpiteEntity
 import com.trevo.core.data.resultado.ResultadoDao
 import com.trevo.core.data.resultado.ResultadoEntity
 
-@Database(entities = [PalpiteEntity::class, ResultadoEntity::class], version = 2)
+@Database(entities = [PalpiteEntity::class, ResultadoEntity::class], version = 3)
 abstract class TrevoDatabase : RoomDatabase() {
     abstract fun palpiteDao(): PalpiteDao
 
@@ -31,5 +31,17 @@ val MIGRATION_1_2 =
                     "`acumulado` INTEGER NOT NULL, " +
                     "`origem` TEXT NOT NULL)",
             )
+        }
+    }
+
+// RF-11 — modo de geração e ritual dos amuletos. `modo` fica NULL nos
+// palpites já existentes (nunca inventa qual modo os gerou — CLAUDE.md §8);
+// `ritual` fica string vazia, o mesmo "sem ritual" que um palpite novo fora
+// do modo Destino já usa (ver PalpiteMapper.codificarRitual).
+val MIGRATION_2_3 =
+    object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `palpites` ADD COLUMN `modo` TEXT")
+            db.execSQL("ALTER TABLE `palpites` ADD COLUMN `ritual` TEXT NOT NULL DEFAULT ''")
         }
     }

@@ -5,7 +5,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import com.trevo.core.data.MIGRATION_1_2
+import com.trevo.core.data.MIGRATION_2_3
 import com.trevo.core.data.TrevoDatabase
+import com.trevo.core.data.notificacoes.NotificacoesScheduler
+import com.trevo.core.data.notificacoes.NotificacoesSchedulerImpl
 import com.trevo.core.data.palpite.PalpiteDao
 import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.palpite.PalpiteRepositoryImpl
@@ -35,7 +38,7 @@ object DataModule {
     ): TrevoDatabase =
         Room
             .databaseBuilder(context, TrevoDatabase::class.java, NOME_DO_BANCO)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
     @Provides
@@ -62,4 +65,7 @@ abstract class DataBindsModule {
 
     @Binds
     abstract fun ligarResultadoRepository(impl: ResultadoRepositoryImpl): ResultadoRepository
+
+    @Binds
+    abstract fun ligarNotificacoesScheduler(impl: NotificacoesSchedulerImpl): NotificacoesScheduler
 }

@@ -2,6 +2,7 @@ package com.trevo.core.data.preferencias
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -10,6 +11,7 @@ import com.trevo.core.engine.identidade.Signo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 
 private val CHAVE_NOME = stringPreferencesKey("nome")
@@ -19,6 +21,10 @@ private val CHAVE_CRENCAS_ATIVAS = stringPreferencesKey("crencas_ativas")
 private val CHAVE_GRUPO_DO_SONHO_NUMERO = intPreferencesKey("grupo_do_sonho_numero")
 private val CHAVE_GRUPO_DO_SONHO_DATA = stringPreferencesKey("grupo_do_sonho_data_iso")
 private const val SEPARADOR_CRENCAS = ","
+
+private val CHAVE_LEMBRETE_FECHAMENTO_ATIVO = booleanPreferencesKey("lembrete_fechamento_ativo")
+private val CHAVE_HORARIO_LEMBRETE_FECHAMENTO = stringPreferencesKey("horario_lembrete_fechamento")
+private val CHAVE_NOTIFICACAO_RESULTADO_ATIVA = booleanPreferencesKey("notificacao_resultado_ativa")
 
 class PreferenciasRepositoryImpl
     @Inject
@@ -78,5 +84,24 @@ class PreferenciasRepositoryImpl
             dataStore.data.map { preferencias ->
                 val dataSalva = preferencias[CHAVE_GRUPO_DO_SONHO_DATA]
                 if (dataSalva == hoje.toString()) preferencias[CHAVE_GRUPO_DO_SONHO_NUMERO] else null
+            }
+
+        override suspend fun salvarPreferenciasDeNotificacao(preferencias: PreferenciasDeNotificacao) {
+            dataStore.edit { armazenadas ->
+                armazenadas[CHAVE_LEMBRETE_FECHAMENTO_ATIVO] = preferencias.lembreteFechamentoAtivo
+                armazenadas[CHAVE_HORARIO_LEMBRETE_FECHAMENTO] = preferencias.horarioLembreteFechamento.toString()
+                armazenadas[CHAVE_NOTIFICACAO_RESULTADO_ATIVA] = preferencias.notificacaoResultadoAtiva
+            }
+        }
+
+        override fun observarPreferenciasDeNotificacao(): Flow<PreferenciasDeNotificacao> =
+            dataStore.data.map { armazenadas ->
+                PreferenciasDeNotificacao(
+                    lembreteFechamentoAtivo = armazenadas[CHAVE_LEMBRETE_FECHAMENTO_ATIVO] ?: false,
+                    horarioLembreteFechamento =
+                        armazenadas[CHAVE_HORARIO_LEMBRETE_FECHAMENTO]?.let { LocalTime.parse(it) }
+                            ?: HORARIO_LEMBRETE_PADRAO,
+                    notificacaoResultadoAtiva = armazenadas[CHAVE_NOTIFICACAO_RESULTADO_ATIVA] ?: false,
+                )
             }
     }
