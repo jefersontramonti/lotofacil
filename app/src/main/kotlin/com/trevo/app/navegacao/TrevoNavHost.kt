@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -40,6 +41,7 @@ import com.trevo.app.detalhe.DesdobramentosViewModel
 import com.trevo.app.detalhe.DetalheViewModel
 import com.trevo.app.detalhe.TelaDesdobramentos
 import com.trevo.app.detalhe.TelaDetalhe
+import com.trevo.app.detalhe.gerarPdfDoVolante
 import com.trevo.app.geracao.GeracaoViewModel
 import com.trevo.app.geracao.TelaGerando
 import com.trevo.app.geracao.movimentoReduzidoAtivado
@@ -61,6 +63,7 @@ import com.trevo.app.ritual.RitualEvento
 import com.trevo.app.ritual.RitualViewModel
 import com.trevo.app.ritual.TelaRitual
 import com.trevo.core.engine.crenca.ModoDeGeracao
+import kotlinx.coroutines.launch
 
 @Composable
 fun TrevoNavHost(modifier: Modifier = Modifier) {
@@ -315,6 +318,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 val uiState by viewModel.uiState.collectAsState()
                 val palpiteId = entrada.arguments?.getLong("palpiteId") ?: 0L
                 val context = LocalContext.current
+                val escopo = rememberCoroutineScope()
 
                 TelaDetalhe(
                     uiState = uiState,
@@ -340,6 +344,14 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                         copiarParaAreaDeTransferencia(context, mensagem)
                         viewModel.aoMarcarCopiadoClick()
                     },
+                    onExportarClick = {
+                        escopo.launch {
+                            val uri =
+                                gerarPdfDoVolante(context, uiState.dezenas, uiState.numeroDoDia, uiState.chanceRealUmEm)
+                            abrirPdfParaCompartilhar(context, uri)
+                        }
+                    },
+                    onExportarBloqueadoClick = { navController.navigate(Rotas.PAYWALL) },
                 )
             }
             composable(
@@ -427,4 +439,20 @@ private fun abrirGerenciamentoDaAssinatura(
             "https://play.google.com/store/account/subscriptions?sku=$productId&package=${context.packageName}",
         )
     context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+}
+
+// RF-08.3 — mesmo espírito do seletor de RF-08.1: abre o seletor do
+// sistema em vez de forçar um app específico, já que "salvar"/"ver"/
+// "enviar" um PDF são igualmente válidos aqui.
+private fun abrirPdfParaCompartilhar(
+    context: Context,
+    uri: Uri,
+) {
+    val intent =
+        Intent(Intent.ACTION_SEND).apply {
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    context.startActivity(Intent.createChooser(intent, null))
 }

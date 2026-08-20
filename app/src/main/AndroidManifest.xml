@@ -43,6 +43,19 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713" />
 
+        <!-- RF-08.3: o PDF exportado vai pro cache do app; FileProvider dá
+             uma content:// URI pro app de destino (visualizador de PDF,
+             WhatsApp etc.) ler sem expor um caminho file:// direto. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>

@@ -66,6 +66,8 @@ fun tagBotaoEnviarWhatsApp(): String = "detalhe_compartilhar_whatsapp"
 
 fun tagBotaoCopiarTexto(): String = "detalhe_compartilhar_copiar"
 
+fun tagBotaoExportar(): String = "detalhe_exportar"
+
 @Composable
 fun TelaDetalhe(
     uiState: DetalheUiState,
@@ -85,6 +87,8 @@ fun TelaDetalhe(
     onFecharCompartilharClick: () -> Unit,
     onEnviarWhatsAppClick: (String) -> Unit,
     onCopiarTextoClick: (String) -> Unit,
+    onExportarClick: () -> Unit,
+    onExportarBloqueadoClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -109,6 +113,8 @@ fun TelaDetalhe(
                 onRefazerClick = onRefazerClick,
                 onExcluirClick = onExcluirClick,
                 onCompartilharClick = onCompartilharClick,
+                onExportarClick = onExportarClick,
+                onExportarBloqueadoClick = onExportarBloqueadoClick,
             )
             if (!uiState.palpiteExiste) {
                 Text(
@@ -175,6 +181,8 @@ private fun Cabecalho(
     onRefazerClick: () -> Unit,
     onExcluirClick: () -> Unit,
     onCompartilharClick: () -> Unit,
+    onExportarClick: () -> Unit,
+    onExportarBloqueadoClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val descricaoVoltar = stringResource(id = R.string.detalhe_voltar_descricao)
@@ -189,6 +197,15 @@ private fun Cabecalho(
             Text(text = stringResource(id = R.string.detalhe_editando_tag), style = MaterialTheme.typography.labelSmall)
         } else if (uiState.palpiteExiste) {
             val descricaoCompartilhar = stringResource(id = R.string.detalhe_compartilhar_icone_descricao)
+            // RF-08.3 — exportar é Pro (wireframe 1p), mesmo padrão de
+            // bloqueada/desbloqueada de TelaCrencas.onCrencaClick/onCrencaBloqueadaClick.
+            val descricaoExportarId =
+                if (uiState.isPro) {
+                    R.string.detalhe_exportar_icone_descricao
+                } else {
+                    R.string.detalhe_exportar_bloqueado_descricao
+                }
+            val descricaoExportar = stringResource(id = descricaoExportarId)
             val descricaoRefazer = stringResource(id = R.string.detalhe_refazer_descricao)
             val descricaoExcluir = stringResource(id = R.string.detalhe_excluir_icone_descricao)
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -199,6 +216,16 @@ private fun Cabecalho(
                             .clickable(role = Role.Button, onClick = onCompartilharClick)
                             .semantics { contentDescription = descricaoCompartilhar }
                             .testTag(tagBotaoCompartilhar()),
+                )
+                Text(
+                    text = if (uiState.isPro) "⤓" else "⤓🔒",
+                    modifier =
+                        Modifier
+                            .clickable(
+                                role = Role.Button,
+                                onClick = if (uiState.isPro) onExportarClick else onExportarBloqueadoClick,
+                            ).semantics { contentDescription = descricaoExportar }
+                            .testTag(tagBotaoExportar()),
                 )
                 Text(
                     text = "↻",

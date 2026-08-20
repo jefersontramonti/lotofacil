@@ -1,8 +1,10 @@
 package com.trevo.app.detalhe
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -12,6 +14,7 @@ import com.trevo.app.R
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.ui.TrevoTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -62,6 +65,8 @@ class TelaDetalheTest {
         onFecharCompartilharClick: () -> Unit = {},
         onEnviarWhatsAppClick: (String) -> Unit = {},
         onCopiarTextoClick: (String) -> Unit = {},
+        onExportarClick: () -> Unit = {},
+        onExportarBloqueadoClick: () -> Unit = {},
     ) {
         composeTestRule.setContent {
             TrevoTheme {
@@ -83,6 +88,8 @@ class TelaDetalheTest {
                     onFecharCompartilharClick = onFecharCompartilharClick,
                     onEnviarWhatsAppClick = onEnviarWhatsAppClick,
                     onCopiarTextoClick = onCopiarTextoClick,
+                    onExportarClick = onExportarClick,
+                    onExportarBloqueadoClick = onExportarBloqueadoClick,
                 )
             }
         }
@@ -277,6 +284,40 @@ class TelaDetalheTest {
         assertTrue(abriu)
     }
 
+    @Test
+    fun semIsProTocarExportarDisparaOCallbackDeBloqueado() {
+        var bloqueado = false
+        var exportou = false
+
+        mostrarTelaDetalhe(
+            uiState = estadoDeExemplo.copy(isPro = false),
+            onExportarClick = { exportou = true },
+            onExportarBloqueadoClick = { bloqueado = true },
+        )
+
+        composeTestRule.onNodeWithTag(tagBotaoExportar()).performClick()
+
+        assertTrue(bloqueado)
+        assertFalse(exportou)
+    }
+
+    @Test
+    fun comIsProTocarExportarDisparaOCallbackDeExportar() {
+        var bloqueado = false
+        var exportou = false
+
+        mostrarTelaDetalhe(
+            uiState = estadoDeExemplo.copy(isPro = true),
+            onExportarClick = { exportou = true },
+            onExportarBloqueadoClick = { bloqueado = true },
+        )
+
+        composeTestRule.onNodeWithTag(tagBotaoExportar()).performClick()
+
+        assertTrue(exportou)
+        assertFalse(bloqueado)
+    }
+
     private val crencasTextoDeExemplo: String
         get() = context.resources.getQuantityString(R.plurals.detalhe_compartilhar_crencas, 1, 1)
 
@@ -357,9 +398,12 @@ class TelaDetalheTest {
 
     @Test
     fun comIsProOSeletorDeFechamentoDestravaOsTamanhosMaiores() {
+        // "16" sozinho é ambíguo (a grade também tem a dezena 16 como
+        // célula, RF-04.1) — a ausência do cadeado é a prova inequívoca do
+        // destravamento.
         mostrarTelaDetalhe(uiState = estadoDeExemplo.copy(isPro = true))
 
-        composeTestRule.onNodeWithText("16").assertIsDisplayed()
+        composeTestRule.onAllNodesWithText("16 🔒").assertCountEquals(0)
     }
 
     @Test

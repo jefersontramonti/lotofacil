@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- RF-08.3: PDF exportado fica em cache/exportados, nunca em
+         armazenamento externo/público — some sozinho quando o sistema
+         limpa o cache do app. -->
+    <cache-path name="exportados" path="exportados/" />
+</paths>

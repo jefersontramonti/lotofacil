@@ -267,6 +267,11 @@
     <string name="detalhe_fixas_limpar">limpar</string>
     <string name="detalhe_refazer_descricao">Refazer o palpite</string>
     <string name="detalhe_excluir_icone_descricao">Excluir palpite</string>
+    <string name="detalhe_exportar_icone_descricao">Exportar em PDF</string>
+    <string name="detalhe_exportar_bloqueado_descricao">Exportar em PDF, disponível no Pro</string>
+    <string name="pdf_titulo_palpite">Palpite %1$d — Trevo</string>
+    <string name="pdf_fechamento_subtitulo">%1$d jogos de 15 dezenas (fechamento de %2$d)</string>
+    <string name="pdf_chance_real">Chance real de 15 acertos: 1 em %1$s</string>
     <string name="detalhe_nao_encontrado">Palpite não encontrado</string>
     <string name="detalhe_ver_desdobramentos_cta">Ver desdobramentos ›</string>
     <string name="detalhe_compartilhar_icone_descricao">Compartilhar palpite</string>
