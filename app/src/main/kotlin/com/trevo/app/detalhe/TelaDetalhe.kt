@@ -22,8 +22,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -58,6 +60,12 @@ fun tagBotaoRefazer(): String = "detalhe_refazer"
 
 fun tagBotaoSalvarEdicao(): String = "detalhe_salvar_edicao"
 
+fun tagBotaoCompartilhar(): String = "detalhe_compartilhar"
+
+fun tagBotaoEnviarWhatsApp(): String = "detalhe_compartilhar_whatsapp"
+
+fun tagBotaoCopiarTexto(): String = "detalhe_compartilhar_copiar"
+
 @Composable
 fun TelaDetalhe(
     uiState: DetalheUiState,
@@ -73,6 +81,10 @@ fun TelaDetalhe(
     onSalvarEdicaoClick: () -> Unit,
     onLimparFixasClick: () -> Unit,
     onVerDesdobramentosClick: () -> Unit,
+    onCompartilharClick: () -> Unit,
+    onFecharCompartilharClick: () -> Unit,
+    onEnviarWhatsAppClick: (String) -> Unit,
+    onCopiarTextoClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -96,6 +108,7 @@ fun TelaDetalhe(
                 onVoltarClick = onVoltarClick,
                 onRefazerClick = onRefazerClick,
                 onExcluirClick = onExcluirClick,
+                onCompartilharClick = onCompartilharClick,
             )
             if (!uiState.palpiteExiste) {
                 Text(
@@ -144,6 +157,15 @@ fun TelaDetalhe(
             },
         )
     }
+
+    if (uiState.compartilhando) {
+        FolhaDeCompartilhamento(
+            uiState = uiState,
+            onFecharClick = onFecharCompartilharClick,
+            onEnviarWhatsAppClick = onEnviarWhatsAppClick,
+            onCopiarTextoClick = onCopiarTextoClick,
+        )
+    }
 }
 
 @Composable
@@ -152,6 +174,7 @@ private fun Cabecalho(
     onVoltarClick: () -> Unit,
     onRefazerClick: () -> Unit,
     onExcluirClick: () -> Unit,
+    onCompartilharClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val descricaoVoltar = stringResource(id = R.string.detalhe_voltar_descricao)
@@ -165,9 +188,18 @@ private fun Cabecalho(
         if (uiState.modoEdicao) {
             Text(text = stringResource(id = R.string.detalhe_editando_tag), style = MaterialTheme.typography.labelSmall)
         } else if (uiState.palpiteExiste) {
+            val descricaoCompartilhar = stringResource(id = R.string.detalhe_compartilhar_icone_descricao)
             val descricaoRefazer = stringResource(id = R.string.detalhe_refazer_descricao)
             val descricaoExcluir = stringResource(id = R.string.detalhe_excluir_icone_descricao)
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = "📤",
+                    modifier =
+                        Modifier
+                            .clickable(role = Role.Button, onClick = onCompartilharClick)
+                            .semantics { contentDescription = descricaoCompartilhar }
+                            .testTag(tagBotaoCompartilhar()),
+                )
                 Text(
                     text = "↻",
                     modifier =
@@ -185,6 +217,103 @@ private fun Cabecalho(
                             .testTag(tagBotaoExcluirDetalhe()),
                 )
             }
+        }
+    }
+}
+
+// RF-08.1/08.2 — texto pronto pra envio, montado a partir de string.xml
+// (nunca literal), com o número do concurso omitido quando ainda
+// desconhecido (ver nota em DetalheUiState.numeroDoConcurso).
+@Composable
+private fun mensagemDeCompartilhamento(uiState: DetalheUiState): String {
+    val dezenasTexto = uiState.dezenas.joinToString(" · ") { "%02d".format(it) }
+    val crencasTexto =
+        pluralStringResource(
+            id = R.plurals.detalhe_compartilhar_crencas,
+            count = uiState.origens.size,
+            uiState.origens.size,
+        )
+    val numeroDoConcurso = uiState.numeroDoConcurso
+    return if (numeroDoConcurso != null) {
+        stringResource(
+            id = R.string.detalhe_compartilhar_mensagem_com_concurso,
+            numeroDoConcurso,
+            dezenasTexto,
+            crencasTexto,
+        )
+    } else {
+        stringResource(id = R.string.detalhe_compartilhar_mensagem_sem_concurso, dezenasTexto, crencasTexto)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FolhaDeCompartilhamento(
+    uiState: DetalheUiState,
+    onFecharClick: () -> Unit,
+    onEnviarWhatsAppClick: (String) -> Unit,
+    onCopiarTextoClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val mensagem = mensagemDeCompartilhamento(uiState)
+    ModalBottomSheet(onDismissRequest = onFecharClick, modifier = modifier) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(id = R.string.detalhe_compartilhar_titulo),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .background(color = NocturneSurface, shape = RoundedCornerShape(8.dp))
+                        .border(border = BorderStroke(1.dp, NocturneOutline), shape = RoundedCornerShape(8.dp))
+                        .padding(12.dp),
+            ) {
+                Text(text = mensagem, style = MaterialTheme.typography.bodySmall)
+            }
+            BotaoPrimario(
+                texto = stringResource(id = R.string.detalhe_compartilhar_whatsapp_cta),
+                onClick = { onEnviarWhatsAppClick(mensagem) },
+                modifier = Modifier.fillMaxWidth().testTag(tagBotaoEnviarWhatsApp()),
+            )
+            Text(
+                text = stringResource(id = R.string.detalhe_compartilhar_copiar_cta),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(role = Role.Button, onClick = { onCopiarTextoClick(mensagem) })
+                        .testTag(tagBotaoCopiarTexto())
+                        .padding(vertical = 12.dp),
+            )
+            if (uiState.copiado) {
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(color = NocturneSurface, shape = RoundedCornerShape(8.dp))
+                            .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
+                            .padding(10.dp),
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.detalhe_compartilhar_copiado_confirmacao),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+            Text(
+                text = stringResource(id = R.string.detalhe_compartilhar_fechar_cta),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(role = Role.Button, onClick = onFecharClick)
+                        .padding(vertical = 12.dp),
+            )
         }
     }
 }

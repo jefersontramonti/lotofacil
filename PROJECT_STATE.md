@@ -44,7 +44,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-03.5 | Indicar dezenas que mudaram vs. palpite anterior | S | F1 | concluído | |
 | RF-03.6 | Total de jogos do dia e custo na lotérica | M | F1 | concluído | |
 | RF-03.7 | Estado vazio sem palpites | M | F1 | concluído | |
-| RF-03.8 | Excluir palpite com confirmação (lista e detalhe) | M | F1 | em andamento | confirmação pronta na lista (`TelaHome`); não há tela de detalhe ainda (RF-04) |
+| RF-03.8 | Excluir palpite com confirmação (lista e detalhe) | M | F1 | concluído | confirmação em `TelaHome` (lista) e `TelaDetalhe` (detalhe, desde RF-04) — nota anterior estava desatualizada, RF-04 já concluiu antes desta revisão |
 | RF-03.9 | Exibir palpites restantes no dia / ilimitado no Pro | M | F3 | não iniciado | |
 | RF-03.10 | Tocar grupo abre card com nome, número, leitura, dezenas | M | F1 | concluído | `DialogoCartaoDoSonho`, wireframe 1t |
 | RF-03.11 | Leitura escrita pros 25 grupos, tradição popular | M | F1 | concluído | conteúdo portado do protótipo de referência (`GRUPOS_DO_BICHO`) |
@@ -129,10 +129,10 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-08.1 | Compartilhar palpite como texto (WhatsApp em destaque) | M | F1 | não iniciado | |
-| RF-08.2 | Prévia da mensagem + copiar texto | M | F1 | não iniciado | |
-| RF-08.3 | Exportar volante em PDF (com jogos do desdobramento) | S | F3 | não iniciado | |
-| RF-08.4 | Exportar volante como imagem para a galeria | C | F3 | não iniciado | |
+| RF-08.1 | Compartilhar palpite como texto (WhatsApp em destaque) | M | F1 | concluído | `TelaDetalhe` (ícone 📤 no cabeçalho) + `FolhaDeCompartilhamento`; tenta abrir direto no WhatsApp (`setPackage("com.whatsapp")`) e cai no `Intent.createChooser` do sistema se o app não estiver instalado — cobre as duas metades do requisito. Número do concurso na mensagem fica `null` (omitido) quando o dia do palpite ainda não tem `Resultado` casado — mesma regra de nunca inventar dado de sorteio de RF-03.1/RF-06.1 (CLAUDE.md §8) |
+| RF-08.2 | Prévia da mensagem + copiar texto | M | F1 | concluído | mesma folha do RF-08.1: caixa de prévia com a mensagem montada, botão "Copiar o texto" (`ClipboardManager` do sistema) e confirmação "Pronto para enviar" |
+| RF-08.3 | Exportar volante em PDF (com jogos do desdobramento) | S | F3 | não iniciado | wireframe 1p: exportar é Pro — depende do RF-09 (Trevo Pro), que ainda não existe |
+| RF-08.4 | Exportar volante como imagem para a galeria | C | F3 | não iniciado | mesma dependência de RF-08.3 |
 
 ## RF-09 · Monetização
 
@@ -150,11 +150,11 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-10.1 | Probabilidade real em toda tela de palpite/fechamento | M | F1 | não iniciado | |
-| RF-10.2 | Nunca afirmar que método aumenta chance de acerto | M | F1 | não iniciado | |
-| RF-10.3 | Deixar explícito que a aposta é feita pelo usuário na Caixa/lotérica | M | F1 | não iniciado | |
-| RF-10.4 | Exibir gasto acumulado sem eufemismo, mesmo negativo | M | F2 | não iniciado | |
-| RF-10.5 | Limite de gasto mensal configurável, com aviso | S | F4 | não iniciado | |
+| RF-10.1 | Probabilidade real em toda tela de palpite/fechamento | M | F1 | concluído | cumprido incidentalmente por outras fatias, nunca teve slice própria: `detalhe_chance_valor`/`probabilidadeDe15Acertos` (RF-04.4) no Detalhe; nota anterior desta tabela estava desatualizada |
+| RF-10.2 | Nunca afirmar que método aumenta chance de acerto | M | F1 | concluído | disclaimers em `home_disclaimer_aposta`, `ritual_disclaimer_escolha` (RF-11.12), `home_sonho_card_disclaimer` (RF-03.13) — nenhum texto do app afirma aumento de chance; nota anterior estava desatualizada |
+| RF-10.3 | Deixar explícito que a aposta é feita pelo usuário na Caixa/lotérica | M | F1 | concluído | `home_disclaimer_aposta` (Home); nota anterior estava desatualizada |
+| RF-10.4 | Exibir gasto acumulado sem eufemismo, mesmo negativo | M | F2 | concluído | `HistoricoUiState.saldo`/RF-06.2 exibe negativo sem eufemismo, verificado no emulador; nota anterior estava desatualizada |
+| RF-10.5 | Limite de gasto mensal configurável, com aviso | S | F4 | não iniciado | único item real do bloco ainda pendente — sem tela/preferência de limite de gasto |
 
 ## RNF — Requisitos não funcionais
 

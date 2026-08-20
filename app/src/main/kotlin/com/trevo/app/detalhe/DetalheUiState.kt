@@ -36,6 +36,12 @@ data class DetalheUiState(
     val modoEdicao: Boolean = false,
     val dezenasEmEdicao: Set<Int> = emptySet(),
     val guardarComoFixasAoSalvar: Boolean = false,
+    // RF-08.1/08.2 — nulo quando o concurso do palpite ainda não foi
+    // sorteado/conferido: CLAUDE.md §8 proíbe inventar número de concurso,
+    // então a mensagem de compartilhamento omite esse trecho nesse caso.
+    val numeroDoConcurso: Int? = null,
+    val compartilhando: Boolean = false,
+    val copiado: Boolean = false,
 ) {
     val faltamOuSobram: Int get() = quantidadeDeDezenas - dezenasEmEdicao.size
 }

@@ -58,6 +58,10 @@ class TelaDetalheTest {
         onSalvarEdicaoClick: () -> Unit = {},
         onLimparFixasClick: () -> Unit = {},
         onVerDesdobramentosClick: () -> Unit = {},
+        onCompartilharClick: () -> Unit = {},
+        onFecharCompartilharClick: () -> Unit = {},
+        onEnviarWhatsAppClick: (String) -> Unit = {},
+        onCopiarTextoClick: (String) -> Unit = {},
     ) {
         composeTestRule.setContent {
             TrevoTheme {
@@ -75,6 +79,10 @@ class TelaDetalheTest {
                     onSalvarEdicaoClick = onSalvarEdicaoClick,
                     onLimparFixasClick = onLimparFixasClick,
                     onVerDesdobramentosClick = onVerDesdobramentosClick,
+                    onCompartilharClick = onCompartilharClick,
+                    onFecharCompartilharClick = onFecharCompartilharClick,
+                    onEnviarWhatsAppClick = onEnviarWhatsAppClick,
+                    onCopiarTextoClick = onCopiarTextoClick,
                 )
             }
         }
@@ -256,6 +264,88 @@ class TelaDetalheTest {
         mostrarTelaDetalhe(uiState = DetalheUiState(carregando = false, palpiteExiste = false))
 
         composeTestRule.onNodeWithText(context.getString(R.string.detalhe_nao_encontrado)).assertIsDisplayed()
+    }
+
+    @Test
+    fun tocarCompartilharDisparaOCallback() {
+        var abriu = false
+
+        mostrarTelaDetalhe(onCompartilharClick = { abriu = true })
+
+        composeTestRule.onNodeWithTag(tagBotaoCompartilhar()).performClick()
+
+        assertTrue(abriu)
+    }
+
+    private val crencasTextoDeExemplo: String
+        get() = context.resources.getQuantityString(R.plurals.detalhe_compartilhar_crencas, 1, 1)
+
+    @Test
+    fun folhaDeCompartilhamentoExibeAMensagemSemNumeroDeConcursoQuandoAindaDesconhecido() {
+        mostrarTelaDetalhe(uiState = estadoDeExemplo.copy(compartilhando = true))
+
+        val dezenas = (1..15).joinToString(" · ") { "%02d".format(it) }
+        composeTestRule
+            .onNodeWithText(
+                context.getString(R.string.detalhe_compartilhar_mensagem_sem_concurso, dezenas, crencasTextoDeExemplo),
+            ).assertIsDisplayed()
+    }
+
+    @Test
+    fun folhaDeCompartilhamentoComNumeroDeConcursoIncluiOConcursoNaMensagem() {
+        mostrarTelaDetalhe(uiState = estadoDeExemplo.copy(compartilhando = true, numeroDoConcurso = 3457))
+
+        val dezenas = (1..15).joinToString(" · ") { "%02d".format(it) }
+        composeTestRule
+            .onNodeWithText(
+                context.getString(
+                    R.string.detalhe_compartilhar_mensagem_com_concurso,
+                    3457,
+                    dezenas,
+                    crencasTextoDeExemplo,
+                ),
+            ).assertIsDisplayed()
+    }
+
+    @Test
+    fun tocarEnviarNoWhatsAppDisparaOCallbackComAMensagemMontada() {
+        var mensagemRecebida: String? = null
+
+        mostrarTelaDetalhe(
+            uiState = estadoDeExemplo.copy(compartilhando = true),
+            onEnviarWhatsAppClick = { mensagemRecebida = it },
+        )
+
+        composeTestRule.onNodeWithTag(tagBotaoEnviarWhatsApp()).performClick()
+
+        val dezenas = (1..15).joinToString(" · ") { "%02d".format(it) }
+        assertEquals(
+            context.getString(R.string.detalhe_compartilhar_mensagem_sem_concurso, dezenas, crencasTextoDeExemplo),
+            mensagemRecebida,
+        )
+    }
+
+    @Test
+    fun tocarCopiarOTextoDisparaOCallbackEExibeAConfirmacao() {
+        var copiou = false
+
+        mostrarTelaDetalhe(
+            uiState = estadoDeExemplo.copy(compartilhando = true),
+            onCopiarTextoClick = { copiou = true },
+        )
+
+        composeTestRule.onNodeWithTag(tagBotaoCopiarTexto()).performClick()
+
+        assertTrue(copiou)
+    }
+
+    @Test
+    fun comCopiadoVerdadeiroExibeAConfirmacaoDeProntoParaEnviar() {
+        mostrarTelaDetalhe(uiState = estadoDeExemplo.copy(compartilhando = true, copiado = true))
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.detalhe_compartilhar_copiado_confirmacao))
+            .assertIsDisplayed()
     }
 
     @Test

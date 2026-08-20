@@ -1,6 +1,11 @@
 package com.trevo.app.navegacao
 
 import android.Manifest
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -279,6 +284,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 val viewModel: DetalheViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsState()
                 val palpiteId = entrada.arguments?.getLong("palpiteId") ?: 0L
+                val context = LocalContext.current
 
                 TelaDetalhe(
                     uiState = uiState,
@@ -297,6 +303,13 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onSalvarEdicaoClick = viewModel::aoSalvarEdicao,
                     onLimparFixasClick = viewModel::aoLimparFixas,
                     onVerDesdobramentosClick = { navController.navigate(Rotas.desdobramentos(palpiteId)) },
+                    onCompartilharClick = viewModel::aoAbrirCompartilharClick,
+                    onFecharCompartilharClick = viewModel::aoFecharCompartilharClick,
+                    onEnviarWhatsAppClick = { mensagem -> enviarPalpiteViaWhatsApp(context, mensagem) },
+                    onCopiarTextoClick = { mensagem ->
+                        copiarParaAreaDeTransferencia(context, mensagem)
+                        viewModel.aoMarcarCopiadoClick()
+                    },
                 )
             }
             composable(
@@ -313,4 +326,37 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+// RF-08.1: tenta abrir direto no WhatsApp (destaque do requisito); sem o
+// app instalado, cai no seletor do sistema em vez de travar num app
+// ausente.
+private fun enviarPalpiteViaWhatsApp(
+    context: Context,
+    mensagem: String,
+) {
+    val intentWhatsApp =
+        Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, mensagem)
+            setPackage("com.whatsapp")
+        }
+    try {
+        context.startActivity(intentWhatsApp)
+    } catch (excecao: ActivityNotFoundException) {
+        val intentGenerico =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, mensagem)
+            }
+        context.startActivity(Intent.createChooser(intentGenerico, null))
+    }
+}
+
+private fun copiarParaAreaDeTransferencia(
+    context: Context,
+    mensagem: String,
+) {
+    val clipboard = context.getSystemService(ClipboardManager::class.java)
+    clipboard.setPrimaryClip(ClipData.newPlainText(mensagem, mensagem))
 }

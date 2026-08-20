@@ -262,6 +262,18 @@
     <string name="detalhe_excluir_icone_descricao">Excluir palpite</string>
     <string name="detalhe_nao_encontrado">Palpite não encontrado</string>
     <string name="detalhe_ver_desdobramentos_cta">Ver desdobramentos ›</string>
+    <string name="detalhe_compartilhar_icone_descricao">Compartilhar palpite</string>
+    <string name="detalhe_compartilhar_titulo">Compartilhar palpite</string>
+    <string name="detalhe_compartilhar_mensagem_com_concurso">Meu palpite da Lotofácil, concurso %1$d: %2$s. Gerado no Trevo com %3$s.</string>
+    <string name="detalhe_compartilhar_mensagem_sem_concurso">Meu palpite da Lotofácil: %1$s. Gerado no Trevo com %2$s.</string>
+    <plurals name="detalhe_compartilhar_crencas">
+        <item quantity="one">%1$d crença</item>
+        <item quantity="other">%1$d crenças</item>
+    </plurals>
+    <string name="detalhe_compartilhar_whatsapp_cta">Enviar no WhatsApp</string>
+    <string name="detalhe_compartilhar_copiar_cta">Copiar o texto</string>
+    <string name="detalhe_compartilhar_copiado_confirmacao">Pronto para enviar</string>
+    <string name="detalhe_compartilhar_fechar_cta">Fechar</string>
     <string name="desdobramentos_titulo">Desdobramentos</string>
     <string name="desdobramentos_explicacao">O fechamento de %1$d dezenas não é uma aposta só. Ele vira todas as combinações possíveis de 15 dentro dessas %1$d dezenas.</string>
     <string name="desdobramentos_jogos_titulo">Jogos</string>

@@ -4,10 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import com.trevo.app.MainDispatcherRule
 import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.app.preferencias.FakePreferenciasRepository
+import com.trevo.app.resultado.FakeResultadoRepository
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.identidade.Signo
 import com.trevo.core.engine.palpite.Palpite
 import com.trevo.core.engine.palpite.PalpiteGenerator
+import com.trevo.core.engine.resultado.OrigemDoResultado
+import com.trevo.core.engine.resultado.Resultado
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -45,11 +48,13 @@ class DetalheViewModelTest {
         palpiteId: Long,
         repository: FakePalpiteRepository = FakePalpiteRepository(RELOGIO_FIXO),
         preferenciasRepository: FakePreferenciasRepository = FakePreferenciasRepository(),
+        resultadoRepository: FakeResultadoRepository = FakeResultadoRepository(RELOGIO_FIXO),
         gerador: PalpiteGenerator = PalpiteGenerator(Random(1)),
     ) = DetalheViewModel(
         savedStateHandle = SavedStateHandle(mapOf("palpiteId" to palpiteId)),
         repository = repository,
         preferenciasRepository = preferenciasRepository,
+        resultadoRepository = resultadoRepository,
         gerador = gerador,
         clock = RELOGIO_FIXO,
     )
@@ -283,5 +288,65 @@ class DetalheViewModelTest {
             viewModel.aoConfirmarExclusao()
             advanceUntilIdle()
             assertFalse(viewModel.uiState.value.palpiteExiste)
+        }
+
+    @Test
+    fun abrirFecharECopiarControlamOEstadoDeCompartilhamento() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val id = repository.salvar(palpiteDeExemplo)
+            val viewModel = novoViewModel(palpiteId = id, repository = repository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            viewModel.aoAbrirCompartilharClick()
+            advanceUntilIdle()
+            assertTrue(viewModel.uiState.value.compartilhando)
+            assertFalse(viewModel.uiState.value.copiado)
+
+            viewModel.aoMarcarCopiadoClick()
+            advanceUntilIdle()
+            assertTrue(viewModel.uiState.value.copiado)
+
+            viewModel.aoFecharCompartilharClick()
+            advanceUntilIdle()
+            assertFalse(viewModel.uiState.value.compartilhando)
+            assertFalse(viewModel.uiState.value.copiado)
+        }
+
+    @Test
+    fun semResultadoCasadoComODiaDoPalpiteNumeroDoConcursoFicaNulo() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val id = repository.salvar(palpiteDeExemplo)
+            val viewModel = novoViewModel(palpiteId = id, repository = repository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            assertEquals(null, viewModel.uiState.value.numeroDoConcurso)
+        }
+
+    @Test
+    fun comResultadoCasadoComODiaDoPalpiteExpoeONumeroDoConcurso() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val resultadoRepository = FakeResultadoRepository(RELOGIO_FIXO)
+            val id = repository.salvar(palpiteDeExemplo)
+            resultadoRepository.adicionarResultado(
+                Resultado(
+                    numero = 3457,
+                    dataApuracao = LocalDate.now(RELOGIO_FIXO),
+                    dezenasSorteadas = (1..15).toList(),
+                    faixasDePremio = emptyList(),
+                    acumulado = false,
+                    origem = OrigemDoResultado.API,
+                ),
+            )
+            val viewModel =
+                novoViewModel(palpiteId = id, repository = repository, resultadoRepository = resultadoRepository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            assertEquals(3457, viewModel.uiState.value.numeroDoConcurso)
         }
 }

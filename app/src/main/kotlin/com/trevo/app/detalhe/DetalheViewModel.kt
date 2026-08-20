@@ -7,11 +7,13 @@ import com.trevo.app.home.CUSTO_POR_JOGO
 import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.palpite.PalpiteSalvo
 import com.trevo.core.data.preferencias.PreferenciasRepository
+import com.trevo.core.data.resultado.ResultadoRepository
 import com.trevo.core.engine.crenca.DEZENAS_DA_MOLDURA
 import com.trevo.core.engine.crenca.DadosDeContribuicao
 import com.trevo.core.engine.palpite.PalpiteGenerator
 import com.trevo.core.engine.palpite.coeficienteBinomial
 import com.trevo.core.engine.palpite.probabilidadeDe15Acertos
+import com.trevo.core.engine.resultado.Resultado
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,6 +37,7 @@ class DetalheViewModel
         savedStateHandle: SavedStateHandle,
         private val repository: PalpiteRepository,
         private val preferenciasRepository: PreferenciasRepository,
+        private val resultadoRepository: ResultadoRepository,
         private val gerador: PalpiteGenerator,
         private val clock: Clock,
     ) : ViewModel() {
@@ -44,12 +47,16 @@ class DetalheViewModel
         private val dezenasEmEdicao = MutableStateFlow<Set<Int>>(emptySet())
         private val guardarComoFixasAoSalvar = MutableStateFlow(false)
         private val palpiteParaConfirmarExclusao = MutableStateFlow(false)
+        private val compartilhando = MutableStateFlow(false)
+        private val copiado = MutableStateFlow(false)
 
         private data class EstadoLocal(
             val modoEdicao: Boolean,
             val dezenasEmEdicao: Set<Int>,
             val guardarComoFixasAoSalvar: Boolean,
             val palpiteParaConfirmarExclusao: Boolean,
+            val compartilhando: Boolean,
+            val copiado: Boolean,
         )
 
         private val estadoLocal =
@@ -58,17 +65,19 @@ class DetalheViewModel
                 dezenasEmEdicao,
                 guardarComoFixasAoSalvar,
                 palpiteParaConfirmarExclusao,
-            ) { edicao, dezenas, guardarFixas, confirmarExclusao ->
-                EstadoLocal(edicao, dezenas, guardarFixas, confirmarExclusao)
+                combine(compartilhando, copiado, ::Pair),
+            ) { edicao, dezenas, guardarFixas, confirmarExclusao, share ->
+                EstadoLocal(edicao, dezenas, guardarFixas, confirmarExclusao, share.first, share.second)
             }
 
         val uiState: StateFlow<DetalheUiState> =
             combine(
                 repository.observarPalpitePorId(palpiteId),
                 repository.observarPalpitesDoDia(LocalDate.now(clock), clock.zone),
+                resultadoRepository.observarTodosOsResultados(),
                 estadoLocal,
-            ) { palpite, palpitesDoDia, local ->
-                montarUiState(palpite, palpitesDoDia, local)
+            ) { palpite, palpitesDoDia, resultados, local ->
+                montarUiState(palpite, palpitesDoDia, resultados, local)
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -78,6 +87,7 @@ class DetalheViewModel
         private fun montarUiState(
             palpiteSalvo: PalpiteSalvo?,
             palpitesDoDia: List<PalpiteSalvo>,
+            resultados: List<Resultado>,
             local: EstadoLocal,
         ): DetalheUiState {
             if (palpiteSalvo == null) return DetalheUiState(carregando = false, palpiteExiste = false)
@@ -90,6 +100,10 @@ class DetalheViewModel
             val probabilidade = probabilidadeDe15Acertos(quantidadeDeDezenas)
             val indiceNaLista = palpitesDoDia.indexOfFirst { it.id == palpiteId }
             val numeroDoDia = if (indiceNaLista >= 0) palpitesDoDia.size - indiceNaLista else 0
+            // RF-08.1/08.2 — só existe quando o concurso do dia do palpite já
+            // foi conferido; nunca calculado offline (CLAUDE.md §8).
+            val diaDoPalpite = palpiteSalvo.criadoEm.atZone(clock.zone).toLocalDate()
+            val numeroDoConcurso = resultados.firstOrNull { it.dataApuracao == diaDoPalpite }?.numero
 
             return DetalheUiState(
                 carregando = false,
@@ -114,6 +128,9 @@ class DetalheViewModel
                 modoEdicao = local.modoEdicao,
                 dezenasEmEdicao = local.dezenasEmEdicao,
                 guardarComoFixasAoSalvar = local.guardarComoFixasAoSalvar,
+                numeroDoConcurso = numeroDoConcurso,
+                compartilhando = local.compartilhando,
+                copiado = local.copiado,
             )
         }
 
@@ -210,5 +227,19 @@ class DetalheViewModel
 
         fun aoConfirmarExclusao() {
             viewModelScope.launch { repository.excluir(palpiteId) }
+        }
+
+        fun aoAbrirCompartilharClick() {
+            copiado.value = false
+            compartilhando.value = true
+        }
+
+        fun aoFecharCompartilharClick() {
+            compartilhando.value = false
+            copiado.value = false
+        }
+
+        fun aoMarcarCopiadoClick() {
+            copiado.value = true
         }
     }
