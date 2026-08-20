@@ -1,6 +1,7 @@
 package com.trevo.app.onboarding
 
 import com.trevo.app.MainDispatcherRule
+import com.trevo.app.assinatura.FakeAssinaturaRepository
 import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.app.preferencias.FakePreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
@@ -37,6 +38,7 @@ class CrencasViewModelTest {
             validadorDeNascimento = ValidadorDataNascimento(RELOGIO_FIXO),
             repository = FakePalpiteRepository(RELOGIO_FIXO),
             preferenciasRepository = FakePreferenciasRepository(),
+            assinaturaRepository = FakeAssinaturaRepository(),
             clock = RELOGIO_FIXO,
         )
 
@@ -169,6 +171,7 @@ class CrencasViewModelTest {
                     validadorDeNascimento = ValidadorDataNascimento(RELOGIO_FIXO),
                     repository = FakePalpiteRepository(RELOGIO_FIXO),
                     preferenciasRepository = preferencias,
+                    assinaturaRepository = FakeAssinaturaRepository(),
                     clock = RELOGIO_FIXO,
                 )
             viewModel.aoTocarCrenca(Crenca.SIGNO)

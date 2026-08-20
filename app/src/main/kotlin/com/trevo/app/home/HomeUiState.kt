@@ -46,8 +46,13 @@ data class HomeUiState(
     // pro modo padrão. RF-11.2: só as crenças filtradas por `modoSelecionado`
     // entram no próximo palpite gerado por aqui.
     val modoSelecionado: ModoDeGeracao = ModoDeGeracao.MISTICO,
+    // RF-09.1/RF-09.2/RF-03.9
+    val isPro: Boolean = false,
+    val palpitesGratisRestantesHoje: Int = 1,
 ) {
     val totalDeJogos: Int get() = palpitesHoje.size
 
     val custoTotal: BigDecimal get() = CUSTO_POR_JOGO.multiply(BigDecimal(totalDeJogos))
+
+    val semPalpiteGratisHoje: Boolean get() = !isPro && palpitesGratisRestantesHoje <= 0
 }

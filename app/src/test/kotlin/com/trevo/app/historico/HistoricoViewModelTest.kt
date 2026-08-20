@@ -1,6 +1,7 @@
 package com.trevo.app.historico
 
 import com.trevo.app.MainDispatcherRule
+import com.trevo.app.assinatura.FakeAssinaturaRepository
 import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.app.resultado.FakeResultadoRepository
 import com.trevo.core.engine.crenca.Crenca
@@ -62,9 +63,11 @@ class HistoricoViewModelTest {
     private fun novoViewModel(
         palpiteRepository: FakePalpiteRepository,
         resultadoRepository: FakeResultadoRepository,
+        assinaturaRepository: FakeAssinaturaRepository = FakeAssinaturaRepository(),
     ) = HistoricoViewModel(
         palpiteRepository = palpiteRepository,
         resultadoRepository = resultadoRepository,
+        assinaturaRepository = assinaturaRepository,
         clock = RELOGIO_HOJE,
     )
 
@@ -135,25 +138,29 @@ class HistoricoViewModelTest {
             assertEquals(0, estado.retornoPercentual)
         }
 
+    // RF-06.6: paginação além dos 3 concursos só existe pra quem é Pro — sem
+    // isso, o grátis nunca veria "ver mais" de verdade.
+    private fun salvarCincoConcursos(
+        palpiteRepository: FakePalpiteRepository,
+        resultadoRepository: FakeResultadoRepository,
+    ) {
+        (1..5).forEach { deslocamento ->
+            val dia = LocalDate.of(2026, 8, 17).minusDays(deslocamento.toLong())
+            val criadoEm = dia.atStartOfDay(ZONA).plusHours(12).toInstant()
+            palpiteRepository.salvarComData(palpiteDeExemplo((1..15).toList()), criadoEm)
+            resultadoRepository.adicionarResultado(resultadoDoDia(dia, (1..15).toList(), numero = 3450 + deslocamento))
+        }
+    }
+
     @Test
-    fun paginacaoRevelaTresPorVezEAoVerMaisAumentaEmTres() =
+    fun paginacaoRevelaTresPorVezEAoVerMaisAumentaEmTresParaAssinantePro() =
         runTest {
             val palpiteRepository = FakePalpiteRepository(RELOGIO_HOJE)
             val resultadoRepository = FakeResultadoRepository(RELOGIO_HOJE)
-            (1..5).forEach { deslocamento ->
-                val dia = LocalDate.of(2026, 8, 17).minusDays(deslocamento.toLong())
-                val criadoEm = dia.atStartOfDay(ZONA).plusHours(12).toInstant()
-                palpiteRepository.salvarComData(palpiteDeExemplo((1..15).toList()), criadoEm)
-                resultadoRepository.adicionarResultado(
-                    resultadoDoDia(
-                        dia,
-                        (1..15).toList(),
-                        numero =
-                            3450 + deslocamento,
-                    ),
-                )
-            }
-            val viewModel = novoViewModel(palpiteRepository, resultadoRepository)
+            salvarCincoConcursos(palpiteRepository, resultadoRepository)
+            val assinatura = FakeAssinaturaRepository()
+            assinatura.definirAssinante("trevo_pro_anual")
+            val viewModel = novoViewModel(palpiteRepository, resultadoRepository, assinatura)
             backgroundScope.launch { viewModel.uiState.collect {} }
             advanceUntilIdle()
 
@@ -169,5 +176,24 @@ class HistoricoViewModelTest {
             estado = viewModel.uiState.value as HistoricoUiState.ComDados
             assertEquals(5, estado.concursosRevelados.size)
             assertTrue(!estado.temMaisConcursos)
+        }
+
+    @Test
+    fun semSerProNuncaVeMaisQueOsTresConcursosMaisRecentes() =
+        runTest {
+            val palpiteRepository = FakePalpiteRepository(RELOGIO_HOJE)
+            val resultadoRepository = FakeResultadoRepository(RELOGIO_HOJE)
+            salvarCincoConcursos(palpiteRepository, resultadoRepository)
+            val viewModel = novoViewModel(palpiteRepository, resultadoRepository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            viewModel.aoVerMaisClick()
+            advanceUntilIdle()
+
+            val estado = viewModel.uiState.value as HistoricoUiState.ComDados
+            assertEquals(3, estado.concursosRevelados.size)
+            assertTrue(!estado.temMaisConcursos)
+            assertTrue(estado.maisConcursosSoNoPro)
         }
 }

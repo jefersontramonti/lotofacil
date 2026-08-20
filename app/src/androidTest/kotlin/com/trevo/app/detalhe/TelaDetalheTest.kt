@@ -349,6 +349,20 @@ class TelaDetalheTest {
     }
 
     @Test
+    fun semIsProOSeletorDeFechamentoMostraOsTamanhosMaioresBloqueados() {
+        mostrarTelaDetalhe(uiState = estadoDeExemplo.copy(isPro = false))
+
+        composeTestRule.onNodeWithText("16 🔒").assertIsDisplayed()
+    }
+
+    @Test
+    fun comIsProOSeletorDeFechamentoDestravaOsTamanhosMaiores() {
+        mostrarTelaDetalhe(uiState = estadoDeExemplo.copy(isPro = true))
+
+        composeTestRule.onNodeWithText("16").assertIsDisplayed()
+    }
+
+    @Test
     fun comFechamentoAcimaDe15ExibeOLinkDeDesdobramentosEDisparaOCallback() {
         var abriu = false
         val estadoComFechamentoMaior = estadoDeExemplo.copy(quantidadeDeDezenas = 18, podeVerDesdobramentos = true)

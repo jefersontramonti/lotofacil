@@ -55,6 +55,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.trevo.app.R
+import com.trevo.app.assinatura.nomeDoPlano
 import com.trevo.core.engine.identidade.EdicaoDataNascimento
 import com.trevo.core.engine.identidade.ErroDataNascimento
 import com.trevo.core.engine.identidade.Signo
@@ -89,6 +90,7 @@ fun TelaPerfil(
     onAlternarLembreteFechamento: (Boolean) -> Unit,
     onEscolherHorarioLembrete: (LocalTime) -> Unit,
     onAlternarNotificacaoResultado: (Boolean) -> Unit,
+    onAssinaturaClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var mostrarDialogoDeHorario by remember { mutableStateOf(false) }
@@ -239,15 +241,26 @@ fun TelaPerfil(
 
             Kicker(texto = stringResource(id = R.string.perfil_assinatura_titulo))
 
-            // RF-07.8 é fase 3 (CLAUDE.md §11/Requisitos) e depende do Google
-            // Play Billing (regra inviolável 4) — ainda não existe no app.
-            // O cartão mostra o único estado real hoje (grátis); o toque não
-            // navega para lugar nenhum ainda.
+            // RF-07.8/RF-09.6 — estado real, derivado do Billing
+            // (AssinaturaRepository). Grátis abre o paywall; Pro abre a
+            // gestão da assinatura na Play Store (RF-09.7 é restaurar, não
+            // gerenciar — ações diferentes, ambas fora do app).
+            val produtoId = uiState.productIdDaAssinatura
+            val tituloAssinaturaId =
+                if (uiState.isPro) R.string.perfil_assinatura_pro_titulo else R.string.perfil_assinatura_gratuito_titulo
             CartaoDeNavegacao(
                 icone = null,
-                titulo = stringResource(id = R.string.perfil_assinatura_gratuito_titulo),
-                descricao = stringResource(id = R.string.perfil_assinatura_gratuito_descricao),
-                onClick = {},
+                titulo = stringResource(id = tituloAssinaturaId),
+                descricao =
+                    if (uiState.isPro && produtoId != null) {
+                        stringResource(
+                            id = R.string.perfil_assinatura_pro_descricao,
+                            stringResource(id = nomeDoPlano(produtoId)),
+                        )
+                    } else {
+                        stringResource(id = R.string.perfil_assinatura_gratuito_descricao)
+                    },
+                onClick = onAssinaturaClick,
                 testTag = TAG_CARTAO_ASSINATURA,
             )
         }

@@ -1,12 +1,15 @@
 package com.trevo.app.navegacao
 
 import android.Manifest
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,6 +32,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.trevo.app.R
+import com.trevo.app.assinatura.PaywallViewModel
+import com.trevo.app.assinatura.TelaPaywall
 import com.trevo.app.conferencia.ConferenciaViewModel
 import com.trevo.app.conferencia.TelaConferencia
 import com.trevo.app.detalhe.DesdobramentosViewModel
@@ -40,6 +45,7 @@ import com.trevo.app.geracao.TelaGerando
 import com.trevo.app.geracao.movimentoReduzidoAtivado
 import com.trevo.app.historico.HistoricoViewModel
 import com.trevo.app.historico.TelaHistorico
+import com.trevo.app.home.AnuncioRecompensadoManager
 import com.trevo.app.home.HomeViewModel
 import com.trevo.app.home.TelaHome
 import com.trevo.app.onboarding.CrencasViewModel
@@ -108,9 +114,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 TelaCrencas(
                     uiState = uiState,
                     onCrencaClick = viewModel::aoTocarCrenca,
-                    onCrencaBloqueadaClick = {
-                        // RF-01.8/RF-09 (paywall) registram o destino aqui
-                    },
+                    onCrencaBloqueadaClick = { navController.navigate(Rotas.PAYWALL) },
                     onVoltarClick = { navController.popBackStack() },
                     onContinuarClick = {
                         // O palpite é gerado e salvo (assíncrono — ver
@@ -150,6 +154,12 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
             composable(Rotas.HOME) {
                 val viewModel: HomeViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsState()
+                val context = LocalContext.current
+                // RF-09.2 — sem Hilt de propósito (ver AnuncioRecompensadoManager);
+                // `remember` na própria rota mantém o anúncio pré-carregado vivo
+                // entre recomposições da Home, sem sobreviver à navegação pra fora.
+                val gerenciadorDeAnuncio = remember { AnuncioRecompensadoManager() }
+                LaunchedEffect(Unit) { gerenciadorDeAnuncio.carregar(context) }
 
                 TelaHome(
                     uiState = uiState,
@@ -165,12 +175,24 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onCtaPrincipalClick = {
                         // RF-11.3 — só o modo Destino abre o ritual; Místico e
                         // Cientista geram direto por HomeViewModel.aoGerarClick.
+                        // RF-09.1 — este CTA só é renderizado quando ainda há
+                        // palpite grátis (ou é Pro), ver TelaHome.SecaoModoDeGeracao.
                         if (uiState.modoSelecionado == ModoDeGeracao.DESTINO) {
                             navController.navigate(Rotas.RITUAL)
                         } else {
                             viewModel.aoGerarClick()
                         }
                     },
+                    onAssistirAnuncioClick = {
+                        context.comoActivity()?.let { activity ->
+                            gerenciadorDeAnuncio.exibir(
+                                activity = activity,
+                                aoGanharRecompensa = viewModel::aoAnuncioRecompensado,
+                                aoFechar = { gerenciadorDeAnuncio.carregar(context) },
+                            )
+                        }
+                    },
+                    onAssinarClick = { navController.navigate(Rotas.PAYWALL) },
                 )
             }
             composable(Rotas.RITUAL) {
@@ -193,9 +215,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onRevelacaoTerminou = viewModel::aoRevelacaoTerminou,
                     onRefazerClick = viewModel::aoRefazerRitualClick,
                     onEscolherTamanhoClick = viewModel::aoEscolherTamanho,
-                    onTamanhoBloqueadoClick = {
-                        // RF-01.8/RF-09 (paywall) registram o destino aqui
-                    },
+                    onTamanhoBloqueadoClick = { navController.navigate(Rotas.PAYWALL) },
                     onMontarPalpiteClick = viewModel::aoMontarPalpiteClick,
                     movimentoReduzido = movimentoReduzidoAtivado(context),
                 )
@@ -220,6 +240,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 TelaHistorico(
                     uiState = uiState,
                     onVerMaisClick = viewModel::aoVerMaisClick,
+                    onAssinarClick = { navController.navigate(Rotas.PAYWALL) },
                 )
             }
             composable(Rotas.PERFIL) {
@@ -257,6 +278,17 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onAlternarLembreteFechamento = viewModel::aoAlternarLembreteFechamento,
                     onEscolherHorarioLembrete = viewModel::aoEscolherHorarioLembrete,
                     onAlternarNotificacaoResultado = viewModel::aoAlternarNotificacaoResultado,
+                    onAssinaturaClick = {
+                        // RF-07.8/RF-09.7 — gerenciar (cancelar/trocar plano) é
+                        // sempre na Play Store, nunca dentro do app; grátis abre
+                        // o paywall igual aos outros pontos de entrada.
+                        val produtoId = uiState.productIdDaAssinatura
+                        if (uiState.isPro && produtoId != null) {
+                            abrirGerenciamentoDaAssinatura(context, produtoId)
+                        } else {
+                            navController.navigate(Rotas.PAYWALL)
+                        }
+                    },
                 )
             }
             composable(Rotas.PERFIL_CRENCAS) {
@@ -266,9 +298,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 TelaCrencas(
                     uiState = uiState,
                     onCrencaClick = viewModel::aoTocarCrenca,
-                    onCrencaBloqueadaClick = {
-                        // RF-01.8/RF-09 (paywall) registram o destino aqui
-                    },
+                    onCrencaBloqueadaClick = { navController.navigate(Rotas.PAYWALL) },
                     onVoltarClick = { navController.popBackStack() },
                     onContinuarClick = {
                         viewModel.aoSalvarClick()
@@ -324,6 +354,20 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onVoltarClick = { navController.popBackStack() },
                 )
             }
+            composable(Rotas.PAYWALL) {
+                val viewModel: PaywallViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsState()
+                val context = LocalContext.current
+
+                TelaPaywall(
+                    uiState = uiState,
+                    onFecharClick = { navController.popBackStack() },
+                    onEscolherPlanoClick = viewModel::aoEscolherPlano,
+                    onComecarTesteClick = {
+                        context.comoActivity()?.let { activity -> viewModel.aoComecarTesteClick(activity) }
+                    },
+                )
+            }
         }
     }
 }
@@ -359,4 +403,28 @@ private fun copiarParaAreaDeTransferencia(
 ) {
     val clipboard = context.getSystemService(ClipboardManager::class.java)
     clipboard.setPrimaryClip(ClipData.newPlainText(mensagem, mensagem))
+}
+
+// RF-09.2/09.4/09.7 — comprar e mostrar anúncio exigem Activity (não só
+// Context) pro BillingClient/AdMob; LocalContext.current dentro do próprio
+// setContent da Activity já É a Activity, mas desembrulha ContextWrapper
+// pra não depender disso silenciosamente.
+private tailrec fun Context.comoActivity(): Activity? =
+    when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.comoActivity()
+        else -> null
+    }
+
+// RF-07.8/RF-09.7 — gerenciar/cancelar assinatura é sempre na Play Store,
+// nunca dentro do app (nenhuma via de pagamento própria, CLAUDE.md §1).
+private fun abrirGerenciamentoDaAssinatura(
+    context: Context,
+    productId: String,
+) {
+    val uri =
+        Uri.parse(
+            "https://play.google.com/store/account/subscriptions?sku=$productId&package=${context.packageName}",
+        )
+    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
 }

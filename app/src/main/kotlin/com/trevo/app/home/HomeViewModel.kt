@@ -2,6 +2,7 @@ package com.trevo.app.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trevo.core.data.assinatura.AssinaturaRepository
 import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.palpite.PalpiteSalvo
 import com.trevo.core.data.preferencias.PerfilSalvo
@@ -42,6 +43,7 @@ class HomeViewModel
     constructor(
         private val repository: PalpiteRepository,
         private val preferenciasRepository: PreferenciasRepository,
+        private val assinaturaRepository: AssinaturaRepository,
         private val gerador: PalpiteGenerator,
         private val clock: Clock,
     ) : ViewModel() {
@@ -74,9 +76,14 @@ class HomeViewModel
                 repository.observarPalpitesDoDia(LocalDate.now(clock), clock.zone),
                 preferenciasRepository.observarPerfil(),
                 preferenciasRepository.observarGrupoDoSonhoDeHoje(LocalDate.now(clock)),
+                combine(
+                    assinaturaRepository.observarIsPro(),
+                    preferenciasRepository.observarPalpitesGratisRestantesHoje(LocalDate.now(clock)),
+                    ::Pair,
+                ),
                 estadoLocal,
-            ) { palpites, perfil, grupoConfirmado, local ->
-                montarUiState(palpites, perfil, grupoConfirmado, local)
+            ) { palpites, perfil, grupoConfirmado, proELimite, local ->
+                montarUiState(palpites, perfil, grupoConfirmado, proELimite.first, proELimite.second, local)
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -87,6 +94,8 @@ class HomeViewModel
             palpites: List<PalpiteSalvo>,
             perfil: PerfilSalvo?,
             grupoConfirmado: Int?,
+            isPro: Boolean,
+            palpitesGratisRestantesHoje: Int,
             local: EstadoLocal,
         ): HomeUiState {
             val hoje = LocalDate.now(clock)
@@ -105,6 +114,8 @@ class HomeViewModel
                 grupoDoSonhoConfirmadoHoje = grupoConfirmado,
                 grupoAbertoNoDialog = local.numeroDoGrupoAberto?.let { grupoDoBichoDeNumero(it) },
                 modoSelecionado = local.modo,
+                isPro = isPro,
+                palpitesGratisRestantesHoje = palpitesGratisRestantesHoje,
             )
         }
 
@@ -173,10 +184,20 @@ class HomeViewModel
         // RF-11.1/RF-11.2/RF-11.3 — Místico e Cientista geram direto por
         // aqui; Destino troca este botão pelo ritual (ver TrevoNavHost), que
         // chama PalpiteRepository.salvar diretamente ao final, não este método.
+        // RF-09.1 — a UI (TelaHome) só mostra este CTA quando
+        // `!uiState.semPalpiteGratisHoje`; o guard abaixo é defensivo contra
+        // um clique com estado desatualizado, mesmo padrão de
+        // DetalheViewModel.aoSalvarEdicao.
         fun aoGerarClick() {
             viewModelScope.launch {
                 val perfil = preferenciasRepository.observarPerfil().first() ?: return@launch
                 val hoje = LocalDate.now(clock)
+                val isPro = assinaturaRepository.observarIsPro().first()
+                if (!isPro &&
+                    preferenciasRepository.observarPalpitesGratisRestantesHoje(hoje).first() <= 0
+                ) {
+                    return@launch
+                }
                 val grupoDoSonho = preferenciasRepository.observarGrupoDoSonhoDeHoje(hoje).first()
                 val dados =
                     DadosDeContribuicao(
@@ -194,6 +215,13 @@ class HomeViewModel
                         modo = modo,
                     )
                 repository.salvar(palpite)
+                if (!isPro) preferenciasRepository.registrarPalpiteGratisUsado(hoje)
             }
+        }
+
+        // RF-09.2 — chamado depois que AnuncioRecompensadoManager confirma a
+        // recompensa (usuário assistiu até o fim); nunca antes.
+        fun aoAnuncioRecompensado() {
+            viewModelScope.launch { preferenciasRepository.registrarAnuncioAssistido(LocalDate.now(clock)) }
         }
     }

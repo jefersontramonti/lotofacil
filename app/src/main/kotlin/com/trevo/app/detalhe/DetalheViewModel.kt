@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trevo.app.home.CUSTO_POR_JOGO
+import com.trevo.core.data.assinatura.AssinaturaRepository
 import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.palpite.PalpiteSalvo
 import com.trevo.core.data.preferencias.PreferenciasRepository
@@ -38,6 +39,7 @@ class DetalheViewModel
         private val repository: PalpiteRepository,
         private val preferenciasRepository: PreferenciasRepository,
         private val resultadoRepository: ResultadoRepository,
+        private val assinaturaRepository: AssinaturaRepository,
         private val gerador: PalpiteGenerator,
         private val clock: Clock,
     ) : ViewModel() {
@@ -75,9 +77,10 @@ class DetalheViewModel
                 repository.observarPalpitePorId(palpiteId),
                 repository.observarPalpitesDoDia(LocalDate.now(clock), clock.zone),
                 resultadoRepository.observarTodosOsResultados(),
+                assinaturaRepository.observarIsPro(),
                 estadoLocal,
-            ) { palpite, palpitesDoDia, resultados, local ->
-                montarUiState(palpite, palpitesDoDia, resultados, local)
+            ) { palpite, palpitesDoDia, resultados, isPro, local ->
+                montarUiState(palpite, palpitesDoDia, resultados, isPro, local)
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -88,6 +91,7 @@ class DetalheViewModel
             palpiteSalvo: PalpiteSalvo?,
             palpitesDoDia: List<PalpiteSalvo>,
             resultados: List<Resultado>,
+            isPro: Boolean,
             local: EstadoLocal,
         ): DetalheUiState {
             if (palpiteSalvo == null) return DetalheUiState(carregando = false, palpiteExiste = false)
@@ -131,6 +135,7 @@ class DetalheViewModel
                 numeroDoConcurso = numeroDoConcurso,
                 compartilhando = local.compartilhando,
                 copiado = local.copiado,
+                isPro = isPro,
             )
         }
 

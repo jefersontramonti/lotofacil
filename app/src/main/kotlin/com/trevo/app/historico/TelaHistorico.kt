@@ -46,11 +46,13 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 const val TAG_BOTAO_VER_MAIS_HISTORICO = "historico_ver_mais"
+const val TAG_BOTAO_ASSINAR_HISTORICO = "historico_assinar"
 
 @Composable
 fun TelaHistorico(
     uiState: HistoricoUiState,
     onVerMaisClick: () -> Unit,
+    onAssinarClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -73,7 +75,7 @@ fun TelaHistorico(
             when (uiState) {
                 is HistoricoUiState.Carregando -> Unit
                 is HistoricoUiState.Vazio -> EstadoVazio()
-                is HistoricoUiState.ComDados -> ConteudoComDados(uiState, onVerMaisClick)
+                is HistoricoUiState.ComDados -> ConteudoComDados(uiState, onVerMaisClick, onAssinarClick)
             }
         }
     }
@@ -103,6 +105,7 @@ private fun EstadoVazio(modifier: Modifier = Modifier) {
 private fun ConteudoComDados(
     uiState: HistoricoUiState.ComDados,
     onVerMaisClick: () -> Unit,
+    onAssinarClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -152,6 +155,21 @@ private fun ConteudoComDados(
                         .clickable(role = Role.Button, onClick = onVerMaisClick)
                         .padding(12.dp)
                         .testTag(TAG_BOTAO_VER_MAIS_HISTORICO),
+            )
+        }
+
+        if (uiState.maisConcursosSoNoPro) {
+            Text(
+                text = stringResource(id = R.string.historico_mais_concursos_pro_cta),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
+                        .clickable(role = Role.Button, onClick = onAssinarClick)
+                        .padding(12.dp)
+                        .testTag(TAG_BOTAO_ASSINAR_HISTORICO),
             )
         }
     }

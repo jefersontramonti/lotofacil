@@ -3,6 +3,7 @@ package com.trevo.app.historico
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trevo.app.home.CUSTO_POR_JOGO
+import com.trevo.core.data.assinatura.AssinaturaRepository
 import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.palpite.PalpiteSalvo
 import com.trevo.core.data.resultado.ResultadoRepository
@@ -24,12 +25,17 @@ import javax.inject.Inject
 
 private const val CONCURSOS_POR_PAGINA = 3
 
+// RF-06.6 — o grátis nunca vê além dos 3 concursos mais recentes; a
+// paginação (CONCURSOS_POR_PAGINA) só existe pra quem é Pro.
+private const val LIMITE_DE_CONCURSOS_NO_GRATIS = 3
+
 @HiltViewModel
 class HistoricoViewModel
     @Inject
     constructor(
         palpiteRepository: PalpiteRepository,
         resultadoRepository: ResultadoRepository,
+        assinaturaRepository: AssinaturaRepository,
         clock: Clock,
     ) : ViewModel() {
         private val concursosRevelados = MutableStateFlow(CONCURSOS_POR_PAGINA)
@@ -38,9 +44,10 @@ class HistoricoViewModel
             combine(
                 palpiteRepository.observarTodosOsPalpites(),
                 resultadoRepository.observarTodosOsResultados(),
+                assinaturaRepository.observarIsPro(),
                 concursosRevelados,
-            ) { palpites, resultados, revelados ->
-                montarUiState(palpites, resultados, revelados, clock.zone)
+            ) { palpites, resultados, isPro, revelados ->
+                montarUiState(palpites, resultados, isPro, revelados, clock.zone)
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -54,13 +61,14 @@ class HistoricoViewModel
         private fun montarUiState(
             palpites: List<PalpiteSalvo>,
             resultados: List<Resultado>,
+            isPro: Boolean,
             revelados: Int,
             zona: ZoneId,
         ): HistoricoUiState {
             // RF-06.1 — só concursos já conferidos: um dia de palpites sem
             // resultado casado ainda não sorteou/foi buscado, e CLAUDE.md
             // §8 proíbe inventar essa associação.
-            val concursos =
+            val todosOsConcursos =
                 palpites
                     .groupBy { it.criadoEm.atZone(zona).toLocalDate() }
                     .mapNotNull { (dia, palpitesDoDia) ->
@@ -68,7 +76,13 @@ class HistoricoViewModel
                         montarConcurso(dia, palpitesDoDia, resultado)
                     }.sortedByDescending { it.data }
 
-            if (concursos.isEmpty()) return HistoricoUiState.Vazio
+            if (todosOsConcursos.isEmpty()) return HistoricoUiState.Vazio
+
+            // As estatísticas refletem só o que o grátis efetivamente vê —
+            // mostrar um total agregando concursos escondidos pelo limite
+            // confundiria mais do que ajudaria.
+            val concursos = if (isPro) todosOsConcursos else todosOsConcursos.take(LIMITE_DE_CONCURSOS_NO_GRATIS)
+            val revelacaoEfetiva = if (isPro) revelados else LIMITE_DE_CONCURSOS_NO_GRATIS
 
             val todosOsPalpites = concursos.flatMap { it.palpites }
             val totalGasto = concursos.sumCustoTotal()
@@ -96,9 +110,11 @@ class HistoricoViewModel
                     (15 downTo 11).map { acertos ->
                         FaixaHistoricoUiState(acertos, todosOsPalpites.count { it.acertos == acertos })
                     },
-                concursosRevelados = concursos.take(revelados),
-                temMaisConcursos = concursos.size > revelados,
-                quantidadeDeConcursosRestantes = (concursos.size - revelados).coerceAtLeast(0),
+                concursosRevelados = concursos.take(revelacaoEfetiva),
+                temMaisConcursos = isPro && concursos.size > revelacaoEfetiva,
+                quantidadeDeConcursosRestantes = if (isPro) (concursos.size - revelacaoEfetiva).coerceAtLeast(0) else 0,
+                isPro = isPro,
+                maisConcursosSoNoPro = !isPro && todosOsConcursos.size > LIMITE_DE_CONCURSOS_NO_GRATIS,
             )
         }
 

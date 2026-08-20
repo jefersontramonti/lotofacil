@@ -97,4 +97,44 @@ class PreferenciasRepositoryTest {
 
             assertNull(repositorio.observarGrupoDoSonhoDeHoje(hoje).first())
         }
+
+    @Test
+    fun semUsoNenhumRestamOPalpiteGratisDoDia() =
+        runTest {
+            val hoje = LocalDate.of(2026, 8, 17)
+
+            assertEquals(1, repositorio.observarPalpitesGratisRestantesHoje(hoje).first())
+        }
+
+    @Test
+    fun aoUsarOPalpiteGratisNaoSobraNenhumRestante() =
+        runTest {
+            val hoje = LocalDate.of(2026, 8, 17)
+
+            repositorio.registrarPalpiteGratisUsado(hoje)
+
+            assertEquals(0, repositorio.observarPalpitesGratisRestantesHoje(hoje).first())
+        }
+
+    @Test
+    fun anuncioAssistidoCreditaMaisUmPalpiteNoDia() =
+        runTest {
+            val hoje = LocalDate.of(2026, 8, 17)
+
+            repositorio.registrarPalpiteGratisUsado(hoje)
+            repositorio.registrarAnuncioAssistido(hoje)
+
+            assertEquals(1, repositorio.observarPalpitesGratisRestantesHoje(hoje).first())
+        }
+
+    @Test
+    fun usoRegistradoOntemNaoAfetaOLimiteDeHoje() =
+        runTest {
+            val ontem = LocalDate.of(2026, 8, 16)
+            val hoje = LocalDate.of(2026, 8, 17)
+
+            repositorio.registrarPalpiteGratisUsado(ontem)
+
+            assertEquals(1, repositorio.observarPalpitesGratisRestantesHoje(hoje).first())
+        }
 }

@@ -54,6 +54,7 @@ import com.trevo.core.engine.crenca.GrupoDoBicho
 import com.trevo.core.engine.crenca.ModoDeGeracao
 import com.trevo.core.engine.crenca.dezenasDoGrupoDoBicho
 import com.trevo.core.engine.identidade.Signo
+import com.trevo.core.ui.BotaoPrimario
 import com.trevo.core.ui.NocturneAccent
 import com.trevo.core.ui.NocturneOutline
 import com.trevo.core.ui.NocturneSurface
@@ -70,6 +71,8 @@ fun tagModo(modo: ModoDeGeracao): String = "modo_${modo.name.lowercase()}"
 
 const val TAG_BOTAO_VER_GRUPOS = "botao_ver_todos_os_grupos"
 const val TAG_BOTAO_CTA_PRINCIPAL = "home_cta_principal"
+const val TAG_BOTAO_ASSISTIR_ANUNCIO = "home_assistir_anuncio"
+const val TAG_BOTAO_ASSINAR = "home_assinar"
 
 @Composable
 fun TelaHome(
@@ -84,6 +87,8 @@ fun TelaHome(
     onConfirmarSonhoClick: (Int) -> Unit = {},
     onSelecionarModoClick: (ModoDeGeracao) -> Unit = {},
     onCtaPrincipalClick: () -> Unit = {},
+    onAssistirAnuncioClick: () -> Unit = {},
+    onAssinarClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -128,9 +133,11 @@ fun TelaHome(
                 style = MaterialTheme.typography.bodySmall,
             )
             SecaoModoDeGeracao(
-                modoSelecionado = uiState.modoSelecionado,
+                uiState = uiState,
                 onSelecionarModoClick = onSelecionarModoClick,
                 onCtaPrincipalClick = onCtaPrincipalClick,
+                onAssistirAnuncioClick = onAssistirAnuncioClick,
+                onAssinarClick = onAssinarClick,
             )
         }
     }
@@ -435,45 +442,87 @@ private fun EstadoVazio(modifier: Modifier = Modifier) {
 // que troca de "Gerar palpite" pra "Começar o ritual" no Destino (wireframe 1d).
 @Composable
 private fun SecaoModoDeGeracao(
-    modoSelecionado: ModoDeGeracao,
+    uiState: HomeUiState,
     onSelecionarModoClick: (ModoDeGeracao) -> Unit,
     onCtaPrincipalClick: () -> Unit,
+    onAssistirAnuncioClick: () -> Unit,
+    onAssinarClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            ModoDeGeracao.entries.forEach { modo ->
-                ChipDeModo(
-                    modo = modo,
-                    selecionado = modo == modoSelecionado,
-                    onClick = { onSelecionarModoClick(modo) },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
-        Text(text = stringResource(id = descricaoDoModo(modoSelecionado)), style = MaterialTheme.typography.bodySmall)
-        val textoCta =
-            if (modoSelecionado ==
-                ModoDeGeracao.DESTINO
-            ) {
-                R.string.home_comecar_ritual_cta
-            } else {
-                R.string.home_gerar_cta
-            }
+        // RF-03.9 — sempre visível, Pro ou grátis.
         Text(
-            text = stringResource(id = textoCta),
-            style = MaterialTheme.typography.titleSmall,
-            textAlign = TextAlign.Center,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
-                    .clickable(role = Role.Button, onClick = onCtaPrincipalClick)
-                    .testTag(TAG_BOTAO_CTA_PRINCIPAL)
-                    .padding(14.dp),
+            text = textoRestantes(uiState.isPro, uiState.palpitesGratisRestantesHoje),
+            style = MaterialTheme.typography.bodySmall,
         )
+        if (uiState.semPalpiteGratisHoje) {
+            // RF-09.1/09.2 — wireframe 1e: sem grátis restante, o CTA principal
+            // vira o anúncio recompensado; assinar é a saída secundária.
+            BotaoPrimario(
+                texto = stringResource(id = R.string.home_assistir_anuncio_cta),
+                onClick = onAssistirAnuncioClick,
+                modifier = Modifier.fillMaxWidth().testTag(TAG_BOTAO_ASSISTIR_ANUNCIO),
+            )
+            Text(
+                text = stringResource(id = R.string.home_assinar_cta),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(role = Role.Button, onClick = onAssinarClick)
+                        .testTag(TAG_BOTAO_ASSINAR)
+                        .padding(10.dp),
+            )
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                ModoDeGeracao.entries.forEach { modo ->
+                    ChipDeModo(
+                        modo = modo,
+                        selecionado = modo == uiState.modoSelecionado,
+                        onClick = { onSelecionarModoClick(modo) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+            Text(
+                text = stringResource(id = descricaoDoModo(uiState.modoSelecionado)),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            val textoCta =
+                if (uiState.modoSelecionado ==
+                    ModoDeGeracao.DESTINO
+                ) {
+                    R.string.home_comecar_ritual_cta
+                } else {
+                    R.string.home_gerar_cta
+                }
+            Text(
+                text = stringResource(id = textoCta),
+                style = MaterialTheme.typography.titleSmall,
+                textAlign = TextAlign.Center,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
+                        .clickable(role = Role.Button, onClick = onCtaPrincipalClick)
+                        .testTag(TAG_BOTAO_CTA_PRINCIPAL)
+                        .padding(14.dp),
+            )
+        }
     }
 }
+
+@Composable
+private fun textoRestantes(
+    isPro: Boolean,
+    restantes: Int,
+): String =
+    if (isPro) {
+        stringResource(id = R.string.home_restantes_pro)
+    } else {
+        pluralStringResource(id = R.plurals.home_restantes_gratis, count = restantes, restantes)
+    }
 
 @Composable
 private fun ChipDeModo(

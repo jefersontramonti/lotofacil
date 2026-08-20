@@ -2,6 +2,7 @@ package com.trevo.app.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trevo.core.data.assinatura.AssinaturaRepository
 import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.preferencias.PreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
@@ -27,10 +28,19 @@ class CrencasViewModel
         private val validadorDeNascimento: ValidadorDataNascimento,
         private val repository: PalpiteRepository,
         private val preferenciasRepository: PreferenciasRepository,
+        private val assinaturaRepository: AssinaturaRepository,
         private val clock: Clock,
     ) : ViewModel() {
         private val estado = MutableStateFlow(CrencasUiState())
         val uiState: StateFlow<CrencasUiState> = estado.asStateFlow()
+
+        init {
+            viewModelScope.launch {
+                assinaturaRepository.observarIsPro().collect { isPro ->
+                    estado.value = estado.value.copy(isPro = isPro)
+                }
+            }
+        }
 
         fun aoTocarCrenca(crenca: Crenca) {
             val selecaoAtual = estado.value.selecionadas

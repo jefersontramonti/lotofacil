@@ -42,6 +42,8 @@ data class DetalheUiState(
     val numeroDoConcurso: Int? = null,
     val compartilhando: Boolean = false,
     val copiado: Boolean = false,
+    // RF-09 — libera 16/18/20 no seletor de fechamento (RF-02.8).
+    val isPro: Boolean = false,
 ) {
     val faltamOuSobram: Int get() = quantidadeDeDezenas - dezenasEmEdicao.size
 }

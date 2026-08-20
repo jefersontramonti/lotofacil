@@ -2,6 +2,8 @@ package com.trevo.app.perfil
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trevo.core.data.assinatura.AssinaturaRepository
+import com.trevo.core.data.assinatura.EstadoDaAssinatura
 import com.trevo.core.data.notificacoes.NotificacoesScheduler
 import com.trevo.core.data.preferencias.PerfilSalvo
 import com.trevo.core.data.preferencias.PreferenciasDeNotificacao
@@ -49,6 +51,7 @@ class PerfilViewModel
         private val scheduler: NotificacoesScheduler,
         private val validador: ValidadorDataNascimento,
         private val verificador: VerificadorDeIdade,
+        private val assinaturaRepository: AssinaturaRepository,
     ) : ViewModel() {
         private val nomeEditado = MutableStateFlow<String?>(null)
         private val nascimentoEditado = MutableStateFlow<String?>(null)
@@ -67,8 +70,13 @@ class PerfilViewModel
         private val estadoLocal = combine(nomeEditado, nascimentoEditado, ::EstadoLocal)
 
         val uiState: StateFlow<PerfilUiState> =
-            combine(perfil, preferenciasDeNotificacao, estadoLocal) { perfilSalvo, notificacoes, local ->
-                montarUiState(perfilSalvo, notificacoes, local)
+            combine(
+                perfil,
+                preferenciasDeNotificacao,
+                assinaturaRepository.observarAssinatura(),
+                estadoLocal,
+            ) { perfilSalvo, notificacoes, assinatura, local ->
+                montarUiState(perfilSalvo, notificacoes, assinatura, local)
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -78,6 +86,7 @@ class PerfilViewModel
         private fun montarUiState(
             perfilSalvo: PerfilSalvo?,
             notificacoes: PreferenciasDeNotificacao,
+            assinatura: EstadoDaAssinatura,
             local: EstadoLocal,
         ): PerfilUiState {
             val nascimentoTexto = local.nascimento ?: perfilSalvo?.nascimento?.format(FORMATO_CAMPO_NASCIMENTO) ?: ""
@@ -96,6 +105,8 @@ class PerfilViewModel
                         HORARIO_FECHAMENTO_DAS_APOSTAS,
                     ),
                 notificacaoResultadoAtiva = notificacoes.notificacaoResultadoAtiva,
+                isPro = assinatura is EstadoDaAssinatura.Assinante,
+                productIdDaAssinatura = (assinatura as? EstadoDaAssinatura.Assinante)?.productId,
             )
         }
 

@@ -36,6 +36,13 @@
                 tools:node="remove" />
         </provider>
 
+        <!-- RF-09.2/09.3: App ID de TESTE do Google (funciona sem conta
+             AdMob). Trocar pelo App ID real do AdMob antes de publicar —
+             ver AnuncioRecompensadoManager para o ad unit id equivalente. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+
     </application>
 
 </manifest>

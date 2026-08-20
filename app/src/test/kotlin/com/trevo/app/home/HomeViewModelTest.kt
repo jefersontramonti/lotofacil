@@ -1,6 +1,7 @@
 package com.trevo.app.home
 
 import com.trevo.app.MainDispatcherRule
+import com.trevo.app.assinatura.FakeAssinaturaRepository
 import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.app.preferencias.FakePreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
@@ -49,7 +50,14 @@ class HomeViewModelTest {
     private fun novoViewModel(
         repository: FakePalpiteRepository = FakePalpiteRepository(RELOGIO_FIXO),
         preferenciasRepository: FakePreferenciasRepository = FakePreferenciasRepository(),
-    ) = HomeViewModel(repository, preferenciasRepository, PalpiteGenerator(Random(1)), RELOGIO_FIXO)
+        assinaturaRepository: FakeAssinaturaRepository = FakeAssinaturaRepository(),
+    ) = HomeViewModel(
+        repository,
+        preferenciasRepository,
+        assinaturaRepository,
+        PalpiteGenerator(Random(1)),
+        RELOGIO_FIXO,
+    )
 
     @Test
     fun estadoComecaSemPalpitesQuandoORepositorioEstaVazio() =
@@ -340,5 +348,74 @@ class HomeViewModelTest {
                     .first()
                     .palpite
             assertTrue(palpiteSalvo.contribuicoes.isEmpty())
+        }
+
+    @Test
+    fun semGratisRestanteEForaDoProAoGerarClickNaoSalvaNada() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val preferencias = FakePreferenciasRepository()
+            preferencias.salvarPerfil("Marlene", null, null, setOf(Crenca.QUENTES))
+            val viewModel = novoViewModel(repository = repository, preferenciasRepository = preferencias)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+            assertEquals(1, viewModel.uiState.value.palpitesHoje.size)
+
+            // Segundo clique no mesmo dia: já usou o único grátis, não é Pro.
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+
+            assertEquals(1, viewModel.uiState.value.palpitesHoje.size)
+            assertEquals(0, viewModel.uiState.value.palpitesGratisRestantesHoje)
+            assertTrue(viewModel.uiState.value.semPalpiteGratisHoje)
+        }
+
+    @Test
+    fun assinanteProGeraVariasVezesNoMesmoDiaSemConsumirONiHumRestante() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val preferencias = FakePreferenciasRepository()
+            val assinatura = FakeAssinaturaRepository()
+            assinatura.definirAssinante("trevo_pro_anual")
+            preferencias.salvarPerfil("Marlene", null, null, setOf(Crenca.QUENTES))
+            val viewModel =
+                novoViewModel(
+                    repository = repository,
+                    preferenciasRepository = preferencias,
+                    assinaturaRepository = assinatura,
+                )
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+
+            assertEquals(2, viewModel.uiState.value.palpitesHoje.size)
+            assertTrue(viewModel.uiState.value.isPro)
+            assertFalse(viewModel.uiState.value.semPalpiteGratisHoje)
+        }
+
+    @Test
+    fun anuncioRecompensadoCreditaUmPalpiteExtraNoDia() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val preferencias = FakePreferenciasRepository()
+            preferencias.salvarPerfil("Marlene", null, null, setOf(Crenca.QUENTES))
+            val viewModel = novoViewModel(repository = repository, preferenciasRepository = preferencias)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+            assertEquals(0, viewModel.uiState.value.palpitesGratisRestantesHoje)
+
+            viewModel.aoAnuncioRecompensado()
+            advanceUntilIdle()
+
+            assertEquals(1, viewModel.uiState.value.palpitesGratisRestantesHoje)
         }
 }

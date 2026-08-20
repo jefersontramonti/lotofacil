@@ -25,4 +25,14 @@ interface PreferenciasRepository {
     suspend fun salvarPreferenciasDeNotificacao(preferencias: PreferenciasDeNotificacao)
 
     fun observarPreferenciasDeNotificacao(): Flow<PreferenciasDeNotificacao>
+
+    // RF-09.1: 1 palpite grátis por dia, reinício à meia-noite no fuso do
+    // aparelho — mesmo padrão de confirmarGrupoDoSonho/observarGrupoDoSonhoDeHoje,
+    // a data salva vs. `hoje` decide o reset, nunca um job/alarme separado.
+    suspend fun registrarPalpiteGratisUsado(hoje: LocalDate)
+
+    // RF-09.2: anúncio recompensado credita mais um palpite no dia.
+    suspend fun registrarAnuncioAssistido(hoje: LocalDate)
+
+    fun observarPalpitesGratisRestantesHoje(hoje: LocalDate): Flow<Int>
 }

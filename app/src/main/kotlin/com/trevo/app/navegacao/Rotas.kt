@@ -11,6 +11,7 @@ object Rotas {
     const val HISTORICO = "historico"
     const val PERFIL = "perfil"
     const val PERFIL_CRENCAS = "perfil_crencas"
+    const val PAYWALL = "paywall"
     const val DETALHE = "detalhe/{palpiteId}"
     const val DESDOBRAMENTOS = "desdobramentos/{palpiteId}"
 

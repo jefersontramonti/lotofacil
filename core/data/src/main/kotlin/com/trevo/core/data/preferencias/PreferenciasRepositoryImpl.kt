@@ -1,6 +1,7 @@
 package com.trevo.core.data.preferencias
 
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -25,6 +26,19 @@ private const val SEPARADOR_CRENCAS = ","
 private val CHAVE_LEMBRETE_FECHAMENTO_ATIVO = booleanPreferencesKey("lembrete_fechamento_ativo")
 private val CHAVE_HORARIO_LEMBRETE_FECHAMENTO = stringPreferencesKey("horario_lembrete_fechamento")
 private val CHAVE_NOTIFICACAO_RESULTADO_ATIVA = booleanPreferencesKey("notificacao_resultado_ativa")
+
+private val CHAVE_LIMITE_DIARIO_DATA = stringPreferencesKey("limite_diario_data_iso")
+private val CHAVE_LIMITE_DIARIO_USADOS = intPreferencesKey("limite_diario_usados")
+private val CHAVE_LIMITE_DIARIO_EXTRAS = intPreferencesKey("limite_diario_extras")
+private const val LIMITE_GRATIS_POR_DIA = 1
+
+private fun MutablePreferences.resetarLimiteSeVirouODia(hoje: LocalDate) {
+    if (this[CHAVE_LIMITE_DIARIO_DATA] != hoje.toString()) {
+        this[CHAVE_LIMITE_DIARIO_DATA] = hoje.toString()
+        this[CHAVE_LIMITE_DIARIO_USADOS] = 0
+        this[CHAVE_LIMITE_DIARIO_EXTRAS] = 0
+    }
+}
 
 class PreferenciasRepositoryImpl
     @Inject
@@ -103,5 +117,30 @@ class PreferenciasRepositoryImpl
                             ?: HORARIO_LEMBRETE_PADRAO,
                     notificacaoResultadoAtiva = armazenadas[CHAVE_NOTIFICACAO_RESULTADO_ATIVA] ?: false,
                 )
+            }
+
+        override suspend fun registrarPalpiteGratisUsado(hoje: LocalDate) {
+            dataStore.edit { preferencias ->
+                preferencias.resetarLimiteSeVirouODia(hoje)
+                preferencias[CHAVE_LIMITE_DIARIO_USADOS] = (preferencias[CHAVE_LIMITE_DIARIO_USADOS] ?: 0) + 1
+            }
+        }
+
+        override suspend fun registrarAnuncioAssistido(hoje: LocalDate) {
+            dataStore.edit { preferencias ->
+                preferencias.resetarLimiteSeVirouODia(hoje)
+                preferencias[CHAVE_LIMITE_DIARIO_EXTRAS] = (preferencias[CHAVE_LIMITE_DIARIO_EXTRAS] ?: 0) + 1
+            }
+        }
+
+        override fun observarPalpitesGratisRestantesHoje(hoje: LocalDate): Flow<Int> =
+            dataStore.data.map { preferencias ->
+                if (preferencias[CHAVE_LIMITE_DIARIO_DATA] != hoje.toString()) {
+                    LIMITE_GRATIS_POR_DIA
+                } else {
+                    val usados = preferencias[CHAVE_LIMITE_DIARIO_USADOS] ?: 0
+                    val extras = preferencias[CHAVE_LIMITE_DIARIO_EXTRAS] ?: 0
+                    (LIMITE_GRATIS_POR_DIA + extras - usados).coerceAtLeast(0)
+                }
             }
     }

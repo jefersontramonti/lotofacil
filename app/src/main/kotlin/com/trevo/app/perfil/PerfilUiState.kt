@@ -17,4 +17,7 @@ data class PerfilUiState(
     // RF-07.5
     val alertaHorarioAposFechamento: Boolean = false,
     val notificacaoResultadoAtiva: Boolean = false,
+    // RF-07.8
+    val isPro: Boolean = false,
+    val productIdDaAssinatura: String? = null,
 )

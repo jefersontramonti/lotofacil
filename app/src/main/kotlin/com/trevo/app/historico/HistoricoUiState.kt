@@ -24,6 +24,10 @@ sealed interface HistoricoUiState {
         val concursosRevelados: List<ConcursoConferidoUiState>,
         val temMaisConcursos: Boolean,
         val quantidadeDeConcursosRestantes: Int,
+        val isPro: Boolean = false,
+        // RF-06.6 — true quando o grátis já mostrou o limite de 3 concursos
+        // mas existem mais concursos conferidos, só visíveis no Pro.
+        val maisConcursosSoNoPro: Boolean = false,
     ) : HistoricoUiState
 }
 

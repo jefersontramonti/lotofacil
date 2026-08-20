@@ -37,10 +37,11 @@ class TelaHistoricoTest {
     private fun mostrarTela(
         uiState: HistoricoUiState,
         onVerMaisClick: () -> Unit = {},
+        onAssinarClick: () -> Unit = {},
     ) {
         composeTestRule.setContent {
             TrevoTheme {
-                TelaHistorico(uiState = uiState, onVerMaisClick = onVerMaisClick)
+                TelaHistorico(uiState = uiState, onVerMaisClick = onVerMaisClick, onAssinarClick = onAssinarClick)
             }
         }
     }
@@ -141,5 +142,24 @@ class TelaHistoricoTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun quandoOGratisAtingeOLimiteExibeOCtaDeAssinarEDisparaOCallback() {
+        var assinou = false
+        mostrarTela(estadoComDados.copy(maisConcursosSoNoPro = true), onAssinarClick = { assinou = true })
+
+        composeTestRule.onNodeWithTag(TAG_BOTAO_ASSINAR_HISTORICO).performClick()
+
+        assertTrue(assinou)
+    }
+
+    @Test
+    fun assinanteProNaoVeOCtaDeAssinar() {
+        mostrarTela(estadoComDados.copy(isPro = true, maisConcursosSoNoPro = false))
+
+        composeTestRule
+            .onAllNodesWithTag(TAG_BOTAO_ASSINAR_HISTORICO)
+            .assertCountEquals(0)
     }
 }

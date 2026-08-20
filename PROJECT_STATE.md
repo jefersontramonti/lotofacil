@@ -16,7 +16,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-01.5 | Calcular signo a partir da data válida; marcador neutro se inválida | M | F1 | concluído |  |
 | RF-01.6 | Impedir avanço do passo com erro de validação | M | F1 | concluído | |
 | RF-01.7 | Apresentar as 12 crenças, seleção múltipla | M | F1 | concluído | |
-| RF-01.8 | Limitar seleção a 3 crenças no grátis, cadeado leva ao paywall | M | F3 | em andamento | limite de 3 e cadeado prontos; toque no cadeado ainda não leva a lugar nenhum (RF-09/paywall não existe) |
+| RF-01.8 | Limitar seleção a 3 crenças no grátis, cadeado leva ao paywall | M | F3 | concluído | `onCrencaBloqueadaClick` (onboarding e edição de crenças no perfil) navega pra `Rotas.PAYWALL`; `CrencasUiState.isPro` agora vem de `AssinaturaRepository.observarIsPro()`, não mais hardcoded |
 | RF-01.9 | Auto-formatar data de nascimento com barras enquanto digita | C | F1 | concluído |  |
 
 ## RF-02 · Motor de geração de palpites
@@ -45,7 +45,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-03.6 | Total de jogos do dia e custo na lotérica | M | F1 | concluído | |
 | RF-03.7 | Estado vazio sem palpites | M | F1 | concluído | |
 | RF-03.8 | Excluir palpite com confirmação (lista e detalhe) | M | F1 | concluído | confirmação em `TelaHome` (lista) e `TelaDetalhe` (detalhe, desde RF-04) — nota anterior estava desatualizada, RF-04 já concluiu antes desta revisão |
-| RF-03.9 | Exibir palpites restantes no dia / ilimitado no Pro | M | F3 | não iniciado | |
+| RF-03.9 | Exibir palpites restantes no dia / ilimitado no Pro | M | F3 | concluído | `HomeUiState.palpitesGratisRestantesHoje`/`isPro`, texto acima do CTA (`home_restantes_gratis`/`home_restantes_pro`), wireframe 1d/1e |
 | RF-03.10 | Tocar grupo abre card com nome, número, leitura, dezenas | M | F1 | concluído | `DialogoCartaoDoSonho`, wireframe 1t |
 | RF-03.11 | Leitura escrita pros 25 grupos, tradição popular | M | F1 | concluído | conteúdo portado do protótipo de referência (`GRUPOS_DO_BICHO`) |
 | RF-03.12 | Confirmar grupo como sonho do dia, indicar já escolhido | M | F1 | concluído | confirmação e persistência (DataStore) prontas; agora alimenta geração real — `HomeViewModel.aoGerarClick`/`RitualViewModel` leem `observarGrupoDoSonhoDeHoje` pro `DadosDeContribuicao` (RF-11) |
@@ -65,7 +65,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-04.7 | Guardar dezenas manuais como fixas permanentes; exibir e limpar | M | F1 | concluído | |
 | RF-04.8 | Refazer o palpite mantendo crenças e fixas | M | F1 | concluído | |
 | RF-04.9 | Qtde de jogos de 15 equivalentes + custo total (fechamento >15) | S | F3 | concluído | `coeficienteBinomial` bate exatamente com `Docs/tabelavalores.md` pros 6 tamanhos oficiais |
-| RF-04.10 | Listar combinações do desdobramento (limitado em tela) | S | F3 | concluído | `combinacoesDe15` (sequence preguiçosa) + `TelaDesdobramentos`, limite de 24. Nenhum palpite real passa de 15 dezenas ainda — Home/Crenças sempre geram 15, e o ritual (RF-11.9) já tem o seletor de fechamento funcional mas com 16/18/20 bloqueados (🔒), que é RF-09/Pro, ainda não existe — então a tela só é alcançável via dados de teste até RF-09 existir |
+| RF-04.10 | Listar combinações do desdobramento (limitado em tela) | S | F3 | concluído | `combinacoesDe15` (sequence preguiçosa) + `TelaDesdobramentos`, limite de 24. Agora alcançável de verdade: RF-09 existe, 16/18/20 destravam com `isPro` real no ritual e no seletor de `TelaDetalhe` |
 
 ## RF-05 · Resultados e conferência
 
@@ -91,7 +91,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-06.3 | Distribuição de faixas 11–15 e melhor resultado | S | F2 | concluído | |
 | RF-06.4 | Paginação incremental ("carregar mais") | M | F2 | concluído | revela 3 concursos por vez, igual ao protótipo — client-side sobre a lista local (todos os concursos já vêm do Room), não paginação de rede |
 | RF-06.5 | Estado vazio sem concurso conferido | M | F2 | concluído | |
-| RF-06.6 | Limitar histórico grátis aos 3 concursos mais recentes | S | F3 | não iniciado | depende do RF-09 (Trevo Pro), que ainda não existe — sem estado "é assinante" pra gatear, igual à pendência já registrada em RF-01.8 |
+| RF-06.6 | Limitar histórico grátis aos 3 concursos mais recentes | S | F3 | concluído | `HistoricoViewModel` corta `concursos`/estatísticas em 3 quando `!isPro` (as estatísticas refletem só o que o grátis vê, nunca um total agregando concurso escondido); `maisConcursosSoNoPro` mostra o CTA de assinar quando há mais concursos além do limite |
 
 ## RF-07 · Perfil e notificações
 
@@ -104,7 +104,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-07.5 | Alertar se horário escolhido ≥ fechamento das apostas | M | F2 | concluído | wireframe 1m e o texto do requisito dizem "19h", mas RF-03.1 já tinha corrigido esse número pra 20h contra `Docs/tabelavalores.md` (fonte oficial: apostas até 20h, sorteio às 21h) — RF-07 segue a correção já aplicada em `TelaHome`, não o número desatualizado do wireframe; mesma razão vale pro aviso de resultado (RF-07.6): o wireframe diz "20h", mas o sorteio só sai às 21h, então o aviso foi pra 21h30 |
 | RF-07.6 | Ligar/desligar notificação de resultado, independente | M | F2 | concluído | `ResultadoSorteioWorker`, horário fixo 21h30 (não configurável, ver nota de RF-07.5); só notifica se `buscarUltimoResultado()` devolver o resultado de hoje — nunca reavisa sobre um concurso já visto (CLAUDE.md §8) |
 | RF-07.7 | Pedir permissão de notificação só ao ativar o primeiro aviso | M | F2 | concluído | evento one-shot do ViewModel (`PerfilEvento.PedirPermissaoDeNotificacao`) disparado só dentro do toggle-liga, nunca num `LaunchedEffect(Unit)` de abertura de tela; `TrevoNavHost` decide se precisa pedir (`ContextCompat.checkSelfPermission`, Android 13+) |
-| RF-07.8 | Exibir estado da assinatura, link para gerenciar na Play Store | M | F3 | não iniciado | depende do RF-09 (Trevo Pro/Play Billing), que ainda não existe — mesma pendência de RF-01.8/RF-06.6; o cartão "Assinatura" já existe na tela mostrando o único estado real hoje (grátis), sem link nem estado Pro inventado |
+| RF-07.8 | Exibir estado da assinatura, link para gerenciar na Play Store | M | F3 | concluído | card mostra `Gratuito`/`Assinante` real (`AssinaturaRepository.observarAssinatura()`); toque abre o paywall (grátis) ou `https://play.google.com/store/account/subscriptions` (Pro) — nunca dentro do app (CLAUDE.md §1). Sem data de renovação: o client do Billing não expõe isso (só Play Developer API/servidor), então não inventamos uma |
 
 ## RF-11 · Modos de geração e ritual dos amuletos
 
@@ -118,7 +118,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | RF-11.6 | Revelação com giro/halo, mostrando amuleto/conceito/frase | S | F1 | concluído | `CirculoDeRevelacao` (`TelaRitual`), halo animado; respeita movimento reduzido do sistema igual a `TelaGerando` |
 | RF-11.7 | Sortear a dezena pelo motor de pesos, excluindo já reveladas | M | F1 | concluído | `PalpiteGenerator.sortearDezenaDoRitual` — mesma fórmula de peso de `gerar()` (refatorada pra dois helpers privados compartilhados, sem duplicar a fórmula), testado que nunca repete entre 3 sorteios sucessivos |
 | RF-11.8 | Trilha de progresso e dezenas já reveladas visíveis durante o ritual | S | F1 | concluído | 8 chips no cabeçalho, um por amuleto (preenchido = feito) + lista "já revelado" na tela de escolha |
-| RF-11.9 | Resumo final: cada amuleto com dezena/frase, contagem do resto, refazer ou montar | M | F1 | concluído | `TelaResumoDoRitual`; "↻" chama `aoRefazerRitualClick` (reseta o estado local, sem tocar em nada persistido). A pedido do usuário, o resumo também ganhou o seletor de fechamento (RF-02.8: 15/16/18/20) — `RitualViewModel.aoEscolherTamanho`/`RitualUiState.Resumo.tamanho`, 16/18/20 sempre bloqueados (🔒) porque `isPro` é hardcoded `false` (mesmo padrão de `CrencasUiState.isPro`/RF-01.8, RF-09 ainda não existe); a máquina já está pronta ponta a ponta — `PalpiteGenerator.gerar` já aceita a quantidade escolhida com as 8 dezenas do ritual forçadas via `dezenasFixas` — falta só o Pro de verdade pra destravar. Bug relatado pelo usuário: nem `TelaEscolhaDoAmuleto` nem `TelaResumoDoRitual` tinham `verticalScroll` (única tela do app sem isso — Home/Detalhe/Conferência/Perfil já usavam), então dava pra travar sem conseguir ver o resto do conteúdo, principalmente depois do seletor de fechamento deixar o resumo mais alto. Corrigido em ambas |
+| RF-11.9 | Resumo final: cada amuleto com dezena/frase, contagem do resto, refazer ou montar | M | F1 | concluído | `TelaResumoDoRitual`; "↻" chama `aoRefazerRitualClick` (reseta o estado local, sem tocar em nada persistido). O resumo também tem o seletor de fechamento (RF-02.8: 15/16/18/20) — `RitualViewModel.aoEscolherTamanho`/`RitualUiState.Resumo.tamanho`, 16/18/20 destravam com `isPro` real (RF-09, `AssinaturaRepository.observarIsPro()`) em vez do hardcoded `false` de antes. Bug relatado pelo usuário: nem `TelaEscolhaDoAmuleto` nem `TelaResumoDoRitual` tinham `verticalScroll` (única tela do app sem isso — Home/Detalhe/Conferência/Perfil já usavam), então dava pra travar sem conseguir ver o resto do conteúdo, principalmente depois do seletor de fechamento deixar o resumo mais alto. Corrigido em ambas |
 | RF-11.10 | Forçar dezenas reveladas no volante final; registrar como fonte própria na origem | M | F1 | concluído | as 8 dezenas entram via `dezenasFixas` (mesmo mecanismo de RF-02.2/RF-04.7 — reaproveitado, não duplicado; as outras 7 do palpite de 15 vêm das crenças/estatística); `Palpite.ritual: List<RevelacaoDoAmuleto>` é metadado à parte pra exibição, persistido em `PalpiteEntity.ritual` (migração `MIGRATION_2_3`); aparece em "De onde vieram as dezenas" (`TelaDetalhe`) ao lado das crenças |
 | RF-11.11 | Limpar o ritual após a montagem, sem reaproveitar dezenas do anterior | M | F1 | concluído | `RitualViewModel` não persiste nada — sair da rota (fechar ou montar) destrói o ViewModel e com ele qualquer revelação em andamento; é a mesma causa-raiz do bug do protótipo que CLAUDE.md §4 documenta, resolvida por nunca reter o estado em vez de limpar explicitamente algo compartilhado |
 | RF-11.12 | Tela do ritual explicita que a escolha é do usuário mas a dezena é sorteada, sem alterar probabilidade | M | F1 | concluído | `ritual_disclaimer_escolha` fixo na tela de escolha de cada amuleto |
@@ -131,20 +131,20 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 |---|---|---|---|---|---|
 | RF-08.1 | Compartilhar palpite como texto (WhatsApp em destaque) | M | F1 | concluído | `TelaDetalhe` (ícone 📤 no cabeçalho) + `FolhaDeCompartilhamento`; tenta abrir direto no WhatsApp (`setPackage("com.whatsapp")`) e cai no `Intent.createChooser` do sistema se o app não estiver instalado — cobre as duas metades do requisito. Número do concurso na mensagem fica `null` (omitido) quando o dia do palpite ainda não tem `Resultado` casado — mesma regra de nunca inventar dado de sorteio de RF-03.1/RF-06.1 (CLAUDE.md §8) |
 | RF-08.2 | Prévia da mensagem + copiar texto | M | F1 | concluído | mesma folha do RF-08.1: caixa de prévia com a mensagem montada, botão "Copiar o texto" (`ClipboardManager` do sistema) e confirmação "Pronto para enviar" |
-| RF-08.3 | Exportar volante em PDF (com jogos do desdobramento) | S | F3 | não iniciado | wireframe 1p: exportar é Pro — depende do RF-09 (Trevo Pro), que ainda não existe |
+| RF-08.3 | Exportar volante em PDF (com jogos do desdobramento) | S | F3 | não iniciado | wireframe 1p: exportar é Pro — RF-09 já existe, mas a implementação de exportar em si (PDF) é outra fatia |
 | RF-08.4 | Exportar volante como imagem para a galeria | C | F3 | não iniciado | mesma dependência de RF-08.3 |
 
 ## RF-09 · Monetização
 
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
-| RF-09.1 | 1 palpite/dia no grátis, reinício à meia-noite (fuso do aparelho) | M | F3 | não iniciado | |
-| RF-09.2 | Anúncio recompensado de 15s libera palpite extra | S | F3 | não iniciado | |
-| RF-09.3 | Nenhum outro formato de anúncio, nem para assinantes | M | F3 | não iniciado | |
-| RF-09.4 | Planos anual/mensal, 7 dias grátis, via Play Billing | M | F3 | não iniciado | |
-| RF-09.5 | Paywall informa cada etapa do teste antes da confirmação | M | F3 | não iniciado | |
-| RF-09.6 | Liberar Pro imediatamente após compra; revogar ao fim | M | F3 | não iniciado | |
-| RF-09.7 | Restaurar assinatura ao reinstalar/trocar de aparelho | M | F3 | não iniciado | |
+| RF-09.1 | 1 palpite/dia no grátis, reinício à meia-noite (fuso do aparelho) | M | F3 | concluído | `PreferenciasRepository.observarPalpitesGratisRestantesHoje`/`registrarPalpiteGratisUsado` — mesmo padrão de data-salva-vs-hoje de `confirmarGrupoDoSonho` (RF-03.12), reset é automático por virada de dia, não um job separado. Gateia `HomeViewModel.aoGerarClick` e `RitualViewModel.aoMontarPalpiteClick` |
+| RF-09.2 | Anúncio recompensado de 15s libera palpite extra | S | F3 | concluído | `AnuncioRecompensadoManager` (`:app`, sem Hilt — só usa Google Mobile Ads SDK) + `registrarAnuncioAssistido`; usa o ad unit de TESTE do Google (`ca-app-pub-3940256099942544/5224354917`) — funciona sem conta AdMob, mas precisa trocar pelo real antes de publicar |
+| RF-09.3 | Nenhum outro formato de anúncio, nem para assinantes | M | F3 | concluído | cumprido por omissão — só existe o `AnuncioRecompensadoManager` recompensado, nenhum banner/intersticial em lugar nenhum do app |
+| RF-09.4 | Planos anual/mensal, 7 dias grátis, via Play Billing | M | F3 | concluído | `AssinaturaRepository`/`AssinaturaRepositoryImpl` (`:core:data`), `billing-ktx` real (`BillingClient`, não mock). IDs de produto usados no código: `trevo_pro_mensal`/`trevo_pro_anual` — **pendente de verdade**: precisam ser criados no Play Console (produto + base plan + oferta de teste de 7 dias) pelo usuário; sem isso `produtosDisponiveis()` devolve lista vazia e o paywall mostra "indisponível", nunca preço inventado. Bug real achado só em device: `PendingPurchasesParams.newBuilder().build()` sem `.enableOneTimeProducts()` lança `IllegalArgumentException` em runtime (Billing 7.1.1 exige a declaração mesmo o Trevo só vendendo assinatura) — derrubava toda tela que injeta `AssinaturaRepository` (Crenças, Home, Ritual, Detalhe, Histórico, Perfil) assim que instanciada; não pegou em `test`/`lint`/`ktlintCheck` porque só estoura ao construir o `BillingClient` real. Corrigido; app testado ponta a ponta no emulador (onboarding → Home → gerar/limite/anúncio → paywall → Detalhe → Perfil → Histórico) sem crash |
+| RF-09.5 | Paywall informa cada etapa do teste antes da confirmação | M | F3 | concluído | `TelaPaywall` (wireframe 1n): caixa "Como funciona o teste" com a linha do tempo (hoje/dia 5/dia 7) antes do CTA "Começar 7 dias grátis" |
+| RF-09.6 | Liberar Pro imediatamente após compra; revogar ao fim | M | F3 | concluído | `EstadoDaAssinatura` deriva sempre de `BillingClient.queryPurchasesAsync` (nunca uma flag local solta) — se o Billing para de devolver a compra, o estado volta pra `Gratuito` sozinho. `PurchasesUpdatedListener` libera na hora após `launchBillingFlow` |
+| RF-09.7 | Restaurar assinatura ao reinstalar/trocar de aparelho | M | F3 | concluído | `AssinaturaRepository.restaurarCompras()` reconsulta `queryPurchasesAsync`; já roda sozinho na conexão inicial do `BillingClient` (`init` do repositório), então reinstalar já restaura sem ação do usuário |
 
 ## RF-10 · Transparência e jogo responsável
 

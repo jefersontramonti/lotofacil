@@ -1,6 +1,7 @@
 package com.trevo.app.ritual
 
 import com.trevo.app.MainDispatcherRule
+import com.trevo.app.assinatura.FakeAssinaturaRepository
 import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.app.preferencias.FakePreferenciasRepository
 import com.trevo.core.engine.crenca.Amuleto
@@ -39,12 +40,14 @@ class RitualViewModelTest {
     private fun novoAmbiente(
         preferencias: FakePreferenciasRepository = FakePreferenciasRepository(),
         palpites: FakePalpiteRepository = FakePalpiteRepository(RELOGIO_FIXO),
+        assinatura: FakeAssinaturaRepository = FakeAssinaturaRepository(),
         semente: Int = 1,
     ) = Triple(
         RitualViewModel(
             gerador = PalpiteGenerator(Random(semente)),
             preferenciasRepository = preferencias,
             palpiteRepository = palpites,
+            assinaturaRepository = assinatura,
             clock = RELOGIO_FIXO,
         ),
         preferencias,
@@ -127,6 +130,26 @@ class RitualViewModelTest {
                     .toSet()
                     .size,
             )
+        }
+
+    @Test
+    fun isProReflenteDaAssinaturaRepositoryChegaAoResumo() =
+        runTest {
+            val assinatura = FakeAssinaturaRepository()
+            val (viewModel, preferencias, _) = novoAmbiente(assinatura = assinatura, semente = 7)
+            preferencias.salvarPerfil("Marlene", null, null, emptySet())
+            assinatura.definirAssinante("trevo_pro_anual")
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            ORDEM_DO_RITUAL.forEach { amuleto ->
+                viewModel.aoEscolherOpcao(opcoesDoAmuleto(amuleto).first())
+                advanceUntilIdle()
+                viewModel.aoRevelacaoTerminou()
+                advanceUntilIdle()
+            }
+
+            assertTrue((viewModel.uiState.value as RitualUiState.Resumo).isPro)
         }
 
     @Test

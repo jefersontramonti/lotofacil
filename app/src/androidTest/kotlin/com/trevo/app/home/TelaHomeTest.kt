@@ -20,8 +20,8 @@ import org.junit.Test
 
 /**
  * RF-03 — Home. Wireframes 1d ("Home · lista de palpites"), 1e ("Home ·
- * limite atingido", reaproveitado só pro estado vazio — anúncio
- * recompensado é RF-09, fora desta fatia) e 1t ("Card do sonho").
+ * limite atingido" — RF-09.1/09.2, anúncio recompensado e CTA de assinar)
+ * e 1t ("Card do sonho").
  */
 class TelaHomeTest {
     @get:Rule
@@ -57,6 +57,8 @@ class TelaHomeTest {
         onGrupoClick: (Int) -> Unit = {},
         onFecharDialogoSonhoClick: () -> Unit = {},
         onConfirmarSonhoClick: (Int) -> Unit = {},
+        onAssistirAnuncioClick: () -> Unit = {},
+        onAssinarClick: () -> Unit = {},
     ) {
         composeTestRule.setContent {
             TrevoTheme {
@@ -69,6 +71,8 @@ class TelaHomeTest {
                     onGrupoClick = onGrupoClick,
                     onFecharDialogoSonhoClick = onFecharDialogoSonhoClick,
                     onConfirmarSonhoClick = onConfirmarSonhoClick,
+                    onAssistirAnuncioClick = onAssistirAnuncioClick,
+                    onAssinarClick = onAssinarClick,
                 )
             }
         }
@@ -386,6 +390,8 @@ class TelaHomeTest {
                 put("home_vazio_descricao", context.getString(R.string.home_vazio_descricao))
                 put("home_disclaimer_aposta", context.getString(R.string.home_disclaimer_aposta))
                 put("home_sonho_card_disclaimer", context.getString(R.string.home_sonho_card_disclaimer))
+                put("home_assistir_anuncio_cta", context.getString(R.string.home_assistir_anuncio_cta))
+                put("home_assinar_cta", context.getString(R.string.home_assinar_cta))
             }
 
         stringsDaTela.forEach { (nomeRecurso, valor) ->
@@ -398,5 +404,57 @@ class TelaHomeTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun comPalpiteGratisRestanteExibeATextoDeRestantesEOCtaNormal() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, isPro = false, palpitesGratisRestantesHoje = 1))
+
+        composeTestRule
+            .onNodeWithText(context.resources.getQuantityString(R.plurals.home_restantes_gratis, 1, 1))
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TAG_BOTAO_CTA_PRINCIPAL).assertIsDisplayed()
+    }
+
+    @Test
+    fun semGratisRestanteExibeOCtaDeAnuncioEDeAssinarEmVezDoGerar() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, isPro = false, palpitesGratisRestantesHoje = 0))
+
+        composeTestRule.onNodeWithTag(TAG_BOTAO_ASSISTIR_ANUNCIO).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TAG_BOTAO_ASSINAR).assertIsDisplayed()
+    }
+
+    @Test
+    fun tocarAssistirAnuncioDisparaOCallback() {
+        var assistiu = false
+        mostrarTelaHome(
+            uiState = HomeUiState(carregando = false, isPro = false, palpitesGratisRestantesHoje = 0),
+            onAssistirAnuncioClick = { assistiu = true },
+        )
+
+        composeTestRule.onNodeWithTag(TAG_BOTAO_ASSISTIR_ANUNCIO).performClick()
+
+        assertTrue(assistiu)
+    }
+
+    @Test
+    fun tocarAssinarNoLimiteDisparaOCallback() {
+        var assinou = false
+        mostrarTelaHome(
+            uiState = HomeUiState(carregando = false, isPro = false, palpitesGratisRestantesHoje = 0),
+            onAssinarClick = { assinou = true },
+        )
+
+        composeTestRule.onNodeWithTag(TAG_BOTAO_ASSINAR).performClick()
+
+        assertTrue(assinou)
+    }
+
+    @Test
+    fun proExibeOTextoDePalpitesIlimitadosMesmoComRestantesZerado() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, isPro = true, palpitesGratisRestantesHoje = 0))
+
+        composeTestRule.onNodeWithText(context.getString(R.string.home_restantes_pro)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TAG_BOTAO_CTA_PRINCIPAL).assertIsDisplayed()
     }
 }

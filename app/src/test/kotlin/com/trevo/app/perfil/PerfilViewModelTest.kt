@@ -1,6 +1,7 @@
 package com.trevo.app.perfil
 
 import com.trevo.app.MainDispatcherRule
+import com.trevo.app.assinatura.FakeAssinaturaRepository
 import com.trevo.app.notificacoes.FakeNotificacoesScheduler
 import com.trevo.app.preferencias.FakePreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
@@ -39,6 +40,7 @@ class PerfilViewModelTest {
         val viewModel: PerfilViewModel,
         val preferencias: FakePreferenciasRepository,
         val scheduler: FakeNotificacoesScheduler,
+        val assinatura: FakeAssinaturaRepository,
     )
 
     // uiState é um StateFlow com SharingStarted.WhileSubscribed — o combine()
@@ -47,15 +49,17 @@ class PerfilViewModelTest {
     private fun TestScope.novoAmbiente(): Ambiente {
         val preferencias = FakePreferenciasRepository()
         val scheduler = FakeNotificacoesScheduler()
+        val assinatura = FakeAssinaturaRepository()
         val viewModel =
             PerfilViewModel(
                 preferenciasRepository = preferencias,
                 scheduler = scheduler,
                 validador = ValidadorDataNascimento(RELOGIO_FIXO),
                 verificador = VerificadorDeIdade(RELOGIO_FIXO),
+                assinaturaRepository = assinatura,
             )
         backgroundScope.launch { viewModel.uiState.collect {} }
-        return Ambiente(viewModel, preferencias, scheduler)
+        return Ambiente(viewModel, preferencias, scheduler, assinatura)
     }
 
     @Test
@@ -187,5 +191,17 @@ class PerfilViewModelTest {
 
             assertTrue(viewModel.uiState.value.notificacaoResultadoAtiva)
             assertTrue(scheduler.notificacaoResultadoAgendada)
+        }
+
+    @Test
+    fun assinanteProExpoeIsProEOProductIdDaAssinatura() =
+        runTest {
+            val (viewModel, preferencias, _, assinatura) = novoAmbiente()
+            preferencias.salvarPerfil("Marlene", null, null, emptySet())
+            assinatura.definirAssinante("trevo_pro_mensal")
+            advanceUntilIdle()
+
+            assertTrue(viewModel.uiState.value.isPro)
+            assertEquals("trevo_pro_mensal", viewModel.uiState.value.productIdDaAssinatura)
         }
 }

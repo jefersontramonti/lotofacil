@@ -24,6 +24,16 @@ class FakePreferenciasRepository : PreferenciasRepository {
 
     private val sonhoDoDia = MutableStateFlow<SonhoConfirmado?>(null)
 
+    private data class LimiteDiario(
+        val data: LocalDate,
+        val usados: Int,
+        val extras: Int,
+    )
+
+    // Espelha LIMITE_GRATIS_POR_DIA de PreferenciasRepositoryImpl (1
+    // palpite grátis/dia, RF-09.1).
+    private val limiteDiario = MutableStateFlow<LimiteDiario?>(null)
+
     override suspend fun salvarPerfil(
         nome: String,
         nascimento: LocalDate?,
@@ -51,4 +61,20 @@ class FakePreferenciasRepository : PreferenciasRepository {
 
     override fun observarPreferenciasDeNotificacao(): StateFlow<PreferenciasDeNotificacao> =
         preferenciasDeNotificacao.asStateFlow()
+
+    override suspend fun registrarPalpiteGratisUsado(hoje: LocalDate) {
+        val atual = limiteDiario.value?.takeIf { it.data == hoje } ?: LimiteDiario(hoje, usados = 0, extras = 0)
+        limiteDiario.value = atual.copy(usados = atual.usados + 1)
+    }
+
+    override suspend fun registrarAnuncioAssistido(hoje: LocalDate) {
+        val atual = limiteDiario.value?.takeIf { it.data == hoje } ?: LimiteDiario(hoje, usados = 0, extras = 0)
+        limiteDiario.value = atual.copy(extras = atual.extras + 1)
+    }
+
+    override fun observarPalpitesGratisRestantesHoje(hoje: LocalDate) =
+        limiteDiario.map { estado ->
+            val atual = estado?.takeIf { it.data == hoje }
+            (1 + (atual?.extras ?: 0) - (atual?.usados ?: 0)).coerceAtLeast(0)
+        }
 }

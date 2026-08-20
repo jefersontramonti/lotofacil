@@ -3,6 +3,7 @@ package com.trevo.app.perfil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trevo.app.onboarding.CrencasUiState
+import com.trevo.core.data.assinatura.AssinaturaRepository
 import com.trevo.core.data.preferencias.PreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +23,7 @@ class EditarCrencasViewModel
     @Inject
     constructor(
         private val preferenciasRepository: PreferenciasRepository,
+        private val assinaturaRepository: AssinaturaRepository,
     ) : ViewModel() {
         private val estado = MutableStateFlow(CrencasUiState())
         val uiState: StateFlow<CrencasUiState> = estado.asStateFlow()
@@ -30,6 +32,11 @@ class EditarCrencasViewModel
             viewModelScope.launch {
                 val perfil = preferenciasRepository.observarPerfil().first()
                 estado.value = estado.value.copy(selecionadas = perfil?.crencasAtivas ?: emptySet())
+            }
+            viewModelScope.launch {
+                assinaturaRepository.observarIsPro().collect { isPro ->
+                    estado.value = estado.value.copy(isPro = isPro)
+                }
             }
         }
 

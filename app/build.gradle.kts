@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.hilt.work)
 
     implementation(libs.phosphor.icon)
+    implementation(libs.play.services.ads)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

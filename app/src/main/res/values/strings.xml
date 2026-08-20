@@ -97,6 +97,13 @@
     <string name="home_gerar_cta">Gerar palpite</string>
     <string name="home_comecar_ritual_cta">✦ Começar o ritual</string>
     <string name="home_palpite_modo_etiqueta">%1$s</string>
+    <string name="home_restantes_pro">🎟 Pro · palpites ilimitados</string>
+    <plurals name="home_restantes_gratis">
+        <item quantity="one">🎟 %1$d palpite grátis hoje</item>
+        <item quantity="other">🎟 %1$d palpites grátis hoje</item>
+    </plurals>
+    <string name="home_assistir_anuncio_cta">▶ Assistir 15s e ganhar um palpite</string>
+    <string name="home_assinar_cta">Ou assine o Pro e gere sem limite</string>
     <string name="amuleto_trevo_nome">Trevo da Sorte</string>
     <string name="amuleto_trevo_conceito">Sorte</string>
     <string name="amuleto_trevo_pergunta">Qual folha você escolhe?</string>
@@ -328,6 +335,7 @@
         <item quantity="one">Ver mais %1$d concurso anterior</item>
         <item quantity="other">Ver mais %1$d concursos anteriores</item>
     </plurals>
+    <string name="historico_mais_concursos_pro_cta">Assine o Pro para ver o histórico completo</string>
     <string name="historico_vazio_titulo">Nada conferido ainda</string>
     <string name="historico_vazio_descricao">Depois do primeiro sorteio conferido, seus palpites e o que eles renderam aparecem aqui.</string>
     <string name="perfil_titulo">Perfil</string>
@@ -359,4 +367,38 @@
     <string name="perfil_assinatura_titulo">Assinatura</string>
     <string name="perfil_assinatura_gratuito_titulo">Plano gratuito</string>
     <string name="perfil_assinatura_gratuito_descricao">Assine o Trevo Pro para crenças e palpites ilimitados</string>
+    <string name="perfil_assinatura_pro_titulo">Trevo Pro ativo</string>
+    <string name="perfil_assinatura_pro_descricao">Plano %1$s · toque para gerenciar</string>
+    <string name="assinatura_plano_anual_nome">anual</string>
+    <string name="assinatura_plano_mensal_nome">mensal</string>
+    <string name="assinatura_plano_desconhecido_nome">Pro</string>
+
+    <string name="paywall_fechar_descricao">Fechar</string>
+    <string name="paywall_tag_pro">✦ Trevo Pro</string>
+    <string name="paywall_tag_trial">7 dias grátis</string>
+    <string name="paywall_titulo">Todas as crenças, todo dia</string>
+    <string name="paywall_subtitulo">O grátis dá um palpite por dia com três crenças. A primeira semana é por conta da casa.</string>
+    <string name="paywall_item_crencas_nome">Crenças ilimitadas</string>
+    <string name="paywall_item_crencas_desc">No grátis são três por palpite.</string>
+    <string name="paywall_item_palpites_nome">Palpites sem limite</string>
+    <string name="paywall_item_palpites_desc">Sem esperar o dia seguinte nem assistir anúncio.</string>
+    <string name="paywall_item_fechamento_nome">Fechamento de 16 a 20 dezenas</string>
+    <string name="paywall_item_fechamento_desc">Volantes maiores com a chance real de cada um.</string>
+    <string name="paywall_item_conferencia_nome">Conferência automática</string>
+    <string name="paywall_item_conferencia_desc">O app confere seus jogos quando o resultado sai.</string>
+    <string name="paywall_item_historico_nome">Histórico completo</string>
+    <string name="paywall_item_historico_desc">Todo palpite guardado, com acertos por concurso.</string>
+    <string name="paywall_item_exportar_nome">Exportar o volante</string>
+    <string name="paywall_item_exportar_desc">PDF pronto para levar à lotérica.</string>
+    <string name="paywall_teste_titulo">Como funciona o teste</string>
+    <string name="paywall_teste_hoje">Hoje · acesso completo, sem cobrança</string>
+    <string name="paywall_teste_dia5">Dia 5 · avisamos que está acabando</string>
+    <string name="paywall_teste_dia7">Dia 7 · a cobrança começa</string>
+    <string name="paywall_plano_selo_mais_escolhido">Mais escolhido</string>
+    <string name="paywall_plano_anual_detalhe">pague uma vez, use o ano todo</string>
+    <string name="paywall_plano_mensal_detalhe">cancela quando quiser</string>
+    <string name="paywall_cta_comecar_teste">Começar 7 dias grátis</string>
+    <string name="paywall_nota_pos_teste">Depois, %1$s ao %2$s. Cancele antes do sétimo dia e não paga nada.</string>
+    <string name="paywall_cta_continuar_gratis">Continuar no grátis</string>
+    <string name="paywall_indisponivel">Os planos ainda não estão disponíveis. Tente de novo mais tarde.</string>
 </resources>

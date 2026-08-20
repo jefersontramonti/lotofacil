@@ -7,6 +7,8 @@ import androidx.room.Room
 import com.trevo.core.data.MIGRATION_1_2
 import com.trevo.core.data.MIGRATION_2_3
 import com.trevo.core.data.TrevoDatabase
+import com.trevo.core.data.assinatura.AssinaturaRepository
+import com.trevo.core.data.assinatura.AssinaturaRepositoryImpl
 import com.trevo.core.data.notificacoes.NotificacoesScheduler
 import com.trevo.core.data.notificacoes.NotificacoesSchedulerImpl
 import com.trevo.core.data.palpite.PalpiteDao
@@ -68,4 +70,7 @@ abstract class DataBindsModule {
 
     @Binds
     abstract fun ligarNotificacoesScheduler(impl: NotificacoesSchedulerImpl): NotificacoesScheduler
+
+    @Binds
+    abstract fun ligarAssinaturaRepository(impl: AssinaturaRepositoryImpl): AssinaturaRepository
 }

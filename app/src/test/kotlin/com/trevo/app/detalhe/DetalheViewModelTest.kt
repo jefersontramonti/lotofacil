@@ -2,6 +2,7 @@ package com.trevo.app.detalhe
 
 import androidx.lifecycle.SavedStateHandle
 import com.trevo.app.MainDispatcherRule
+import com.trevo.app.assinatura.FakeAssinaturaRepository
 import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.app.preferencias.FakePreferenciasRepository
 import com.trevo.app.resultado.FakeResultadoRepository
@@ -49,12 +50,14 @@ class DetalheViewModelTest {
         repository: FakePalpiteRepository = FakePalpiteRepository(RELOGIO_FIXO),
         preferenciasRepository: FakePreferenciasRepository = FakePreferenciasRepository(),
         resultadoRepository: FakeResultadoRepository = FakeResultadoRepository(RELOGIO_FIXO),
+        assinaturaRepository: FakeAssinaturaRepository = FakeAssinaturaRepository(),
         gerador: PalpiteGenerator = PalpiteGenerator(Random(1)),
     ) = DetalheViewModel(
         savedStateHandle = SavedStateHandle(mapOf("palpiteId" to palpiteId)),
         repository = repository,
         preferenciasRepository = preferenciasRepository,
         resultadoRepository = resultadoRepository,
+        assinaturaRepository = assinaturaRepository,
         gerador = gerador,
         clock = RELOGIO_FIXO,
     )
@@ -348,5 +351,23 @@ class DetalheViewModelTest {
             advanceUntilIdle()
 
             assertEquals(3457, viewModel.uiState.value.numeroDoConcurso)
+        }
+
+    @Test
+    fun isProReflenteDaAssinaturaRepositoryDestravaOFechamento() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val assinaturaRepository = FakeAssinaturaRepository()
+            val id = repository.salvar(palpiteDeExemplo)
+            val viewModel =
+                novoViewModel(palpiteId = id, repository = repository, assinaturaRepository = assinaturaRepository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+            assertFalse(viewModel.uiState.value.isPro)
+
+            assinaturaRepository.definirAssinante("trevo_pro_anual")
+            advanceUntilIdle()
+
+            assertTrue(viewModel.uiState.value.isPro)
         }
 }

@@ -2,6 +2,7 @@ package com.trevo.app.ritual
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trevo.core.data.assinatura.AssinaturaRepository
 import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.preferencias.PreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
@@ -26,9 +27,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 // RF-02.8/RF-11 — 15 é o tamanho padrão fora de fechamento; DEZESSEIS/
-// DEZOITO/VINTE são fechamento, hoje sempre bloqueados no ritual porque
-// `isPro` nunca é true (RF-09 ainda não existe — mesma pendência já
-// registrada em RF-01.8/RF-04.10).
+// DEZOITO/VINTE são fechamento, só desbloqueados no ritual com `isPro`
+// (RF-09) — mesmo padrão de RF-01.8/RF-04.10.
 private const val QUANTIDADE_PADRAO_DO_PALPITE = 15
 
 sealed interface RitualEvento {
@@ -47,6 +47,7 @@ class RitualViewModel
         private val gerador: PalpiteGenerator,
         private val preferenciasRepository: PreferenciasRepository,
         private val palpiteRepository: PalpiteRepository,
+        private val assinaturaRepository: AssinaturaRepository,
         private val clock: Clock,
     ) : ViewModel() {
         private val estado = MutableStateFlow<RitualUiState>(RitualUiState.Carregando)
@@ -57,6 +58,7 @@ class RitualViewModel
 
         private var crencasAtivas: Set<Crenca> = emptySet()
         private lateinit var dados: DadosDeContribuicao
+        private var isPro: Boolean = false
 
         init {
             viewModelScope.launch {
@@ -73,6 +75,13 @@ class RitualViewModel
                         grupoDoSonho = grupoDoSonho,
                     )
                 estado.value = primeiroPasso()
+            }
+            viewModelScope.launch {
+                assinaturaRepository.observarIsPro().collect { valor ->
+                    isPro = valor
+                    val atual = estado.value as? RitualUiState.Resumo
+                    if (atual != null) estado.value = atual.copy(isPro = valor)
+                }
             }
         }
 
@@ -110,6 +119,7 @@ class RitualViewModel
                     RitualUiState.Resumo(
                         reveladas = atual.reveladas,
                         quantidadeDeOutrasDezenas = QUANTIDADE_PADRAO_DO_PALPITE - atual.reveladas.size,
+                        isPro = isPro,
                     )
                 }
         }
@@ -147,6 +157,10 @@ class RitualViewModel
                         ritual = atual.reveladas,
                     )
                 palpiteRepository.salvar(palpite)
+                // RF-09.1 — mesma contagem diária de HomeViewModel.aoGerarClick;
+                // a UI só chega até aqui com restante disponível (gate em
+                // TrevoNavHost, ver onCtaPrincipalClick), este é o registro do uso.
+                if (!isPro) preferenciasRepository.registrarPalpiteGratisUsado(dados.hoje)
                 canalDeEventos.send(RitualEvento.PalpiteMontado)
             }
         }

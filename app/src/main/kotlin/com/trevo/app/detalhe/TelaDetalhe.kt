@@ -340,7 +340,7 @@ private fun SecaoVisualizacao(
                 modifier = Modifier.weight(1f),
             )
         }
-        SeletorDeFechamento(quantidadeAtual = uiState.quantidadeDeDezenas)
+        SeletorDeFechamento(quantidadeAtual = uiState.quantidadeDeDezenas, isPro = uiState.isPro)
         if (uiState.podeVerDesdobramentos) {
             Text(
                 text = stringResource(id = R.string.detalhe_ver_desdobramentos_cta),
@@ -398,6 +398,7 @@ private fun CaixaDeDestaque(
 @Composable
 private fun SeletorDeFechamento(
     quantidadeAtual: Int,
+    isPro: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -408,6 +409,8 @@ private fun SeletorDeFechamento(
         )
         listOf(15, 16, 18, 20).forEach { tamanho ->
             val ativo = tamanho == quantidadeAtual
+            // RF-09 — 15 nunca precisa de Pro; os demais só destravam com isPro.
+            val bloqueado = tamanho != 15 && !isPro
             val descricaoBloqueado = stringResource(id = R.string.detalhe_fechamento_bloqueado_descricao, tamanho)
             Box(
                 modifier =
@@ -420,11 +423,13 @@ private fun SeletorDeFechamento(
                             border = BorderStroke(1.dp, if (ativo) NocturneAccent else NocturneOutline),
                             shape = RoundedCornerShape(6.dp),
                         ).padding(vertical = 8.dp)
-                        .then(if (!ativo) Modifier.semantics { contentDescription = descricaoBloqueado } else Modifier),
+                        .then(
+                            if (bloqueado) Modifier.semantics { contentDescription = descricaoBloqueado } else Modifier,
+                        ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = if (ativo) tamanho.toString() else "$tamanho 🔒",
+                    text = if (bloqueado) "$tamanho 🔒" else tamanho.toString(),
                     style = MaterialTheme.typography.labelSmall,
                 )
             }
