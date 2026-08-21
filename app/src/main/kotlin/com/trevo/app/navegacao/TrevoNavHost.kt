@@ -13,7 +13,11 @@ import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,6 +71,19 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TrevoNavHost(modifier: Modifier = Modifier) {
+    val inicioViewModel: InicioViewModel = hiltViewModel()
+    val perfilJaExiste by inicioViewModel.perfilJaExiste.collectAsState()
+    val jaSabeOPontoDePartida = perfilJaExiste
+
+    if (jaSabeOPontoDePartida == null) {
+        // Aguardando a primeira leitura do DataStore antes de montar o
+        // NavHost — sem isso o app sempre abriria em Abertura e só depois
+        // saberia que já havia perfil, tarde demais pra mudar o
+        // startDestination (fixo na primeira composição do NavHost).
+        Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+        return
+    }
+
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rotaAtual = backStackEntry?.destination?.route
@@ -81,7 +98,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
     ) { paddingDoConteudo ->
         NavHost(
             navController = navController,
-            startDestination = Rotas.ABERTURA,
+            startDestination = if (jaSabeOPontoDePartida) Rotas.HOME else Rotas.ABERTURA,
             modifier = Modifier.padding(paddingDoConteudo),
         ) {
             composable(Rotas.ABERTURA) {
