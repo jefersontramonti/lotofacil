@@ -137,4 +137,40 @@ class PreferenciasRepositoryTest {
 
             assertEquals(1, repositorio.observarPalpitesGratisRestantesHoje(hoje).first())
         }
+
+    @Test
+    fun semUsoNenhumRestamDoisAnunciosDisponiveisNoDia() =
+        runTest {
+            val hoje = LocalDate.of(2026, 8, 17)
+
+            assertEquals(2, repositorio.observarAnunciosDisponiveisHoje(hoje).first())
+        }
+
+    @Test
+    fun aposDoisAnunciosNaoSobraNenhumDisponivelEUmTerceiroNaoCreditaMais() =
+        runTest {
+            val hoje = LocalDate.of(2026, 8, 17)
+
+            repositorio.registrarAnuncioAssistido(hoje)
+            repositorio.registrarAnuncioAssistido(hoje)
+            assertEquals(0, repositorio.observarAnunciosDisponiveisHoje(hoje).first())
+            assertEquals(3, repositorio.observarPalpitesGratisRestantesHoje(hoje).first())
+
+            repositorio.registrarAnuncioAssistido(hoje)
+
+            assertEquals(0, repositorio.observarAnunciosDisponiveisHoje(hoje).first())
+            assertEquals(3, repositorio.observarPalpitesGratisRestantesHoje(hoje).first())
+        }
+
+    @Test
+    fun limiteDeAnunciosReiniciaNoDiaSeguinte() =
+        runTest {
+            val ontem = LocalDate.of(2026, 8, 16)
+            val hoje = LocalDate.of(2026, 8, 17)
+
+            repositorio.registrarAnuncioAssistido(ontem)
+            repositorio.registrarAnuncioAssistido(ontem)
+
+            assertEquals(2, repositorio.observarAnunciosDisponiveisHoje(hoje).first())
+        }
 }

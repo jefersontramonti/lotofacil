@@ -64,6 +64,13 @@ class HomeViewModel
             val modo: ModoDeGeracao,
         )
 
+        private data class EstadoDeLimite(
+            val isPro: Boolean,
+            val palpitesGratisRestantesHoje: Int,
+            val ultimoResultado: Resultado?,
+            val anunciosDisponiveisHoje: Int,
+        )
+
         private val estadoLocal =
             combine(
                 palpiteParaConfirmarExclusao,
@@ -83,12 +90,12 @@ class HomeViewModel
                     assinaturaRepository.observarIsPro(),
                     preferenciasRepository.observarPalpitesGratisRestantesHoje(LocalDate.now(clock)),
                     resultadoRepository.observarUltimoResultadoSalvo(),
-                    ::Triple,
+                    preferenciasRepository.observarAnunciosDisponiveisHoje(LocalDate.now(clock)),
+                    ::EstadoDeLimite,
                 ),
                 estadoLocal,
-            ) { palpites, perfil, grupoConfirmado, proLimiteEResultado, local ->
-                val (isPro, restantes, ultimoResultado) = proLimiteEResultado
-                montarUiState(palpites, perfil, grupoConfirmado, isPro, restantes, ultimoResultado, local)
+            ) { palpites, perfil, grupoConfirmado, limite, local ->
+                montarUiState(palpites, perfil, grupoConfirmado, limite, local)
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -99,9 +106,7 @@ class HomeViewModel
             palpites: List<PalpiteSalvo>,
             perfil: PerfilSalvo?,
             grupoConfirmado: Int?,
-            isPro: Boolean,
-            palpitesGratisRestantesHoje: Int,
-            ultimoResultado: Resultado?,
+            limite: EstadoDeLimite,
             local: EstadoLocal,
         ): HomeUiState {
             val hoje = LocalDate.now(clock)
@@ -120,8 +125,9 @@ class HomeViewModel
                 grupoDoSonhoConfirmadoHoje = grupoConfirmado,
                 grupoAbertoNoDialog = local.numeroDoGrupoAberto?.let { grupoDoBichoDeNumero(it) },
                 modoSelecionado = local.modo,
-                isPro = isPro,
-                palpitesGratisRestantesHoje = palpitesGratisRestantesHoje,
+                isPro = limite.isPro,
+                palpitesGratisRestantesHoje = limite.palpitesGratisRestantesHoje,
+                anunciosDisponiveisHoje = limite.anunciosDisponiveisHoje,
                 // RF-03.1 — a Caixa nunca pula número (mesmo sem sorteio aos
                 // domingos, Docs/tabelavalores.md), então "último + 1" é o
                 // concurso correntemente aceitando apostas. CLAUDE.md §8 proíbe
@@ -130,7 +136,7 @@ class HomeViewModel
                 // inventado; `null` até o primeiro resultado real ser buscado
                 // (RF-05) ou quando o último salvo foi entrada manual sem
                 // número (RF-05.10).
-                numeroDoConcursoCorrente = ultimoResultado?.numero?.plus(1),
+                numeroDoConcursoCorrente = limite.ultimoResultado?.numero?.plus(1),
             )
         }
 

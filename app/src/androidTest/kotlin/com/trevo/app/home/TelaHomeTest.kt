@@ -1,7 +1,9 @@
 package com.trevo.app.home
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -391,6 +393,10 @@ class TelaHomeTest {
                 put("home_disclaimer_aposta", context.getString(R.string.home_disclaimer_aposta))
                 put("home_sonho_card_disclaimer", context.getString(R.string.home_sonho_card_disclaimer))
                 put("home_assistir_anuncio_cta", context.getString(R.string.home_assistir_anuncio_cta))
+                put(
+                    "home_anuncios_disponiveis",
+                    context.resources.getQuantityString(R.plurals.home_anuncios_disponiveis, 2, 2),
+                )
                 put("home_assinar_cta", context.getString(R.string.home_assinar_cta))
             }
 
@@ -421,6 +427,39 @@ class TelaHomeTest {
         mostrarTelaHome(uiState = HomeUiState(carregando = false, isPro = false, palpitesGratisRestantesHoje = 0))
 
         composeTestRule.onNodeWithTag(TAG_BOTAO_ASSISTIR_ANUNCIO).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TAG_BOTAO_ASSINAR).assertIsDisplayed()
+    }
+
+    @Test
+    fun comAnunciosDisponiveisExibeOContadorEmbaixoDoBotao() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    isPro = false,
+                    palpitesGratisRestantesHoje = 0,
+                    anunciosDisponiveisHoje = 2,
+                ),
+        )
+
+        composeTestRule
+            .onNodeWithText(context.resources.getQuantityString(R.plurals.home_anuncios_disponiveis, 2, 2))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun semAnunciosDisponiveisEsconceOBotaoDeAnuncioESoSobraAssinar() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    isPro = false,
+                    palpitesGratisRestantesHoje = 0,
+                    anunciosDisponiveisHoje = 0,
+                ),
+        )
+
+        composeTestRule.onAllNodesWithTag(TAG_BOTAO_ASSISTIR_ANUNCIO).assertCountEquals(0)
         composeTestRule.onNodeWithTag(TAG_BOTAO_ASSINAR).assertIsDisplayed()
     }
 

@@ -49,6 +49,10 @@ data class HomeUiState(
     // RF-09.1/RF-09.2/RF-03.9
     val isPro: Boolean = false,
     val palpitesGratisRestantesHoje: Int = 1,
+    // RF-09.2 — máx. 2 anúncios recompensados/dia (espelha
+    // LIMITE_ANUNCIOS_POR_DIA de PreferenciasRepositoryImpl); zero esconde
+    // o botão de anúncio, sobrando só a chamada pra assinar.
+    val anunciosDisponiveisHoje: Int = 2,
     // RF-03.1 — null até o primeiro resultado real ser buscado (RF-05);
     // nunca inventado, ver nota em HomeViewModel.montarUiState.
     val numeroDoConcursoCorrente: Int? = null,

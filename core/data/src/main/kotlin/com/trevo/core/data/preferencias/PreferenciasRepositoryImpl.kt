@@ -32,6 +32,10 @@ private val CHAVE_LIMITE_DIARIO_USADOS = intPreferencesKey("limite_diario_usados
 private val CHAVE_LIMITE_DIARIO_EXTRAS = intPreferencesKey("limite_diario_extras")
 private const val LIMITE_GRATIS_POR_DIA = 1
 
+// RF-09.2 — no máximo 2 anúncios recompensados por dia, mesmo reset por
+// virada de dia do limite grátis (resetarLimiteSeVirouODia).
+private const val LIMITE_ANUNCIOS_POR_DIA = 2
+
 private fun MutablePreferences.resetarLimiteSeVirouODia(hoje: LocalDate) {
     if (this[CHAVE_LIMITE_DIARIO_DATA] != hoje.toString()) {
         this[CHAVE_LIMITE_DIARIO_DATA] = hoje.toString()
@@ -129,7 +133,10 @@ class PreferenciasRepositoryImpl
         override suspend fun registrarAnuncioAssistido(hoje: LocalDate) {
             dataStore.edit { preferencias ->
                 preferencias.resetarLimiteSeVirouODia(hoje)
-                preferencias[CHAVE_LIMITE_DIARIO_EXTRAS] = (preferencias[CHAVE_LIMITE_DIARIO_EXTRAS] ?: 0) + 1
+                val extrasAtuais = preferencias[CHAVE_LIMITE_DIARIO_EXTRAS] ?: 0
+                if (extrasAtuais < LIMITE_ANUNCIOS_POR_DIA) {
+                    preferencias[CHAVE_LIMITE_DIARIO_EXTRAS] = extrasAtuais + 1
+                }
             }
         }
 
@@ -141,6 +148,16 @@ class PreferenciasRepositoryImpl
                     val usados = preferencias[CHAVE_LIMITE_DIARIO_USADOS] ?: 0
                     val extras = preferencias[CHAVE_LIMITE_DIARIO_EXTRAS] ?: 0
                     (LIMITE_GRATIS_POR_DIA + extras - usados).coerceAtLeast(0)
+                }
+            }
+
+        override fun observarAnunciosDisponiveisHoje(hoje: LocalDate): Flow<Int> =
+            dataStore.data.map { preferencias ->
+                if (preferencias[CHAVE_LIMITE_DIARIO_DATA] != hoje.toString()) {
+                    LIMITE_ANUNCIOS_POR_DIA
+                } else {
+                    val extras = preferencias[CHAVE_LIMITE_DIARIO_EXTRAS] ?: 0
+                    (LIMITE_ANUNCIOS_POR_DIA - extras).coerceAtLeast(0)
                 }
             }
     }

@@ -104,6 +104,10 @@
         <item quantity="other">🎟 %1$d palpites grátis hoje</item>
     </plurals>
     <string name="home_assistir_anuncio_cta">▶ Assistir 15s e ganhar um palpite</string>
+    <plurals name="home_anuncios_disponiveis">
+        <item quantity="one">%1$d anúncio disponível hoje</item>
+        <item quantity="other">%1$d anúncios disponíveis hoje</item>
+    </plurals>
     <string name="home_assinar_cta">Ou assine o Pro e gere sem limite</string>
     <string name="amuleto_trevo_nome">Trevo da Sorte</string>
     <string name="amuleto_trevo_conceito">Sorte</string>

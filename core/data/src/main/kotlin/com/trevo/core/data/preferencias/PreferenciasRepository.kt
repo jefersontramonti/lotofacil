@@ -31,8 +31,15 @@ interface PreferenciasRepository {
     // a data salva vs. `hoje` decide o reset, nunca um job/alarme separado.
     suspend fun registrarPalpiteGratisUsado(hoje: LocalDate)
 
-    // RF-09.2: anúncio recompensado credita mais um palpite no dia.
+    // RF-09.2: anúncio recompensado credita mais um palpite no dia. Sem
+    // efeito além do limite diário de anúncios (2/dia) — ver
+    // observarAnunciosDisponiveisHoje.
     suspend fun registrarAnuncioAssistido(hoje: LocalDate)
 
     fun observarPalpitesGratisRestantesHoje(hoje: LocalDate): Flow<Int>
+
+    // RF-09.2: quantos anúncios recompensados ainda podem ser assistidos
+    // hoje (máx. 2/dia, reinício à meia-noite — mesmo padrão de
+    // observarPalpitesGratisRestantesHoje).
+    fun observarAnunciosDisponiveisHoje(hoje: LocalDate): Flow<Int>
 }

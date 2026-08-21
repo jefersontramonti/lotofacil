@@ -466,12 +466,27 @@ private fun SecaoModoDeGeracao(
         )
         if (uiState.semPalpiteGratisHoje) {
             // RF-09.1/09.2 — wireframe 1e: sem grátis restante, o CTA principal
-            // vira o anúncio recompensado; assinar é a saída secundária.
-            BotaoPrimario(
-                texto = stringResource(id = R.string.home_assistir_anuncio_cta),
-                onClick = onAssistirAnuncioClick,
-                modifier = Modifier.fillMaxWidth().testTag(TAG_BOTAO_ASSISTIR_ANUNCIO),
-            )
+            // vira o anúncio recompensado; assinar é a saída secundária. Máx.
+            // 2 anúncios/dia (HomeUiState.anunciosDisponiveisHoje) — no limite
+            // o botão de anúncio some e só sobra a chamada pra assinar.
+            if (uiState.anunciosDisponiveisHoje > 0) {
+                BotaoPrimario(
+                    texto = stringResource(id = R.string.home_assistir_anuncio_cta),
+                    onClick = onAssistirAnuncioClick,
+                    modifier = Modifier.fillMaxWidth().testTag(TAG_BOTAO_ASSISTIR_ANUNCIO),
+                )
+                Text(
+                    text =
+                        pluralStringResource(
+                            id = R.plurals.home_anuncios_disponiveis,
+                            count = uiState.anunciosDisponiveisHoje,
+                            uiState.anunciosDisponiveisHoje,
+                        ),
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             Text(
                 text = stringResource(id = R.string.home_assinar_cta),
                 style = MaterialTheme.typography.bodyMedium,

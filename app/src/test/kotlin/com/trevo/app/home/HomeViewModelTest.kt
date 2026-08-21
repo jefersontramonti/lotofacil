@@ -425,6 +425,35 @@ class HomeViewModelTest {
         }
 
     @Test
+    fun limiteDeDoisAnunciosPorDiaEsgotaOBotaoDeAnuncioENaoCreditaUmTerceiro() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val preferencias = FakePreferenciasRepository()
+            preferencias.salvarPerfil("Marlene", null, null, setOf(Crenca.QUENTES))
+            val viewModel = novoViewModel(repository = repository, preferenciasRepository = preferencias)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+            assertEquals(2, viewModel.uiState.value.anunciosDisponiveisHoje)
+
+            viewModel.aoAnuncioRecompensado()
+            advanceUntilIdle()
+            assertEquals(1, viewModel.uiState.value.anunciosDisponiveisHoje)
+
+            viewModel.aoAnuncioRecompensado()
+            advanceUntilIdle()
+            assertEquals(0, viewModel.uiState.value.anunciosDisponiveisHoje)
+            assertEquals(2, viewModel.uiState.value.palpitesGratisRestantesHoje)
+
+            viewModel.aoAnuncioRecompensado()
+            advanceUntilIdle()
+
+            assertEquals(0, viewModel.uiState.value.anunciosDisponiveisHoje)
+            assertEquals(2, viewModel.uiState.value.palpitesGratisRestantesHoje)
+        }
+
+    @Test
     fun semResultadoAindaBuscadoNumeroDoConcursoCorrenteFicaNulo() =
         runTest {
             val viewModel = novoViewModel()

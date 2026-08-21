@@ -34,6 +34,10 @@ class FakePreferenciasRepository : PreferenciasRepository {
     // palpite grátis/dia, RF-09.1).
     private val limiteDiario = MutableStateFlow<LimiteDiario?>(null)
 
+    // Espelha LIMITE_ANUNCIOS_POR_DIA de PreferenciasRepositoryImpl (2
+    // anúncios recompensados/dia, RF-09.2).
+    private val limiteAnunciosPorDia = 2
+
     override suspend fun salvarPerfil(
         nome: String,
         nascimento: LocalDate?,
@@ -69,12 +73,20 @@ class FakePreferenciasRepository : PreferenciasRepository {
 
     override suspend fun registrarAnuncioAssistido(hoje: LocalDate) {
         val atual = limiteDiario.value?.takeIf { it.data == hoje } ?: LimiteDiario(hoje, usados = 0, extras = 0)
-        limiteDiario.value = atual.copy(extras = atual.extras + 1)
+        if (atual.extras < limiteAnunciosPorDia) {
+            limiteDiario.value = atual.copy(extras = atual.extras + 1)
+        }
     }
 
     override fun observarPalpitesGratisRestantesHoje(hoje: LocalDate) =
         limiteDiario.map { estado ->
             val atual = estado?.takeIf { it.data == hoje }
             (1 + (atual?.extras ?: 0) - (atual?.usados ?: 0)).coerceAtLeast(0)
+        }
+
+    override fun observarAnunciosDisponiveisHoje(hoje: LocalDate) =
+        limiteDiario.map { estado ->
+            val extras = estado?.takeIf { it.data == hoje }?.extras ?: 0
+            (limiteAnunciosPorDia - extras).coerceAtLeast(0)
         }
 }
