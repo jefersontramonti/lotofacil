@@ -10,7 +10,7 @@ Legenda de fase: **F1** MVP publicável · **F2** Retenção · **F3** Monetiza�
 | ID | Requisito (resumo) | Pri | Fase | Status | Branch/PR |
 |---|---|---|---|---|---|
 | RF-01.1 | Tela inicial com proposta + aviso de aleatoriedade | M | F1 | concluído |  |
-| RF-01.2 | Coletar nome e data de nascimento em campos separados | M | F1 | concluído |  |
+| RF-01.2 | Coletar nome e data de nascimento em campos separados | M | F1 | concluído | bug relatado pelo usuário: o app sempre abria em `Rotas.ABERTURA`, sem checar se já havia perfil salvo — nome/nascimento eram gravados (`CrencasViewModel.aoGerarPalpite` → `PreferenciasRepository.salvarPerfil`) mas nunca lidos de volta no início, então todo relançamento repetia o onboarding inteiro. Corrigido com `InicioViewModel` (expõe `perfilJaExiste: StateFlow<Boolean?>`); `TrevoNavHost` espera esse valor antes de montar o `NavHost` e escolhe `Rotas.HOME` quando já existe perfil. Verificado no emulador (onboarding uma vez → force-stop → reabrir → cai direto na Home) |
 | RF-01.3 | Validar data dd/mm/aaaa (mês, dia, bissexto, ano 1900–hoje) | M | F1 | concluído |  |
 | RF-01.4 | Bloquear cadastro de menores de 18 anos | M | F1 | concluído |  |
 | RF-01.5 | Calcular signo a partir da data válida; marcador neutro se inválida | M | F1 | concluído |  |
