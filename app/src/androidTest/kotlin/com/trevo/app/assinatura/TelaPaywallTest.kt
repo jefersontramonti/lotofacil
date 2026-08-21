@@ -68,6 +68,17 @@ class TelaPaywallTest {
     }
 
     @Test
+    fun semProdutosDisponiveisOValorDoProContinuaVisivel() {
+        mostrarTelaPaywall(uiState = PaywallUiState(carregando = false, produtos = emptyList()))
+
+        composeTestRule.onNodeWithText(context.getString(R.string.paywall_titulo)).assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.paywall_item_palpites_nome))
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText(context.getString(R.string.paywall_teste_titulo)).assertIsDisplayed()
+    }
+
+    @Test
     fun tocarUmPlanoDisparaOCallbackComOProductIdCorreto() {
         var escolhido: String? = null
         mostrarTelaPaywall(onEscolherPlanoClick = { escolhido = it })

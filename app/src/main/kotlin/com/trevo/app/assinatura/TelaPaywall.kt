@@ -87,16 +87,12 @@ fun TelaPaywall(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             CabecalhoDoPaywall(onFecharClick)
-            if (uiState.carregando) {
-                Text(text = "", style = MaterialTheme.typography.bodySmall)
-            } else if (uiState.indisponivel) {
-                Text(
-                    text = stringResource(id = R.string.paywall_indisponivel),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            } else {
-                ConteudoDoPaywall(uiState, onEscolherPlanoClick, onComecarTesteClick)
-            }
+            // O valor do Pro (benefícios, teste de 7 dias) não depende do Play
+            // Billing — fica sempre visível. Só a seção de planos (preço real)
+            // cai pro estado "indisponível" quando o Play Console ainda não
+            // tem os produtos, em vez de esconder a tela inteira.
+            ConteudoEstaticoDoPaywall()
+            SecaoDePlanos(uiState, onEscolherPlanoClick, onComecarTesteClick)
             Text(
                 text = stringResource(id = R.string.paywall_cta_continuar_gratis),
                 style = MaterialTheme.typography.bodyMedium,
@@ -135,12 +131,7 @@ private fun CabecalhoDoPaywall(
 }
 
 @Composable
-private fun ConteudoDoPaywall(
-    uiState: PaywallUiState,
-    onEscolherPlanoClick: (String) -> Unit,
-    onComecarTesteClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ConteudoEstaticoDoPaywall(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             SelinhoDoPaywall(stringResource(id = R.string.paywall_tag_pro))
@@ -177,7 +168,30 @@ private fun ConteudoDoPaywall(
             Text(text = stringResource(id = R.string.paywall_teste_dia5), style = MaterialTheme.typography.bodySmall)
             Text(text = stringResource(id = R.string.paywall_teste_dia7), style = MaterialTheme.typography.bodySmall)
         }
+    }
+}
 
+// RF-09.4 — só esta seção depende do Play Billing de verdade
+// (AssinaturaRepository.produtosDisponiveis()): preço, planos e o CTA de
+// compra. Sem produto no Play Console, cai em "indisponível" aqui, sem
+// esconder o resto do valor do Pro (ConteudoEstaticoDoPaywall).
+@Composable
+private fun SecaoDePlanos(
+    uiState: PaywallUiState,
+    onEscolherPlanoClick: (String) -> Unit,
+    onComecarTesteClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (uiState.carregando) return
+    if (uiState.indisponivel) {
+        Text(
+            text = stringResource(id = R.string.paywall_indisponivel),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = modifier,
+        )
+        return
+    }
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             uiState.produtos.forEach { produto ->
                 CartaoDePlano(

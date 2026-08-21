@@ -387,7 +387,7 @@
     <string name="paywall_tag_pro">✦ Trevo Pro</string>
     <string name="paywall_tag_trial">7 dias grátis</string>
     <string name="paywall_titulo">Todas as crenças, todo dia</string>
-    <string name="paywall_subtitulo">O grátis dá um palpite por dia com três crenças. A primeira semana é por conta da casa.</string>
+    <string name="paywall_subtitulo">O grátis dá um palpite por dia com três crenças. O Pro tira o limite e libera o fechamento. A primeira semana é por conta da casa.</string>
     <string name="paywall_item_crencas_nome">Crenças ilimitadas</string>
     <string name="paywall_item_crencas_desc">No grátis são três por palpite.</string>
     <string name="paywall_item_palpites_nome">Palpites sem limite</string>
