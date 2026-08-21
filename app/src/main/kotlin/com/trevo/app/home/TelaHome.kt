@@ -111,7 +111,16 @@ fun TelaHome(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             CabecalhoHome()
-            Text(text = stringResource(id = R.string.home_horario_apostas), style = MaterialTheme.typography.bodyMedium)
+            // RF-03.1 — só entra "Concurso N ·" quando já existe um número
+            // real (RF-05 já buscou um resultado); sem isso, só os horários.
+            val numeroDoConcurso = uiState.numeroDoConcursoCorrente
+            val textoConcursoEHorario =
+                if (numeroDoConcurso != null) {
+                    stringResource(id = R.string.home_concurso_e_horario, numeroDoConcurso)
+                } else {
+                    stringResource(id = R.string.home_horario_apostas)
+                }
+            Text(text = textoConcursoEHorario, style = MaterialTheme.typography.bodyMedium)
             HorizontalDivider(color = NocturneOutline)
             if (uiState.nome != null) {
                 SecaoSorteLuaSigno(uiState)

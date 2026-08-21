@@ -7,6 +7,7 @@ import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.palpite.PalpiteSalvo
 import com.trevo.core.data.preferencias.PerfilSalvo
 import com.trevo.core.data.preferencias.PreferenciasRepository
+import com.trevo.core.data.resultado.ResultadoRepository
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.crenca.DadosDeContribuicao
 import com.trevo.core.engine.crenca.GRUPOS_DO_BICHO
@@ -15,6 +16,7 @@ import com.trevo.core.engine.crenca.crencasAtivasNoModo
 import com.trevo.core.engine.crenca.faseDaLuaEm
 import com.trevo.core.engine.crenca.indiceDeSorteDoDia
 import com.trevo.core.engine.palpite.PalpiteGenerator
+import com.trevo.core.engine.resultado.Resultado
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,6 +46,7 @@ class HomeViewModel
         private val repository: PalpiteRepository,
         private val preferenciasRepository: PreferenciasRepository,
         private val assinaturaRepository: AssinaturaRepository,
+        private val resultadoRepository: ResultadoRepository,
         private val gerador: PalpiteGenerator,
         private val clock: Clock,
     ) : ViewModel() {
@@ -79,11 +82,13 @@ class HomeViewModel
                 combine(
                     assinaturaRepository.observarIsPro(),
                     preferenciasRepository.observarPalpitesGratisRestantesHoje(LocalDate.now(clock)),
-                    ::Pair,
+                    resultadoRepository.observarUltimoResultadoSalvo(),
+                    ::Triple,
                 ),
                 estadoLocal,
-            ) { palpites, perfil, grupoConfirmado, proELimite, local ->
-                montarUiState(palpites, perfil, grupoConfirmado, proELimite.first, proELimite.second, local)
+            ) { palpites, perfil, grupoConfirmado, proLimiteEResultado, local ->
+                val (isPro, restantes, ultimoResultado) = proLimiteEResultado
+                montarUiState(palpites, perfil, grupoConfirmado, isPro, restantes, ultimoResultado, local)
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -96,6 +101,7 @@ class HomeViewModel
             grupoConfirmado: Int?,
             isPro: Boolean,
             palpitesGratisRestantesHoje: Int,
+            ultimoResultado: Resultado?,
             local: EstadoLocal,
         ): HomeUiState {
             val hoje = LocalDate.now(clock)
@@ -116,6 +122,15 @@ class HomeViewModel
                 modoSelecionado = local.modo,
                 isPro = isPro,
                 palpitesGratisRestantesHoje = palpitesGratisRestantesHoje,
+                // RF-03.1 — a Caixa nunca pula número (mesmo sem sorteio aos
+                // domingos, Docs/tabelavalores.md), então "último + 1" é o
+                // concurso correntemente aceitando apostas. CLAUDE.md §8 proíbe
+                // inventar dado de SORTEIO (dezenas/prêmio) — isto é aritmética
+                // sobre um número real já confirmado pela API, não um resultado
+                // inventado; `null` até o primeiro resultado real ser buscado
+                // (RF-05) ou quando o último salvo foi entrada manual sem
+                // número (RF-05.10).
+                numeroDoConcursoCorrente = ultimoResultado?.numero?.plus(1),
             )
         }
 

@@ -70,6 +70,7 @@
     <string name="crenca_numerologia_nome">Numerologia do nome</string>
     <string name="crenca_numerologia_desc">As letras do seu nome viram dezenas</string>
     <string name="home_horario_apostas">Apostas até 20h · sorteio às 21h</string>
+    <string name="home_concurso_e_horario">Concurso %1$d · apostas até 20h · sorteio às 21h</string>
     <string name="home_secao_palpites_titulo">Palpites de hoje</string>
     <plurals name="home_resumo_jogos">
         <item quantity="one">%1$d jogo · %2$s</item>

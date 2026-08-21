@@ -4,12 +4,15 @@ import com.trevo.app.MainDispatcherRule
 import com.trevo.app.assinatura.FakeAssinaturaRepository
 import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.app.preferencias.FakePreferenciasRepository
+import com.trevo.app.resultado.FakeResultadoRepository
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.crenca.GRUPOS_DO_BICHO
 import com.trevo.core.engine.crenca.ModoDeGeracao
 import com.trevo.core.engine.identidade.Signo
 import com.trevo.core.engine.palpite.Palpite
 import com.trevo.core.engine.palpite.PalpiteGenerator
+import com.trevo.core.engine.resultado.OrigemDoResultado
+import com.trevo.core.engine.resultado.Resultado
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -51,10 +54,12 @@ class HomeViewModelTest {
         repository: FakePalpiteRepository = FakePalpiteRepository(RELOGIO_FIXO),
         preferenciasRepository: FakePreferenciasRepository = FakePreferenciasRepository(),
         assinaturaRepository: FakeAssinaturaRepository = FakeAssinaturaRepository(),
+        resultadoRepository: FakeResultadoRepository = FakeResultadoRepository(RELOGIO_FIXO),
     ) = HomeViewModel(
         repository,
         preferenciasRepository,
         assinaturaRepository,
+        resultadoRepository,
         PalpiteGenerator(Random(1)),
         RELOGIO_FIXO,
     )
@@ -417,5 +422,59 @@ class HomeViewModelTest {
             advanceUntilIdle()
 
             assertEquals(1, viewModel.uiState.value.palpitesGratisRestantesHoje)
+        }
+
+    @Test
+    fun semResultadoAindaBuscadoNumeroDoConcursoCorrenteFicaNulo() =
+        runTest {
+            val viewModel = novoViewModel()
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            assertNull(viewModel.uiState.value.numeroDoConcursoCorrente)
+        }
+
+    @Test
+    fun comUltimoResultadoSalvoNumeroDoConcursoCorrenteEUmAMaisQueOUltimoSorteado() =
+        runTest {
+            val resultadoRepository = FakeResultadoRepository(RELOGIO_FIXO)
+            resultadoRepository.adicionarResultado(
+                Resultado(
+                    numero = 3457,
+                    dataApuracao = LocalDate.now(RELOGIO_FIXO),
+                    dezenasSorteadas = (1..15).toList(),
+                    faixasDePremio = emptyList(),
+                    acumulado = false,
+                    origem = OrigemDoResultado.API,
+                ),
+            )
+            val viewModel = novoViewModel(resultadoRepository = resultadoRepository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            assertEquals(3458, viewModel.uiState.value.numeroDoConcursoCorrente)
+        }
+
+    @Test
+    fun comUltimoResultadoManualSemNumeroNumeroDoConcursoCorrenteFicaNulo() =
+        runTest {
+            // RF-05.10: entrada manual não tem número real da Caixa — nunca
+            // inventa um "próximo" a partir de um número que não existe.
+            val resultadoRepository = FakeResultadoRepository(RELOGIO_FIXO)
+            resultadoRepository.adicionarResultado(
+                Resultado(
+                    numero = null,
+                    dataApuracao = LocalDate.now(RELOGIO_FIXO),
+                    dezenasSorteadas = (1..15).toList(),
+                    faixasDePremio = emptyList(),
+                    acumulado = false,
+                    origem = OrigemDoResultado.MANUAL,
+                ),
+            )
+            val viewModel = novoViewModel(resultadoRepository = resultadoRepository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            assertNull(viewModel.uiState.value.numeroDoConcursoCorrente)
         }
 }

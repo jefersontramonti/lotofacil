@@ -457,4 +457,20 @@ class TelaHomeTest {
         composeTestRule.onNodeWithText(context.getString(R.string.home_restantes_pro)).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TAG_BOTAO_CTA_PRINCIPAL).assertIsDisplayed()
     }
+
+    @Test
+    fun semNumeroDoConcursoAindaExibeSoOsHorarios() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, numeroDoConcursoCorrente = null))
+
+        composeTestRule.onNodeWithText(context.getString(R.string.home_horario_apostas)).assertIsDisplayed()
+    }
+
+    @Test
+    fun comNumeroDoConcursoExibeOConcursoJuntoDosHorarios() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, numeroDoConcursoCorrente = 3458))
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.home_concurso_e_horario, 3458))
+            .assertIsDisplayed()
+    }
 }

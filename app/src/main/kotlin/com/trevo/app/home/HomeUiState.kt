@@ -49,6 +49,9 @@ data class HomeUiState(
     // RF-09.1/RF-09.2/RF-03.9
     val isPro: Boolean = false,
     val palpitesGratisRestantesHoje: Int = 1,
+    // RF-03.1 — null até o primeiro resultado real ser buscado (RF-05);
+    // nunca inventado, ver nota em HomeViewModel.montarUiState.
+    val numeroDoConcursoCorrente: Int? = null,
 ) {
     val totalDeJogos: Int get() = palpitesHoje.size
 
