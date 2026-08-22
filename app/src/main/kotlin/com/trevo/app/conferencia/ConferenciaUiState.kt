@@ -1,6 +1,8 @@
 package com.trevo.app.conferencia
 
+import com.trevo.core.engine.resultado.FaixaDePremio
 import java.math.BigDecimal
+import java.time.LocalDate
 
 sealed interface ConferenciaUiState {
     data object Carregando : ConferenciaUiState
@@ -17,11 +19,16 @@ sealed interface ConferenciaUiState {
 
     data class Sucesso(
         val numeroDoConcurso: Int?,
+        val dataApuracao: LocalDate,
         val dezenasSorteadas: List<Int>,
         val totalGanho: BigDecimal,
         val totalGasto: BigDecimal,
         val itens: List<PalpiteConferidoUiState>,
         val origemManual: Boolean,
+        // RF-05.10: faixasDePremio vem vazia pra resultado manual — a
+        // tabela de premiação oficial só existe na resposta da Caixa.
+        val faixasDePremio: List<FaixaDePremio>,
+        val acumulado: Boolean,
     ) : ConferenciaUiState
 }
 

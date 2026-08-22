@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.trevo.app.R
 import com.trevo.app.detalhe.GradeDeDezenas
+import com.trevo.core.engine.resultado.FaixaDePremio
 import com.trevo.core.ui.BotaoPrimario
 import com.trevo.core.ui.BotaoVoltar
 import com.trevo.core.ui.NocturneAccent
@@ -54,6 +55,8 @@ import com.trevo.core.ui.NocturneOutline
 import com.trevo.core.ui.NocturneSurface
 import java.math.BigDecimal
 import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 const val TAG_BOTAO_TENTAR_NOVAMENTE = "conferencia_tentar_novamente"
@@ -285,12 +288,27 @@ private fun SecaoSucesso(
                 } else {
                     stringResource(id = R.string.conferencia_concurso_titulo, uiState.numeroDoConcurso)
                 }
-            Text(text = tituloConcurso, style = MaterialTheme.typography.bodySmall)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = tituloConcurso, style = MaterialTheme.typography.bodySmall)
+                if (!uiState.origemManual) {
+                    Text(text = formatarData(uiState.dataApuracao), style = MaterialTheme.typography.bodySmall)
+                }
+            }
             LinhaDeDezenas(
                 dezenas = uiState.dezenasSorteadas,
                 dezenasCheias = uiState.dezenasSorteadas.toSet(),
                 modifier = Modifier.padding(top = 6.dp),
             )
+            if (uiState.acumulado) {
+                Text(
+                    text = stringResource(id = R.string.conferencia_acumulado),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
+            }
+            if (uiState.faixasDePremio.isNotEmpty()) {
+                SecaoPremiacao(faixas = uiState.faixasDePremio, modifier = Modifier.padding(top = 10.dp))
+            }
         }
 
         if (uiState.itens.isNotEmpty()) {
@@ -332,6 +350,58 @@ private fun SecaoSucesso(
         }
     }
 }
+
+@Composable
+private fun SecaoPremiacao(
+    faixas: List<FaixaDePremio>,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(id = R.string.conferencia_premiacao_titulo),
+            style = MaterialTheme.typography.titleSmall,
+        )
+        Column(modifier = Modifier.padding(top = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            faixas.forEach { faixa -> LinhaDePremiacao(faixa) }
+        }
+    }
+}
+
+@Composable
+private fun LinhaDePremiacao(
+    faixa: FaixaDePremio,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text =
+                pluralStringResource(
+                    id = R.plurals.conferencia_acertos,
+                    count = faixa.acertosNecessarios,
+                    faixa.acertosNecessarios,
+                ),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.weight(1f),
+        )
+        Text(text = textoDeGanhadores(faixa), style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun textoDeGanhadores(faixa: FaixaDePremio): String =
+    if (faixa.numeroDeGanhadores == 0L) {
+        stringResource(id = R.string.conferencia_premiacao_sem_ganhador)
+    } else {
+        pluralStringResource(
+            id = R.plurals.conferencia_premiacao_ganhadores,
+            count = faixa.numeroDeGanhadores.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+            faixa.numeroDeGanhadores,
+            formatarReais(faixa.valorPremio),
+        )
+    }
+
+private fun formatarData(data: LocalDate): String =
+    data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale("pt", "BR")))
 
 @Composable
 private fun CartaoDeTotal(

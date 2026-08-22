@@ -108,11 +108,14 @@ class ConferenciaViewModel
 
             return ConferenciaUiState.Sucesso(
                 numeroDoConcurso = resultado.numero,
+                dataApuracao = resultado.dataApuracao,
                 dezenasSorteadas = resultado.dezenasSorteadas,
                 totalGanho = totalGanho,
                 totalGasto = totalGasto,
                 itens = itens,
                 origemManual = resultado.origem == OrigemDoResultado.MANUAL,
+                faixasDePremio = resultado.faixasDePremio,
+                acumulado = resultado.acumulado,
             )
         }
     }

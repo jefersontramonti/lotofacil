@@ -9,12 +9,16 @@ import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.trevo.app.R
 import com.trevo.app.detalhe.tagDezenaNaGrade
+import com.trevo.core.engine.resultado.FaixaDePremio
 import com.trevo.core.ui.TrevoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.math.BigDecimal
+import java.text.NumberFormat
+import java.time.LocalDate
+import java.util.Locale
 
 /**
  * RF-05 — Conferência. Wireframes 1j (resultado saiu) e 1k (offline e erro).
@@ -90,6 +94,7 @@ class TelaConferenciaTest {
     private val sucessoDeExemplo =
         ConferenciaUiState.Sucesso(
             numeroDoConcurso = 3457,
+            dataApuracao = LocalDate.of(2026, 8, 21),
             dezenasSorteadas = (1..15).toList(),
             totalGanho = BigDecimal("30.00"),
             totalGasto = BigDecimal("6.00"),
@@ -111,6 +116,21 @@ class TelaConferenciaTest {
                     ),
                 ),
             origemManual = false,
+            faixasDePremio =
+                listOf(
+                    FaixaDePremio(acertosNecessarios = 15, numeroDeGanhadores = 0, valorPremio = BigDecimal.ZERO),
+                    FaixaDePremio(
+                        acertosNecessarios = 14,
+                        numeroDeGanhadores = 207,
+                        valorPremio = BigDecimal("2251.87"),
+                    ),
+                    FaixaDePremio(
+                        acertosNecessarios = 13,
+                        numeroDeGanhadores = 6937,
+                        valorPremio = BigDecimal("35.00"),
+                    ),
+                ),
+            acumulado = true,
         )
 
     @Test
@@ -122,6 +142,35 @@ class TelaConferenciaTest {
             .assertIsDisplayed()
         composeTestRule.onNodeWithText(context.getString(R.string.home_palpite_rotulo, 1)).assertIsDisplayed()
         composeTestRule.onNodeWithText(context.getString(R.string.home_palpite_rotulo, 2)).assertIsDisplayed()
+    }
+
+    @Test
+    fun estadoDeSucessoMostraDataDoSorteioETabelaDePremiacao() {
+        mostrarTela(sucessoDeExemplo)
+
+        composeTestRule.onNodeWithText("21/08/2026").assertIsDisplayed()
+        composeTestRule.onNodeWithText(context.getString(R.string.conferencia_premiacao_titulo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(context.getString(R.string.conferencia_acumulado)).assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.conferencia_premiacao_sem_ganhador))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(
+                context.resources.getQuantityString(
+                    R.plurals.conferencia_premiacao_ganhadores,
+                    207,
+                    207,
+                    formatarReaisDeTeste(BigDecimal("2251.87")),
+                ),
+            ).assertIsDisplayed()
+    }
+
+    @Test
+    fun resultadoManualNaoMostraDataNemTabelaDePremiacao() {
+        mostrarTela(sucessoDeExemplo.copy(origemManual = true, faixasDePremio = emptyList()))
+
+        composeTestRule.onNodeWithText("21/08/2026").assertDoesNotExist()
+        composeTestRule.onNodeWithText(context.getString(R.string.conferencia_premiacao_titulo)).assertDoesNotExist()
     }
 
     @Test
@@ -176,6 +225,12 @@ class TelaConferenciaTest {
                 put("conferencia_disclaimer_oficial", context.getString(R.string.conferencia_disclaimer_oficial))
                 put("conferencia_legenda_bolas", context.getString(R.string.conferencia_legenda_bolas))
                 put("conferencia_vazio_descricao", context.getString(R.string.conferencia_vazio_descricao))
+                put("conferencia_acumulado", context.getString(R.string.conferencia_acumulado))
+                put("conferencia_premiacao_titulo", context.getString(R.string.conferencia_premiacao_titulo))
+                put(
+                    "conferencia_premiacao_sem_ganhador",
+                    context.getString(R.string.conferencia_premiacao_sem_ganhador),
+                )
             }
 
         stringsDaTela.forEach { (nomeRecurso, valor) ->
@@ -190,3 +245,6 @@ class TelaConferenciaTest {
         }
     }
 }
+
+private fun formatarReaisDeTeste(valor: BigDecimal): String =
+    NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(valor)

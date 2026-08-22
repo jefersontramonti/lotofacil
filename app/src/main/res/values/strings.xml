@@ -310,6 +310,13 @@
     <string name="conferencia_sem_premio">sem prêmio</string>
     <string name="conferencia_premio_indisponivel">resultado manual, sem valor de prêmio</string>
     <string name="conferencia_premio_rotulo">Prêmio</string>
+    <string name="conferencia_acumulado">Concurso acumulado</string>
+    <string name="conferencia_premiacao_titulo">Premiação</string>
+    <string name="conferencia_premiacao_sem_ganhador">Não houve acertador</string>
+    <plurals name="conferencia_premiacao_ganhadores">
+        <item quantity="one">%1$d aposta ganhadora, %2$s</item>
+        <item quantity="other">%1$d apostas ganhadoras, %2$s</item>
+    </plurals>
     <string name="conferencia_disclaimer_oficial">A conferência oficial e o pagamento do prêmio são feitos pela Caixa.</string>
     <string name="conferencia_legenda_bolas">Bola cheia = acerto, tracejada = marcada que não saiu.</string>
     <string name="conferencia_vazio_titulo">Nenhum palpite hoje</string>
