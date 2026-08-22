@@ -290,6 +290,20 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                                         PackageManager.PERMISSION_GRANTED
                                 if (!jaConcedida) lancadorDePermissao.launch(Manifest.permission.POST_NOTIFICATIONS)
                             }
+                            // LGPD/achado de auditoria de segurança — perfil e
+                            // palpites já foram apagados quando este evento
+                            // chega; não existe mais perfil salvo, então volta
+                            // pro onboarding e limpa toda a pilha de navegação
+                            // (popUpTo o próprio grafo, inclusive), senão
+                            // "voltar" reabriria uma tela que lê dado que não
+                            // existe mais.
+                            PerfilEvento.DadosExcluidos -> {
+                                navController.navigate(Rotas.ABERTURA) {
+                                    popUpTo(navController.graph.id) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -313,6 +327,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                             navController.navigate(Rotas.PAYWALL)
                         }
                     },
+                    onConfirmarExclusaoDeDadosClick = viewModel::aoConfirmarExclusaoDeDados,
                 )
             }
             composable(Rotas.PERFIL_CRENCAS) {

@@ -11,6 +11,11 @@ interface PalpiteRepository {
 
     suspend fun excluir(id: Long)
 
+    // LGPD/achado de auditoria de segurança — apaga todos os palpites,
+    // parte do fluxo de "excluir meus dados" (ver
+    // PreferenciasRepository.excluirTudo(), a outra metade).
+    suspend fun excluirTodos()
+
     fun observarPalpitesDoDia(
         dia: LocalDate,
         zona: ZoneId,

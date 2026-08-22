@@ -3,13 +3,16 @@ package com.trevo.app.perfil
 import com.trevo.app.MainDispatcherRule
 import com.trevo.app.assinatura.FakeAssinaturaRepository
 import com.trevo.app.notificacoes.FakeNotificacoesScheduler
+import com.trevo.app.palpite.FakePalpiteRepository
 import com.trevo.app.preferencias.FakePreferenciasRepository
 import com.trevo.core.engine.crenca.Crenca
 import com.trevo.core.engine.identidade.ErroDataNascimento
 import com.trevo.core.engine.identidade.Signo
 import com.trevo.core.engine.identidade.ValidadorDataNascimento
 import com.trevo.core.engine.identidade.VerificadorDeIdade
+import com.trevo.core.engine.palpite.Palpite
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -41,6 +44,7 @@ class PerfilViewModelTest {
         val preferencias: FakePreferenciasRepository,
         val scheduler: FakeNotificacoesScheduler,
         val assinatura: FakeAssinaturaRepository,
+        val palpites: FakePalpiteRepository,
     )
 
     // uiState é um StateFlow com SharingStarted.WhileSubscribed — o combine()
@@ -50,6 +54,7 @@ class PerfilViewModelTest {
         val preferencias = FakePreferenciasRepository()
         val scheduler = FakeNotificacoesScheduler()
         val assinatura = FakeAssinaturaRepository()
+        val palpites = FakePalpiteRepository(RELOGIO_FIXO)
         val viewModel =
             PerfilViewModel(
                 preferenciasRepository = preferencias,
@@ -57,9 +62,10 @@ class PerfilViewModelTest {
                 validador = ValidadorDataNascimento(RELOGIO_FIXO),
                 verificador = VerificadorDeIdade(RELOGIO_FIXO),
                 assinaturaRepository = assinatura,
+                palpiteRepository = palpites,
             )
         backgroundScope.launch { viewModel.uiState.collect {} }
-        return Ambiente(viewModel, preferencias, scheduler, assinatura)
+        return Ambiente(viewModel, preferencias, scheduler, assinatura, palpites)
     }
 
     @Test
@@ -203,5 +209,41 @@ class PerfilViewModelTest {
 
             assertTrue(viewModel.uiState.value.isPro)
             assertEquals("trevo_pro_mensal", viewModel.uiState.value.productIdDaAssinatura)
+        }
+
+    @Test
+    fun confirmarExclusaoDeDadosApagaPerfilEPalpitesECancelaLembretes() =
+        runTest {
+            val (viewModel, preferencias, scheduler, _, palpites) = novoAmbiente()
+            preferencias.salvarPerfil(
+                nome = "Marlene",
+                nascimento = LocalDate.of(1978, 7, 14),
+                signo = Signo.CANCER,
+                crencasAtivas = setOf(Crenca.SIGNO),
+            )
+            palpites.salvar(
+                Palpite(dezenas = (1..15).toList(), dezenasFixas = emptyList(), contribuicoes = emptyMap(), forca = 80),
+            )
+            advanceUntilIdle()
+
+            viewModel.aoConfirmarExclusaoDeDados()
+            advanceUntilIdle()
+
+            assertNull(preferencias.perfilSalvo.value)
+            assertTrue(palpites.todos.value.isEmpty())
+            assertTrue(scheduler.lembreteCancelado)
+            assertTrue(scheduler.notificacaoResultadoCancelada)
+        }
+
+    @Test
+    fun confirmarExclusaoDeDadosEmiteOEventoDadosExcluidos() =
+        runTest {
+            val (viewModel, preferencias, _, _, _) = novoAmbiente()
+            preferencias.salvarPerfil("Marlene", null, null, emptySet())
+            advanceUntilIdle()
+
+            viewModel.aoConfirmarExclusaoDeDados()
+
+            assertEquals(PerfilEvento.DadosExcluidos, viewModel.eventos.first())
         }
 }

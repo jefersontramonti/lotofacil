@@ -75,6 +75,8 @@ const val TAG_SWITCH_LEMBRETE = "perfil_switch_lembrete"
 const val TAG_SWITCH_RESULTADO = "perfil_switch_resultado"
 const val TAG_CHIP_HORARIO_ATUAL = "perfil_chip_horario_atual"
 const val TAG_CARTAO_ASSINATURA = "perfil_cartao_assinatura"
+const val TAG_CARTAO_EXCLUIR_DADOS = "perfil_cartao_excluir_dados"
+const val TAG_BOTAO_CONFIRMAR_EXCLUSAO_DADOS = "perfil_confirmar_exclusao_dados"
 
 private val HORARIOS_SUGERIDOS = listOf(LocalTime.of(17, 0), LocalTime.of(18, 0), LocalTime.of(18, 30))
 private val FORMATO_HORARIO = DateTimeFormatter.ofPattern("HH:mm")
@@ -91,9 +93,11 @@ fun TelaPerfil(
     onEscolherHorarioLembrete: (LocalTime) -> Unit,
     onAlternarNotificacaoResultado: (Boolean) -> Unit,
     onAssinaturaClick: () -> Unit = {},
+    onConfirmarExclusaoDeDadosClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var mostrarDialogoDeHorario by remember { mutableStateOf(false) }
+    var mostrarDialogoDeExclusaoDeDados by remember { mutableStateOf(false) }
 
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
@@ -263,6 +267,16 @@ fun TelaPerfil(
                 onClick = onAssinaturaClick,
                 testTag = TAG_CARTAO_ASSINATURA,
             )
+
+            Kicker(texto = stringResource(id = R.string.perfil_dados_titulo))
+
+            CartaoDeNavegacao(
+                icone = null,
+                titulo = stringResource(id = R.string.perfil_excluir_dados_titulo),
+                descricao = stringResource(id = R.string.perfil_excluir_dados_descricao),
+                onClick = { mostrarDialogoDeExclusaoDeDados = true },
+                testTag = TAG_CARTAO_EXCLUIR_DADOS,
+            )
         }
     }
 
@@ -276,6 +290,41 @@ fun TelaPerfil(
             onCancelar = { mostrarDialogoDeHorario = false },
         )
     }
+
+    if (mostrarDialogoDeExclusaoDeDados) {
+        DialogoConfirmarExclusaoDeDados(
+            onConfirmarClick = {
+                mostrarDialogoDeExclusaoDeDados = false
+                onConfirmarExclusaoDeDadosClick()
+            },
+            onCancelarClick = { mostrarDialogoDeExclusaoDeDados = false },
+        )
+    }
+}
+
+@Composable
+private fun DialogoConfirmarExclusaoDeDados(
+    onConfirmarClick: () -> Unit,
+    onCancelarClick: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancelarClick,
+        title = { Text(text = stringResource(id = R.string.perfil_excluir_dados_confirmar_titulo)) },
+        text = { Text(text = stringResource(id = R.string.perfil_excluir_dados_confirmar_mensagem)) },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirmarClick,
+                modifier = Modifier.testTag(TAG_BOTAO_CONFIRMAR_EXCLUSAO_DADOS),
+            ) {
+                Text(text = stringResource(id = R.string.perfil_excluir_dados_confirmar_cta))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelarClick) {
+                Text(text = stringResource(id = R.string.perfil_excluir_dados_cancelar_cta))
+            }
+        },
+    )
 }
 
 @Composable

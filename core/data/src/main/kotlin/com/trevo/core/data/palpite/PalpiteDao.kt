@@ -17,6 +17,12 @@ interface PalpiteDao {
     @Query("DELETE FROM palpites WHERE id = :id")
     suspend fun excluirPorId(id: Long)
 
+    // LGPD/achado de auditoria de segurança — apaga todos os palpites do
+    // usuário, parte do fluxo de "excluir meus dados" (ver
+    // PreferenciasRepository.excluirTudo(), a outra metade).
+    @Query("DELETE FROM palpites")
+    suspend fun excluirTodos()
+
     @Query(
         "SELECT * FROM palpites WHERE criadoEmEpochMillis BETWEEN :inicioEpochMillis AND :fimEpochMillis " +
             "ORDER BY criadoEmEpochMillis DESC",

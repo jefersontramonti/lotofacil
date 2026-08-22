@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.trevo.core.data.assinatura.AssinaturaRepository
 import com.trevo.core.data.assinatura.EstadoDaAssinatura
 import com.trevo.core.data.notificacoes.NotificacoesScheduler
+import com.trevo.core.data.palpite.PalpiteRepository
 import com.trevo.core.data.preferencias.PerfilSalvo
 import com.trevo.core.data.preferencias.PreferenciasDeNotificacao
 import com.trevo.core.data.preferencias.PreferenciasRepository
@@ -41,6 +42,11 @@ private val FORMATO_CAMPO_NASCIMENTO = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 sealed interface PerfilEvento {
     // RF-07.7 — nunca pedida na abertura do app, só aqui, no primeiro toggle ligado.
     data object PedirPermissaoDeNotificacao : PerfilEvento
+
+    // LGPD/achado de auditoria de segurança — perfil e palpites já foram
+    // apagados quando este evento chega; quem escuta (TrevoNavHost) navega
+    // de volta pro onboarding, já que não existe mais perfil salvo.
+    data object DadosExcluidos : PerfilEvento
 }
 
 @HiltViewModel
@@ -52,6 +58,7 @@ class PerfilViewModel
         private val validador: ValidadorDataNascimento,
         private val verificador: VerificadorDeIdade,
         private val assinaturaRepository: AssinaturaRepository,
+        private val palpiteRepository: PalpiteRepository,
     ) : ViewModel() {
         private val nomeEditado = MutableStateFlow<String?>(null)
         private val nascimentoEditado = MutableStateFlow<String?>(null)
@@ -198,6 +205,22 @@ class PerfilViewModel
                 } else {
                     scheduler.cancelarNotificacaoResultado()
                 }
+            }
+        }
+
+        // LGPD/achado de auditoria de segurança — direito de eliminação:
+        // apaga perfil/crenças/notificações (DataStore) e todos os palpites
+        // (Room), e cancela qualquer lembrete/notificação agendados (senão
+        // ficariam órfãos, disparando depois dos dados já apagados). Nome e
+        // data de nascimento são os únicos dados pessoais coletados pelo
+        // Trevo (CLAUDE.md) — isso cobre os dois.
+        fun aoConfirmarExclusaoDeDados() {
+            viewModelScope.launch {
+                scheduler.cancelarLembreteFechamento()
+                scheduler.cancelarNotificacaoResultado()
+                palpiteRepository.excluirTodos()
+                preferenciasRepository.excluirTudo()
+                canalDeEventos.send(PerfilEvento.DadosExcluidos)
             }
         }
     }

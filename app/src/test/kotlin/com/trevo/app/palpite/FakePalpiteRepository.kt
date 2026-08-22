@@ -45,6 +45,10 @@ class FakePalpiteRepository(
         estado.value = estado.value.filterNot { it.id == id }
     }
 
+    override suspend fun excluirTodos() {
+        estado.value = emptyList()
+    }
+
     override fun observarPalpitesDoDia(
         dia: LocalDate,
         zona: ZoneId,

@@ -20,6 +20,8 @@ class PalpiteRepositoryImpl
 
         override suspend fun excluir(id: Long) = dao.excluirPorId(id)
 
+        override suspend fun excluirTodos() = dao.excluirTodos()
+
         override fun observarPalpitesDoDia(
             dia: LocalDate,
             zona: ZoneId,

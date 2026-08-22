@@ -160,4 +160,8 @@ class PreferenciasRepositoryImpl
                     (LIMITE_ANUNCIOS_POR_DIA - extras).coerceAtLeast(0)
                 }
             }
+
+        override suspend fun excluirTudo() {
+            dataStore.edit { it.clear() }
+        }
     }

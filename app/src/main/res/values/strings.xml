@@ -394,6 +394,14 @@
     <string name="assinatura_plano_mensal_nome">mensal</string>
     <string name="assinatura_plano_desconhecido_nome">Pro</string>
 
+    <string name="perfil_dados_titulo">Seus dados</string>
+    <string name="perfil_excluir_dados_titulo">Excluir meus dados</string>
+    <string name="perfil_excluir_dados_descricao">Apaga perfil, crenças e todos os palpites salvos neste aparelho.</string>
+    <string name="perfil_excluir_dados_confirmar_titulo">Excluir todos os seus dados?</string>
+    <string name="perfil_excluir_dados_confirmar_mensagem">Perfil, crenças e todos os palpites salvos neste aparelho serão apagados. Essa ação não pode ser desfeita.</string>
+    <string name="perfil_excluir_dados_confirmar_cta">Excluir tudo</string>
+    <string name="perfil_excluir_dados_cancelar_cta">Cancelar</string>
+
     <string name="paywall_fechar_descricao">Fechar</string>
     <string name="paywall_tag_pro">✦ Trevo Pro</string>
     <string name="paywall_tag_trial">7 dias grátis</string>

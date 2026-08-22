@@ -42,4 +42,10 @@ interface PreferenciasRepository {
     // hoje (máx. 2/dia, reinício à meia-noite — mesmo padrão de
     // observarPalpitesGratisRestantesHoje).
     fun observarAnunciosDisponiveisHoje(hoje: LocalDate): Flow<Int>
+
+    // LGPD/achado de auditoria de segurança — apaga perfil, crenças,
+    // notificações e todos os outros dados guardados no DataStore. Parte do
+    // fluxo de "excluir meus dados" (ver PalpiteRepository.excluirTodos(),
+    // a outra metade — os palpites, no Room).
+    suspend fun excluirTudo()
 }

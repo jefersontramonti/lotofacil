@@ -89,4 +89,11 @@ class FakePreferenciasRepository : PreferenciasRepository {
             val extras = estado?.takeIf { it.data == hoje }?.extras ?: 0
             (limiteAnunciosPorDia - extras).coerceAtLeast(0)
         }
+
+    override suspend fun excluirTudo() {
+        perfil.value = null
+        preferenciasDeNotificacao.value = PreferenciasDeNotificacao()
+        sonhoDoDia.value = null
+        limiteDiario.value = null
+    }
 }
