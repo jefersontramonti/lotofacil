@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,57 +73,65 @@ fun TelaConferencia(
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    // A barra de navegação inferior (fora desta Composable,
-                    // ver TrevoNavHost) já cobre o inset de baixo — pedir de
-                    // novo aqui dobraria o espaço reservado.
-                    .windowInsetsPadding(
-                        WindowInsets.safeDrawing.only(
-                            WindowInsetsSides.Top + WindowInsetsSides.Horizontal,
-                        ),
-                    ).verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+        // Puxar pra baixo reusa o mesmo "tentar de novo" que já existe pros
+        // estados de erro — a única diferença é o gesto em vez do botão.
+        PullToRefreshBox(
+            isRefreshing = uiState is ConferenciaUiState.Carregando,
+            onRefresh = onTentarNovamenteClick,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            Cabecalho(onVoltarClick = onVoltarClick)
-            when (uiState) {
-                is ConferenciaUiState.Carregando -> {
-                    Text(
-                        text = stringResource(id = R.string.conferencia_carregando),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                is ConferenciaUiState.Espera -> {
-                    EstadoDeAviso(emoji = "🕓", titulo = stringResource(id = R.string.conferencia_espera_titulo)) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        // A barra de navegação inferior (fora desta Composable,
+                        // ver TrevoNavHost) já cobre o inset de baixo — pedir de
+                        // novo aqui dobraria o espaço reservado.
+                        .windowInsetsPadding(
+                            WindowInsets.safeDrawing.only(
+                                WindowInsetsSides.Top + WindowInsetsSides.Horizontal,
+                            ),
+                        ).verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp, vertical = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Cabecalho(onVoltarClick = onVoltarClick)
+                when (uiState) {
+                    is ConferenciaUiState.Carregando -> {
                         Text(
-                            text = stringResource(id = R.string.conferencia_espera_descricao),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center,
+                            text = stringResource(id = R.string.conferencia_carregando),
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     }
+                    is ConferenciaUiState.Espera -> {
+                        EstadoDeAviso(emoji = "🕓", titulo = stringResource(id = R.string.conferencia_espera_titulo)) {
+                            Text(
+                                text = stringResource(id = R.string.conferencia_espera_descricao),
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                    is ConferenciaUiState.SemConexao -> {
+                        EstadoDeFalha(
+                            emoji = "📵",
+                            titulo = stringResource(id = R.string.conferencia_sem_conexao_titulo),
+                            descricao = stringResource(id = R.string.conferencia_sem_conexao_descricao),
+                            onTentarNovamenteClick = onTentarNovamenteClick,
+                            onInformarResultadoManualmente = onInformarResultadoManualmente,
+                        )
+                    }
+                    is ConferenciaUiState.Falha -> {
+                        EstadoDeFalha(
+                            emoji = "⚠",
+                            titulo = stringResource(id = R.string.conferencia_falha_titulo),
+                            descricao = stringResource(id = R.string.conferencia_falha_descricao),
+                            onTentarNovamenteClick = onTentarNovamenteClick,
+                            onInformarResultadoManualmente = onInformarResultadoManualmente,
+                        )
+                    }
+                    is ConferenciaUiState.Sucesso -> SecaoSucesso(uiState)
                 }
-                is ConferenciaUiState.SemConexao -> {
-                    EstadoDeFalha(
-                        emoji = "📵",
-                        titulo = stringResource(id = R.string.conferencia_sem_conexao_titulo),
-                        descricao = stringResource(id = R.string.conferencia_sem_conexao_descricao),
-                        onTentarNovamenteClick = onTentarNovamenteClick,
-                        onInformarResultadoManualmente = onInformarResultadoManualmente,
-                    )
-                }
-                is ConferenciaUiState.Falha -> {
-                    EstadoDeFalha(
-                        emoji = "⚠",
-                        titulo = stringResource(id = R.string.conferencia_falha_titulo),
-                        descricao = stringResource(id = R.string.conferencia_falha_descricao),
-                        onTentarNovamenteClick = onTentarNovamenteClick,
-                        onInformarResultadoManualmente = onInformarResultadoManualmente,
-                    )
-                }
-                is ConferenciaUiState.Sucesso -> SecaoSucesso(uiState)
             }
         }
     }

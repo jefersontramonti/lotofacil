@@ -217,6 +217,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                         }
                     },
                     onAssinarClick = { navController.navigate(Rotas.PAYWALL) },
+                    onAtualizarClick = viewModel::aoAtualizar,
                 )
             }
             composable(Rotas.RITUAL) {

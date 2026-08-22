@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,70 +94,77 @@ fun TelaHome(
     onCtaPrincipalClick: () -> Unit = {},
     onAssistirAnuncioClick: () -> Unit = {},
     onAssinarClick: () -> Unit = {},
+    onAtualizarClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    // A barra de navegação inferior (fora desta Composable,
-                    // ver TrevoNavHost) já cobre o inset de baixo — pedir de
-                    // novo aqui dobraria o espaço reservado.
-                    .windowInsetsPadding(
-                        WindowInsets.safeDrawing.only(
-                            WindowInsetsSides.Top + WindowInsetsSides.Horizontal,
-                        ),
-                    ).verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+        PullToRefreshBox(
+            isRefreshing = uiState.atualizando,
+            onRefresh = onAtualizarClick,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            CabecalhoHome()
-            val proximoConcurso = uiState.proximoConcurso
-            if (proximoConcurso != null) {
-                CartaoProximoConcurso(proximoConcurso)
-            } else {
-                // RF-03.1 — só entra "Concurso N ·" quando já existe um número
-                // real (RF-05 já buscou um resultado); sem isso, só os horários.
-                val numeroDoConcurso = uiState.numeroDoConcursoCorrente
-                val textoConcursoEHorario =
-                    if (numeroDoConcurso != null) {
-                        stringResource(id = R.string.home_concurso_e_horario, numeroDoConcurso)
-                    } else {
-                        stringResource(id = R.string.home_horario_apostas)
-                    }
-                Text(text = textoConcursoEHorario, style = MaterialTheme.typography.bodyMedium)
-            }
-            HorizontalDivider(color = NocturneOutline)
-            if (uiState.nome != null) {
-                SecaoSorteLuaSigno(uiState)
-            }
-            if (uiState.crencaSonhoAtiva) {
-                SecaoSonho(
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        // A barra de navegação inferior (fora desta Composable,
+                        // ver TrevoNavHost) já cobre o inset de baixo — pedir de
+                        // novo aqui dobraria o espaço reservado.
+                        .windowInsetsPadding(
+                            WindowInsets.safeDrawing.only(
+                                WindowInsetsSides.Top + WindowInsetsSides.Horizontal,
+                            ),
+                        ).verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp, vertical = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                CabecalhoHome()
+                val proximoConcurso = uiState.proximoConcurso
+                if (proximoConcurso != null) {
+                    CartaoProximoConcurso(proximoConcurso)
+                } else {
+                    // RF-03.1 — só entra "Concurso N ·" quando já existe um número
+                    // real (RF-05 já buscou um resultado); sem isso, só os horários.
+                    val numeroDoConcurso = uiState.numeroDoConcursoCorrente
+                    val textoConcursoEHorario =
+                        if (numeroDoConcurso != null) {
+                            stringResource(id = R.string.home_concurso_e_horario, numeroDoConcurso)
+                        } else {
+                            stringResource(id = R.string.home_horario_apostas)
+                        }
+                    Text(text = textoConcursoEHorario, style = MaterialTheme.typography.bodyMedium)
+                }
+                HorizontalDivider(color = NocturneOutline)
+                if (uiState.nome != null) {
+                    SecaoSorteLuaSigno(uiState)
+                }
+                if (uiState.crencaSonhoAtiva) {
+                    SecaoSonho(
+                        uiState = uiState,
+                        onAlternarListaDeGruposClick = onAlternarListaDeGruposClick,
+                        onGrupoClick = onGrupoClick,
+                    )
+                }
+                SecaoPalpites(
                     uiState = uiState,
-                    onAlternarListaDeGruposClick = onAlternarListaDeGruposClick,
-                    onGrupoClick = onGrupoClick,
+                    onExcluirClick = onExcluirClick,
+                    onPalpiteClick = onPalpiteClick,
+                )
+                Text(
+                    text = stringResource(id = R.string.home_disclaimer_aposta),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                SecaoModoDeGeracao(
+                    uiState = uiState,
+                    onSelecionarModoClick = onSelecionarModoClick,
+                    onCtaPrincipalClick = onCtaPrincipalClick,
+                    onAssistirAnuncioClick = onAssistirAnuncioClick,
+                    onAssinarClick = onAssinarClick,
                 )
             }
-            SecaoPalpites(
-                uiState = uiState,
-                onExcluirClick = onExcluirClick,
-                onPalpiteClick = onPalpiteClick,
-            )
-            Text(
-                text = stringResource(id = R.string.home_disclaimer_aposta),
-                style = MaterialTheme.typography.bodySmall,
-            )
-            SecaoModoDeGeracao(
-                uiState = uiState,
-                onSelecionarModoClick = onSelecionarModoClick,
-                onCtaPrincipalClick = onCtaPrincipalClick,
-                onAssistirAnuncioClick = onAssistirAnuncioClick,
-                onAssinarClick = onAssinarClick,
-            )
         }
     }
 

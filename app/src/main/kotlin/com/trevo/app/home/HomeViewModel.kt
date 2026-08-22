@@ -55,6 +55,10 @@ class HomeViewModel
         private val numeroDoGrupoAbertoNoDialog = MutableStateFlow<Int?>(null)
         private val listaDeGruposExpandida = MutableStateFlow(false)
 
+        // Puxar pra baixo (pull-to-refresh) — só o indicador visual do gesto;
+        // a busca em si é a mesma de atualizarResultadoEmSegundoPlano().
+        private val atualizandoManualmente = MutableStateFlow(false)
+
         // RF-11.1 — seleção de modo é transiente (não sobrevive a reabrir a Home).
         private val modoSelecionado = MutableStateFlow(ModoDeGeracao.MISTICO)
 
@@ -67,6 +71,7 @@ class HomeViewModel
             val numeroDoGrupoAberto: Int?,
             val listaExpandida: Boolean,
             val modo: ModoDeGeracao,
+            val atualizando: Boolean,
         )
 
         private data class EstadoDeLimite(
@@ -82,8 +87,9 @@ class HomeViewModel
                 numeroDoGrupoAbertoNoDialog,
                 listaDeGruposExpandida,
                 modoSelecionado,
-            ) { idParaExcluir, numeroDoGrupoAberto, listaExpandida, modo ->
-                EstadoLocal(idParaExcluir, numeroDoGrupoAberto, listaExpandida, modo)
+                atualizandoManualmente,
+            ) { idParaExcluir, numeroDoGrupoAberto, listaExpandida, modo, atualizando ->
+                EstadoLocal(idParaExcluir, numeroDoGrupoAberto, listaExpandida, modo, atualizando)
             }
 
         val uiState: StateFlow<HomeUiState> =
@@ -114,14 +120,34 @@ class HomeViewModel
         // Home já funciona 100% a partir do que `observarUltimoResultadoSalvo()`
         // já tem em Room (mesmo padrão de ResultadoSorteioWorker.doWork).
         private fun atualizarResultadoEmSegundoPlano() {
+            viewModelScope.launch { buscarResultadoSilenciosamente() }
+        }
+
+        // Puxar pra baixo (pull-to-refresh) — mesma busca best-effort do
+        // `init`, só que com o indicador visual ligado enquanto roda, pro
+        // usuário ver que o gesto fez algo mesmo quando a busca falha em
+        // silêncio (offline) ou não muda nada (resultado já era o mais
+        // recente).
+        fun aoAtualizar() {
             viewModelScope.launch {
+                atualizandoManualmente.value = true
                 try {
-                    resultadoRepository.buscarUltimoResultado()
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    // silencioso — ver comentário acima.
+                    buscarResultadoSilenciosamente()
+                } finally {
+                    atualizandoManualmente.value = false
                 }
+            }
+        }
+
+        private suspend fun buscarResultadoSilenciosamente() {
+            try {
+                resultadoRepository.buscarUltimoResultado()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // silencioso — CLAUDE.md §8: falha de rede nunca pode impedir
+                // o uso do app: a Home já funciona 100% a partir do que
+                // observarUltimoResultadoSalvo() já tem em Room.
             }
         }
 
@@ -161,6 +187,7 @@ class HomeViewModel
                 // número (RF-05.10).
                 numeroDoConcursoCorrente = limite.ultimoResultado?.numero?.plus(1),
                 proximoConcurso = limite.ultimoResultado?.proximoConcurso,
+                atualizando = local.atualizando,
             )
         }
 

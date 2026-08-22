@@ -62,6 +62,9 @@ data class HomeUiState(
     // um resultado manual, RF-05.10) — sem isso a Home some com o card em
     // vez de estimar um valor.
     val proximoConcurso: ProximoConcurso? = null,
+    // Puxar pra baixo (pull-to-refresh) — true enquanto a atualização
+    // manual está em andamento; ver HomeViewModel.aoAtualizar().
+    val atualizando: Boolean = false,
 ) {
     val totalDeJogos: Int get() = palpitesHoje.size
 

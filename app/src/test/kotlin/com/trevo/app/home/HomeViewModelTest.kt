@@ -24,6 +24,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.io.IOException
 import java.math.BigDecimal
 import java.time.Clock
 import java.time.Instant
@@ -632,5 +633,50 @@ class HomeViewModelTest {
                 viewModel.uiState.value.proximoConcurso
                     ?.numero,
             )
+        }
+
+    @Test
+    fun aoAtualizarPuxandoParaBaixoBuscaNovoResultadoENaoFicaTravadoAtualizando() =
+        runTest {
+            val resultadoRepository = FakeResultadoRepository(RELOGIO_FIXO)
+            resultadoRepository.proximoResultado =
+                Resultado(
+                    numero = 3457,
+                    dataApuracao = LocalDate.now(RELOGIO_FIXO),
+                    dezenasSorteadas = (1..15).toList(),
+                    faixasDePremio = emptyList(),
+                    acumulado = false,
+                    origem = OrigemDoResultado.API,
+                    proximoConcurso = proximoConcursoDeExemplo,
+                )
+            val viewModel = novoViewModel(resultadoRepository = resultadoRepository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+            assertFalse(viewModel.uiState.value.atualizando)
+
+            viewModel.aoAtualizar()
+            advanceUntilIdle()
+
+            assertFalse(viewModel.uiState.value.atualizando)
+            assertEquals(
+                3458,
+                viewModel.uiState.value.proximoConcurso
+                    ?.numero,
+            )
+        }
+
+    @Test
+    fun aoAtualizarComFalhaDeRedeNaoFicaTravadoAtualizando() =
+        runTest {
+            val resultadoRepository = FakeResultadoRepository(RELOGIO_FIXO)
+            resultadoRepository.proximaExcecao = IOException("sem rede")
+            val viewModel = novoViewModel(resultadoRepository = resultadoRepository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            viewModel.aoAtualizar()
+            advanceUntilIdle()
+
+            assertFalse(viewModel.uiState.value.atualizando)
         }
 }
