@@ -28,6 +28,20 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // Achado de auditoria de segurança: sem isso, o release saía sem
+    // R8/shrink — nomes de classe e método (incluindo o caminho de
+    // validação de Pro/Billing) ficavam legíveis num decompilador.
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+    }
 }
 
 dependencies {
