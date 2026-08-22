@@ -420,7 +420,70 @@ class HomeViewModelTest {
             advanceUntilIdle()
             assertEquals(0, viewModel.uiState.value.palpitesGratisRestantesHoje)
 
-            viewModel.aoAnuncioRecompensado()
+            viewModel.aoAnuncioCarregado("token-1")
+            viewModel.aoAnuncioRecompensado("token-1")
+            advanceUntilIdle()
+
+            assertEquals(1, viewModel.uiState.value.palpitesGratisRestantesHoje)
+        }
+
+    @Test
+    fun anuncioRecompensadoComTokenDivergenteNaoCredita() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val preferencias = FakePreferenciasRepository()
+            preferencias.salvarPerfil("Marlene", null, null, setOf(Crenca.QUENTES))
+            val viewModel = novoViewModel(repository = repository, preferenciasRepository = preferencias)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+            assertEquals(0, viewModel.uiState.value.palpitesGratisRestantesHoje)
+
+            viewModel.aoAnuncioCarregado("token-real")
+            viewModel.aoAnuncioRecompensado("token-forjado")
+            advanceUntilIdle()
+
+            assertEquals(0, viewModel.uiState.value.palpitesGratisRestantesHoje)
+        }
+
+    @Test
+    fun anuncioRecompensadoSemAoAnuncioCarregadoNaoCredita() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val preferencias = FakePreferenciasRepository()
+            preferencias.salvarPerfil("Marlene", null, null, setOf(Crenca.QUENTES))
+            val viewModel = novoViewModel(repository = repository, preferenciasRepository = preferencias)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+            assertEquals(0, viewModel.uiState.value.palpitesGratisRestantesHoje)
+
+            viewModel.aoAnuncioRecompensado("token-qualquer")
+            advanceUntilIdle()
+
+            assertEquals(0, viewModel.uiState.value.palpitesGratisRestantesHoje)
+        }
+
+    @Test
+    fun tokenDeAnuncioJaConsumidoNaoCreditaDeNovoMesmoRepetido() =
+        runTest {
+            val repository = FakePalpiteRepository(RELOGIO_FIXO)
+            val preferencias = FakePreferenciasRepository()
+            preferencias.salvarPerfil("Marlene", null, null, setOf(Crenca.QUENTES))
+            val viewModel = novoViewModel(repository = repository, preferenciasRepository = preferencias)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+            viewModel.aoGerarClick()
+            advanceUntilIdle()
+
+            viewModel.aoAnuncioCarregado("token-1")
+            viewModel.aoAnuncioRecompensado("token-1")
+            advanceUntilIdle()
+            assertEquals(1, viewModel.uiState.value.palpitesGratisRestantesHoje)
+
+            viewModel.aoAnuncioRecompensado("token-1")
             advanceUntilIdle()
 
             assertEquals(1, viewModel.uiState.value.palpitesGratisRestantesHoje)
@@ -439,16 +502,19 @@ class HomeViewModelTest {
             advanceUntilIdle()
             assertEquals(2, viewModel.uiState.value.anunciosDisponiveisHoje)
 
-            viewModel.aoAnuncioRecompensado()
+            viewModel.aoAnuncioCarregado("token-1")
+            viewModel.aoAnuncioRecompensado("token-1")
             advanceUntilIdle()
             assertEquals(1, viewModel.uiState.value.anunciosDisponiveisHoje)
 
-            viewModel.aoAnuncioRecompensado()
+            viewModel.aoAnuncioCarregado("token-2")
+            viewModel.aoAnuncioRecompensado("token-2")
             advanceUntilIdle()
             assertEquals(0, viewModel.uiState.value.anunciosDisponiveisHoje)
             assertEquals(2, viewModel.uiState.value.palpitesGratisRestantesHoje)
 
-            viewModel.aoAnuncioRecompensado()
+            viewModel.aoAnuncioCarregado("token-3")
+            viewModel.aoAnuncioRecompensado("token-3")
             advanceUntilIdle()
 
             assertEquals(0, viewModel.uiState.value.anunciosDisponiveisHoje)

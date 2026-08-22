@@ -179,7 +179,9 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 // `remember` na própria rota mantém o anúncio pré-carregado vivo
                 // entre recomposições da Home, sem sobreviver à navegação pra fora.
                 val gerenciadorDeAnuncio = remember { AnuncioRecompensadoManager() }
-                LaunchedEffect(Unit) { gerenciadorDeAnuncio.carregar(context) }
+                LaunchedEffect(
+                    Unit,
+                ) { gerenciadorDeAnuncio.carregar(context, aoCarregar = viewModel::aoAnuncioCarregado) }
 
                 TelaHome(
                     uiState = uiState,
@@ -208,7 +210,9 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                             gerenciadorDeAnuncio.exibir(
                                 activity = activity,
                                 aoGanharRecompensa = viewModel::aoAnuncioRecompensado,
-                                aoFechar = { gerenciadorDeAnuncio.carregar(context) },
+                                aoFechar = {
+                                    gerenciadorDeAnuncio.carregar(context, aoCarregar = viewModel::aoAnuncioCarregado)
+                                },
                             )
                         }
                     },

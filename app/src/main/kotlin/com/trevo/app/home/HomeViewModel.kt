@@ -264,9 +264,26 @@ class HomeViewModel
             }
         }
 
-        // RF-09.2 — chamado depois que AnuncioRecompensadoManager confirma a
+        // RF-09.2/achado de auditoria de segurança — `token` só existe pra
+        // fechar o caminho mais barato de fraude (um botão reconectado direto
+        // nesta função num APK adulterado, sem passar pelo carregamento real
+        // do anúncio): só credita se bater com o que `aoAnuncioCarregado`
+        // registrou quando o SDK do AdMob de fato carregou um anúncio, e o
+        // token é consumido (de uso único) mesmo se a checagem falhar. Não é
+        // verificação server-side (SSV) — o app não tem backend hoje; dívida
+        // registrada em PROJECT_STATE.md.
+        private var tokenDoAnuncioPendente: String? = null
+
+        fun aoAnuncioCarregado(token: String) {
+            tokenDoAnuncioPendente = token
+        }
+
+        // Chamado depois que AnuncioRecompensadoManager confirma a
         // recompensa (usuário assistiu até o fim); nunca antes.
-        fun aoAnuncioRecompensado() {
+        fun aoAnuncioRecompensado(token: String) {
+            val tokenValido = token == tokenDoAnuncioPendente
+            tokenDoAnuncioPendente = null
+            if (!tokenValido) return
             viewModelScope.launch { preferenciasRepository.registrarAnuncioAssistido(LocalDate.now(clock)) }
         }
     }

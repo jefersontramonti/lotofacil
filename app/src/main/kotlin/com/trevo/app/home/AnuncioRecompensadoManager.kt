@@ -9,6 +9,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.OnUserEarnedRewardListener
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import java.util.UUID
 
 // RF-09.2/09.3 — só este formato (recompensado) em todo o app, nunca banner
 // nem intersticial; RF-09.3 é cumprido por omissão, não há outro lugar que
@@ -22,16 +23,37 @@ private const val ID_ANUNCIO_RECOMPENSADO_TESTE = "ca-app-pub-3940256099942544/5
 // `remember` na Composable que o usa (TrevoNavHost), mesmo espírito do
 // launcher de permissão de RF-07.7.
 class AnuncioRecompensadoManager {
-    private var anuncioCarregado: RewardedAd? = null
+    // Achado de auditoria de segurança: nada aqui substitui verificação
+    // server-side (SSV) — sem backend, não há como confirmar fora do
+    // aparelho que o anúncio foi assistido de verdade. O token existe só
+    // pra fechar o caminho mais barato de fraude (um botão reconectado
+    // direto em `HomeViewModel.aoAnuncioRecompensado`, num APK adulterado,
+    // sem passar pelo carregamento real do anúncio): pra creditar, quem
+    // chama precisa produzir o mesmo token que `aoCarregar` emitiu quando o
+    // SDK do AdMob de fato carregou um anúncio — ver HomeViewModel e
+    // PROJECT_STATE.md (dívida de SSV registrada). Não resiste a
+    // instrumentação em tempo de execução (Frida/Xposed) num aparelho
+    // rooteado, só a uma reconexão estática do botão.
+    private data class AnuncioCarregado(
+        val anuncio: RewardedAd,
+        val token: String,
+    )
 
-    fun carregar(context: Context) {
+    private var anuncioCarregado: AnuncioCarregado? = null
+
+    fun carregar(
+        context: Context,
+        aoCarregar: (token: String) -> Unit,
+    ) {
         RewardedAd.load(
             context,
             ID_ANUNCIO_RECOMPENSADO_TESTE,
             AdRequest.Builder().build(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(anuncio: RewardedAd) {
-                    anuncioCarregado = anuncio
+                    val token = UUID.randomUUID().toString()
+                    anuncioCarregado = AnuncioCarregado(anuncio, token)
+                    aoCarregar(token)
                 }
 
                 override fun onAdFailedToLoad(erro: LoadAdError) {
@@ -46,21 +68,21 @@ class AnuncioRecompensadoManager {
     // aconteceu.
     fun exibir(
         activity: Activity,
-        aoGanharRecompensa: () -> Unit,
+        aoGanharRecompensa: (token: String) -> Unit,
         aoFechar: () -> Unit,
     ) {
-        val anuncio = anuncioCarregado
-        if (anuncio == null) {
+        val carregado = anuncioCarregado
+        if (carregado == null) {
             aoFechar()
             return
         }
         anuncioCarregado = null
-        anuncio.fullScreenContentCallback =
+        carregado.anuncio.fullScreenContentCallback =
             object : FullScreenContentCallback() {
                 override fun onAdDismissedFullScreenContent() = aoFechar()
 
                 override fun onAdFailedToShowFullScreenContent(erro: AdError) = aoFechar()
             }
-        anuncio.show(activity, OnUserEarnedRewardListener { aoGanharRecompensa() })
+        carregado.anuncio.show(activity, OnUserEarnedRewardListener { aoGanharRecompensa(carregado.token) })
     }
 }
