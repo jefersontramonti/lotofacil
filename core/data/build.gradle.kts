@@ -42,6 +42,7 @@ dependencies {
     ksp(libs.androidx.hilt.compiler)
 
     implementation(libs.billing.ktx)
+    implementation(libs.androidx.lifecycle.process)
 
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.kotlinx.serialization)
