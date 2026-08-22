@@ -4,6 +4,7 @@ import com.trevo.core.engine.crenca.FaseDaLua
 import com.trevo.core.engine.crenca.GrupoDoBicho
 import com.trevo.core.engine.crenca.ModoDeGeracao
 import com.trevo.core.engine.identidade.Signo
+import com.trevo.core.engine.resultado.ProximoConcurso
 import java.math.BigDecimal
 
 // Docs/tabelavalores.md — tabela oficial de preços da Lotofácil. Jogo de
@@ -56,6 +57,11 @@ data class HomeUiState(
     // RF-03.1 — null até o primeiro resultado real ser buscado (RF-05);
     // nunca inventado, ver nota em HomeViewModel.montarUiState.
     val numeroDoConcursoCorrente: Int? = null,
+    // Card do próximo concurso — vem junto no mesmo payload do último
+    // resultado buscado. `null` até a primeira busca bem-sucedida (ou pra
+    // um resultado manual, RF-05.10) — sem isso a Home some com o card em
+    // vez de estimar um valor.
+    val proximoConcurso: ProximoConcurso? = null,
 ) {
     val totalDeJogos: Int get() = palpitesHoje.size
 

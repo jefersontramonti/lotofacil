@@ -17,4 +17,5 @@ data class ResultadoEntity(
     val faixas: String,
     val acumulado: Boolean,
     val origem: String,
+    val proximoConcurso: String? = null,
 )

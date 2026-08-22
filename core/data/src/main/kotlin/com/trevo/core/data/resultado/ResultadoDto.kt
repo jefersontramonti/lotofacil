@@ -12,6 +12,10 @@ data class ResultadoDto(
     val listaDezenas: List<String>,
     val listaRateioPremio: List<RateioDto> = emptyList(),
     val acumulado: Boolean = false,
+    val numeroConcursoProximo: Int? = null,
+    val dataProximoConcurso: String? = null,
+    val valorEstimadoProximoConcurso: Double? = null,
+    val valorAcumuladoProximoConcurso: Double? = null,
 )
 
 @Serializable

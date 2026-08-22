@@ -18,6 +18,7 @@ import com.trevo.core.engine.crenca.indiceDeSorteDoDia
 import com.trevo.core.engine.palpite.PalpiteGenerator
 import com.trevo.core.engine.resultado.Resultado
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -56,6 +57,10 @@ class HomeViewModel
 
         // RF-11.1 — seleção de modo é transiente (não sobrevive a reabrir a Home).
         private val modoSelecionado = MutableStateFlow(ModoDeGeracao.MISTICO)
+
+        init {
+            atualizarResultadoEmSegundoPlano()
+        }
 
         private data class EstadoLocal(
             val idParaExcluir: Long?,
@@ -102,6 +107,24 @@ class HomeViewModel
                 initialValue = HomeUiState(),
             )
 
+        // Card do próximo concurso: tenta atualizar o cache do resultado (e
+        // os dados do próximo concurso que vêm no mesmo payload) ao abrir a
+        // Home. Best-effort — CLAUDE.md §8 proíbe que falha de rede impeça a
+        // geração de palpite, então qualquer erro aqui fica em silêncio; a
+        // Home já funciona 100% a partir do que `observarUltimoResultadoSalvo()`
+        // já tem em Room (mesmo padrão de ResultadoSorteioWorker.doWork).
+        private fun atualizarResultadoEmSegundoPlano() {
+            viewModelScope.launch {
+                try {
+                    resultadoRepository.buscarUltimoResultado()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    // silencioso — ver comentário acima.
+                }
+            }
+        }
+
         private fun montarUiState(
             palpites: List<PalpiteSalvo>,
             perfil: PerfilSalvo?,
@@ -137,6 +160,7 @@ class HomeViewModel
                 // (RF-05) ou quando o último salvo foi entrada manual sem
                 // número (RF-05.10).
                 numeroDoConcursoCorrente = limite.ultimoResultado?.numero?.plus(1),
+                proximoConcurso = limite.ultimoResultado?.proximoConcurso,
             )
         }
 

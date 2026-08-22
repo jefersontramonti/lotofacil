@@ -17,6 +17,16 @@ data class FaixaDePremio(
     val valorPremio: BigDecimal,
 )
 
+// Info sobre o concurso que ainda vai ser sorteado — vem no mesmo payload
+// da API que traz o último resultado. `null` pra resultado manual (RF-05.10):
+// sem a API não há como saber data/valor do próximo concurso.
+data class ProximoConcurso(
+    val numero: Int,
+    val data: LocalDate,
+    val valorEstimadoPremio: BigDecimal,
+    val valorAcumulado: BigDecimal,
+)
+
 // `numero` é nulo pra um resultado inserido manualmente (RF-05.10) — o
 // app nunca calcula/inventa número de concurso offline.
 data class Resultado(
@@ -26,4 +36,5 @@ data class Resultado(
     val faixasDePremio: List<FaixaDePremio>,
     val acumulado: Boolean,
     val origem: OrigemDoResultado,
+    val proximoConcurso: ProximoConcurso?,
 )

@@ -43,6 +43,7 @@ class FakeResultadoRepository(
                 faixasDePremio = emptyList(),
                 acumulado = false,
                 origem = OrigemDoResultado.MANUAL,
+                proximoConcurso = null,
             )
         proximoResultado = resultado
         proximaExcecao = null

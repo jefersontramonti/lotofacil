@@ -12,6 +12,7 @@ import com.trevo.core.engine.identidade.Signo
 import com.trevo.core.engine.palpite.Palpite
 import com.trevo.core.engine.palpite.PalpiteGenerator
 import com.trevo.core.engine.resultado.OrigemDoResultado
+import com.trevo.core.engine.resultado.ProximoConcurso
 import com.trevo.core.engine.resultado.Resultado
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -23,6 +24,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.math.BigDecimal
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -475,6 +477,7 @@ class HomeViewModelTest {
                     faixasDePremio = emptyList(),
                     acumulado = false,
                     origem = OrigemDoResultado.API,
+                    proximoConcurso = null,
                 ),
             )
             val viewModel = novoViewModel(resultadoRepository = resultadoRepository)
@@ -498,6 +501,7 @@ class HomeViewModelTest {
                     faixasDePremio = emptyList(),
                     acumulado = false,
                     origem = OrigemDoResultado.MANUAL,
+                    proximoConcurso = null,
                 ),
             )
             val viewModel = novoViewModel(resultadoRepository = resultadoRepository)
@@ -505,5 +509,62 @@ class HomeViewModelTest {
             advanceUntilIdle()
 
             assertNull(viewModel.uiState.value.numeroDoConcursoCorrente)
+        }
+
+    private val proximoConcursoDeExemplo =
+        ProximoConcurso(
+            numero = 3458,
+            data = LocalDate.now(RELOGIO_FIXO).plusDays(1),
+            valorEstimadoPremio = BigDecimal("1700000.00"),
+            valorAcumulado = BigDecimal("1556187.62"),
+        )
+
+    @Test
+    fun comProximoConcursoNoResultadoCacheadoUiStateExpoeOsDados() =
+        runTest {
+            val resultadoRepository = FakeResultadoRepository(RELOGIO_FIXO)
+            resultadoRepository.adicionarResultado(
+                Resultado(
+                    numero = 3457,
+                    dataApuracao = LocalDate.now(RELOGIO_FIXO),
+                    dezenasSorteadas = (1..15).toList(),
+                    faixasDePremio = emptyList(),
+                    acumulado = false,
+                    origem = OrigemDoResultado.API,
+                    proximoConcurso = proximoConcursoDeExemplo,
+                ),
+            )
+            val viewModel = novoViewModel(resultadoRepository = resultadoRepository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            val proximo = viewModel.uiState.value.proximoConcurso
+            assertEquals(3458, proximo?.numero)
+            assertEquals(0, BigDecimal("1700000.00").compareTo(proximo?.valorEstimadoPremio))
+        }
+
+    @Test
+    fun aoAbrirAHomeTentaAtualizarOResultadoEmSegundoPlano() =
+        runTest {
+            val resultadoRepository = FakeResultadoRepository(RELOGIO_FIXO)
+            resultadoRepository.proximoResultado =
+                Resultado(
+                    numero = 3457,
+                    dataApuracao = LocalDate.now(RELOGIO_FIXO),
+                    dezenasSorteadas = (1..15).toList(),
+                    faixasDePremio = emptyList(),
+                    acumulado = false,
+                    origem = OrigemDoResultado.API,
+                    proximoConcurso = proximoConcursoDeExemplo,
+                )
+            val viewModel = novoViewModel(resultadoRepository = resultadoRepository)
+            backgroundScope.launch { viewModel.uiState.collect {} }
+            advanceUntilIdle()
+
+            assertEquals(
+                3458,
+                viewModel.uiState.value.proximoConcurso
+                    ?.numero,
+            )
         }
 }

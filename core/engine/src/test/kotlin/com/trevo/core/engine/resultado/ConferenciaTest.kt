@@ -33,6 +33,7 @@ class ConferenciaTest {
         faixasDePremio = faixas,
         acumulado = true,
         origem = OrigemDoResultado.API,
+        proximoConcurso = null,
     )
 
     @Test

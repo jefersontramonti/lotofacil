@@ -55,6 +55,7 @@ class HistoricoViewModelTest {
             ),
         acumulado = false,
         origem = OrigemDoResultado.API,
+        proximoConcurso = null,
     )
 
     private fun relogioNoDia(dia: LocalDate): Clock =

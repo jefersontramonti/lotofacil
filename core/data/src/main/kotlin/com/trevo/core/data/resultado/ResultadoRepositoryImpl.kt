@@ -36,6 +36,7 @@ class ResultadoRepositoryImpl
                     faixasDePremio = emptyList(),
                     acumulado = false,
                     origem = OrigemDoResultado.MANUAL,
+                    proximoConcurso = null,
                 )
             dao.inserir(resultado.paraEntity())
         }

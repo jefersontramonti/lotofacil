@@ -2,6 +2,7 @@ package com.trevo.core.data.resultado
 
 import com.trevo.core.engine.resultado.FaixaDePremio
 import com.trevo.core.engine.resultado.OrigemDoResultado
+import com.trevo.core.engine.resultado.ProximoConcurso
 import com.trevo.core.engine.resultado.Resultado
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -23,7 +24,24 @@ fun ResultadoDto.paraDominio(): Resultado =
         faixasDePremio = listaRateioPremio.mapNotNull { it.paraDominio() },
         acumulado = acumulado,
         origem = OrigemDoResultado.API,
+        proximoConcurso = paraProximoConcurso(),
     )
+
+// Os 4 campos chegam juntos ou não chegam — schema real confirmado contra
+// a API (não documentado em nenhum doc do projeto): numeroConcursoProximo,
+// dataProximoConcurso, valorEstimadoProximoConcurso, valorAcumuladoProximoConcurso.
+private fun ResultadoDto.paraProximoConcurso(): ProximoConcurso? {
+    val numeroProximo = numeroConcursoProximo ?: return null
+    val dataProximo = dataProximoConcurso?.let { LocalDate.parse(it, FORMATO_DATA_API) } ?: return null
+    val valorEstimado = valorEstimadoProximoConcurso ?: return null
+    val valorAcumulado = valorAcumuladoProximoConcurso ?: return null
+    return ProximoConcurso(
+        numero = numeroProximo,
+        data = dataProximo,
+        valorEstimadoPremio = BigDecimal.valueOf(valorEstimado),
+        valorAcumulado = BigDecimal.valueOf(valorAcumulado),
+    )
+}
 
 // valorPremio chega como número JSON puro (Double) — convertido pra
 // BigDecimal aqui, na borda, antes de entrar em qualquer lógica de
@@ -50,6 +68,7 @@ fun Resultado.paraEntity(id: Long = 0): ResultadoEntity =
         faixas = codificarFaixas(faixasDePremio),
         acumulado = acumulado,
         origem = origem.name,
+        proximoConcurso = codificarProximoConcurso(proximoConcurso),
     )
 
 fun ResultadoEntity.paraDominio(): Resultado =
@@ -60,6 +79,7 @@ fun ResultadoEntity.paraDominio(): Resultado =
         faixasDePremio = decodificarFaixas(faixas),
         acumulado = acumulado,
         origem = OrigemDoResultado.valueOf(origem),
+        proximoConcurso = decodificarProximoConcurso(proximoConcurso),
     )
 
 private fun decodificarDezenas(texto: String): List<Int> =
@@ -87,3 +107,24 @@ private fun decodificarFaixas(texto: String): List<FaixaDePremio> =
             )
         }
     }
+
+private fun codificarProximoConcurso(proximoConcurso: ProximoConcurso?): String? =
+    proximoConcurso?.let {
+        listOf(
+            it.numero,
+            it.data,
+            it.valorEstimadoPremio,
+            it.valorAcumulado,
+        ).joinToString(SEPARADOR_CAMPOS_FAIXA)
+    }
+
+private fun decodificarProximoConcurso(texto: String?): ProximoConcurso? {
+    if (texto.isNullOrEmpty()) return null
+    val (numero, data, valorEstimado, valorAcumulado) = texto.split(SEPARADOR_CAMPOS_FAIXA)
+    return ProximoConcurso(
+        numero = numero.toInt(),
+        data = LocalDate.parse(data),
+        valorEstimadoPremio = BigDecimal(valorEstimado),
+        valorAcumulado = BigDecimal(valorAcumulado),
+    )
+}

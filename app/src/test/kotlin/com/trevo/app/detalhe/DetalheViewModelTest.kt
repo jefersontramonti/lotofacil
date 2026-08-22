@@ -343,6 +343,7 @@ class DetalheViewModelTest {
                     faixasDePremio = emptyList(),
                     acumulado = false,
                     origem = OrigemDoResultado.API,
+                    proximoConcurso = null,
                 ),
             )
             val viewModel =

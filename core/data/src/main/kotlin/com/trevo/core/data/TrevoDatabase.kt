@@ -9,7 +9,7 @@ import com.trevo.core.data.palpite.PalpiteEntity
 import com.trevo.core.data.resultado.ResultadoDao
 import com.trevo.core.data.resultado.ResultadoEntity
 
-@Database(entities = [PalpiteEntity::class, ResultadoEntity::class], version = 3)
+@Database(entities = [PalpiteEntity::class, ResultadoEntity::class], version = 4)
 abstract class TrevoDatabase : RoomDatabase() {
     abstract fun palpiteDao(): PalpiteDao
 
@@ -43,5 +43,15 @@ val MIGRATION_2_3 =
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("ALTER TABLE `palpites` ADD COLUMN `modo` TEXT")
             db.execSQL("ALTER TABLE `palpites` ADD COLUMN `ritual` TEXT NOT NULL DEFAULT ''")
+        }
+    }
+
+// RF-03.1 — card do próximo concurso na Home. Coluna nula: resultados já
+// cacheados antes desta versão não têm essa info até a próxima busca
+// bem-sucedida (a API não devolve isso pra um resultado antigo específico).
+val MIGRATION_3_4 =
+    object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `resultados` ADD COLUMN `proximoConcurso` TEXT")
         }
     }

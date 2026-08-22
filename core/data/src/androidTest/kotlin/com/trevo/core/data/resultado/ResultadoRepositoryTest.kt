@@ -16,6 +16,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneOffset
 
 @RunWith(AndroidJUnit4::class)
@@ -79,6 +80,29 @@ class ResultadoRepositoryTest {
             assertEquals((1..15).toList(), resultado.dezenasSorteadas)
             assertEquals(OrigemDoResultado.API, resultado.origem)
             assertEquals(1, apiFake.chamadas)
+            assertNull(resultado.proximoConcurso)
+        }
+
+    @Test
+    fun apiTrazDadosDoProximoConcursoESobrevivemAoRoundTripDoRoom() =
+        runTest {
+            apiFake.proximoResultado =
+                dtoDeExemplo.copy(
+                    numeroConcursoProximo = 3458,
+                    dataProximoConcurso = "02/08/2025",
+                    valorEstimadoProximoConcurso = 1700000.0,
+                    valorAcumuladoProximoConcurso = 1556187.62,
+                )
+
+            val resultado = repositorio.buscarUltimoResultado()
+            val salvo = repositorio.observarUltimoResultadoSalvo().first()
+
+            val proximo = checkNotNull(resultado.proximoConcurso)
+            assertEquals(3458, proximo.numero)
+            assertEquals(LocalDate.of(2025, 8, 2), proximo.data)
+            assertEquals(0, java.math.BigDecimal("1700000.0").compareTo(proximo.valorEstimadoPremio))
+            assertEquals(0, java.math.BigDecimal("1556187.62").compareTo(proximo.valorAcumulado))
+            assertEquals(3458, salvo?.proximoConcurso?.numero)
         }
 
     @Test

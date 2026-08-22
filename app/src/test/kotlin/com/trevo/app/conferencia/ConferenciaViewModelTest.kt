@@ -55,6 +55,7 @@ class ConferenciaViewModelTest {
                 ),
             acumulado = false,
             origem = OrigemDoResultado.API,
+            proximoConcurso = null,
         )
 
     private fun novoViewModel(

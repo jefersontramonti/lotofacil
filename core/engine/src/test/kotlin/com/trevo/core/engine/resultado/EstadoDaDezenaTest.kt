@@ -22,6 +22,7 @@ class EstadoDaDezenaTest {
             faixasDePremio = emptyList(),
             acumulado = false,
             origem = OrigemDoResultado.API,
+            proximoConcurso = null,
         )
 
     @Test

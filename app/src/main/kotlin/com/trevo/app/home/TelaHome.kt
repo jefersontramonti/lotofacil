@@ -54,11 +54,15 @@ import com.trevo.core.engine.crenca.GrupoDoBicho
 import com.trevo.core.engine.crenca.ModoDeGeracao
 import com.trevo.core.engine.crenca.dezenasDoGrupoDoBicho
 import com.trevo.core.engine.identidade.Signo
+import com.trevo.core.engine.resultado.ProximoConcurso
 import com.trevo.core.ui.BotaoPrimario
 import com.trevo.core.ui.NocturneAccent
 import com.trevo.core.ui.NocturneOutline
 import com.trevo.core.ui.NocturneSurface
+import java.math.BigDecimal
 import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 fun tagCartaoPalpite(id: Long): String = "palpite_$id"
@@ -111,16 +115,21 @@ fun TelaHome(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             CabecalhoHome()
-            // RF-03.1 — só entra "Concurso N ·" quando já existe um número
-            // real (RF-05 já buscou um resultado); sem isso, só os horários.
-            val numeroDoConcurso = uiState.numeroDoConcursoCorrente
-            val textoConcursoEHorario =
-                if (numeroDoConcurso != null) {
-                    stringResource(id = R.string.home_concurso_e_horario, numeroDoConcurso)
-                } else {
-                    stringResource(id = R.string.home_horario_apostas)
-                }
-            Text(text = textoConcursoEHorario, style = MaterialTheme.typography.bodyMedium)
+            val proximoConcurso = uiState.proximoConcurso
+            if (proximoConcurso != null) {
+                CartaoProximoConcurso(proximoConcurso)
+            } else {
+                // RF-03.1 — só entra "Concurso N ·" quando já existe um número
+                // real (RF-05 já buscou um resultado); sem isso, só os horários.
+                val numeroDoConcurso = uiState.numeroDoConcursoCorrente
+                val textoConcursoEHorario =
+                    if (numeroDoConcurso != null) {
+                        stringResource(id = R.string.home_concurso_e_horario, numeroDoConcurso)
+                    } else {
+                        stringResource(id = R.string.home_horario_apostas)
+                    }
+                Text(text = textoConcursoEHorario, style = MaterialTheme.typography.bodyMedium)
+            }
             HorizontalDivider(color = NocturneOutline)
             if (uiState.nome != null) {
                 SecaoSorteLuaSigno(uiState)
@@ -195,6 +204,56 @@ private fun CabecalhoHome(modifier: Modifier = Modifier) {
         Text(text = stringResource(id = R.string.app_name), style = MaterialTheme.typography.headlineSmall)
     }
 }
+
+@Composable
+private fun CartaoProximoConcurso(
+    proximoConcurso: ProximoConcurso,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(color = NocturneSurface, shape = RoundedCornerShape(8.dp))
+                .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text = stringResource(id = R.string.home_proximo_concurso_titulo, proximoConcurso.numero),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Text(text = formatarData(proximoConcurso.data), style = MaterialTheme.typography.bodySmall)
+        }
+        Text(
+            text = stringResource(id = R.string.home_proximo_concurso_horario),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Column(modifier = Modifier.padding(top = 6.dp)) {
+            Text(
+                text = stringResource(id = R.string.home_proximo_concurso_premio_estimado),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                text = formatarReais(proximoConcurso.valorEstimadoPremio),
+                style = MaterialTheme.typography.titleMedium,
+            )
+        }
+        if (proximoConcurso.valorAcumulado > BigDecimal.ZERO) {
+            Text(
+                text =
+                    stringResource(
+                        id = R.string.home_proximo_concurso_valor_acumulado,
+                        formatarReais(proximoConcurso.valorAcumulado),
+                    ),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+private fun formatarData(data: LocalDate): String =
+    data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale("pt", "BR")))
 
 @Composable
 private fun SecaoSorteLuaSigno(

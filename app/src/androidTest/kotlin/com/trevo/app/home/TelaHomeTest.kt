@@ -13,12 +13,17 @@ import com.trevo.app.R
 import com.trevo.core.engine.crenca.FaseDaLua
 import com.trevo.core.engine.crenca.GRUPOS_DO_BICHO
 import com.trevo.core.engine.identidade.Signo
+import com.trevo.core.engine.resultado.ProximoConcurso
 import com.trevo.core.ui.TrevoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.math.BigDecimal
+import java.text.NumberFormat
+import java.time.LocalDate
+import java.util.Locale
 
 /**
  * RF-03 — Home. Wireframes 1d ("Home · lista de palpites"), 1e ("Home ·
@@ -398,6 +403,10 @@ class TelaHomeTest {
                     context.resources.getQuantityString(R.plurals.home_anuncios_disponiveis, 2, 2),
                 )
                 put("home_assinar_cta", context.getString(R.string.home_assinar_cta))
+                put(
+                    "home_proximo_concurso_premio_estimado",
+                    context.getString(R.string.home_proximo_concurso_premio_estimado),
+                )
             }
 
         stringsDaTela.forEach { (nomeRecurso, valor) ->
@@ -512,4 +521,69 @@ class TelaHomeTest {
             .onNodeWithText(context.getString(R.string.home_concurso_e_horario, 3458))
             .assertIsDisplayed()
     }
+
+    private val proximoConcursoDeExemplo =
+        ProximoConcurso(
+            numero = 3458,
+            data = LocalDate.of(2026, 8, 23),
+            valorEstimadoPremio = BigDecimal("1700000.00"),
+            valorAcumulado = BigDecimal("1556187.62"),
+        )
+
+    @Test
+    fun comProximoConcursoExibeOCardComNumeroDataEPremioEstimado() {
+        mostrarTelaHome(
+            uiState = HomeUiState(carregando = false, proximoConcurso = proximoConcursoDeExemplo),
+        )
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.home_proximo_concurso_titulo, 3458))
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText("23/08/2026").assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.home_proximo_concurso_premio_estimado))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(
+                context.getString(
+                    R.string.home_proximo_concurso_valor_acumulado,
+                    formatarReaisDeTeste(BigDecimal("1556187.62")),
+                ),
+            ).assertIsDisplayed()
+    }
+
+    @Test
+    fun semProximoConcursoNaoExibeOCardEMantemOTextoDeHorarios() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, proximoConcurso = null))
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.home_proximo_concurso_premio_estimado))
+            .assertDoesNotExist()
+        composeTestRule.onNodeWithText(context.getString(R.string.home_horario_apostas)).assertIsDisplayed()
+    }
+
+    @Test
+    fun valorAcumuladoZeradoNaoExibeALinhaDeAcumulado() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    proximoConcurso = proximoConcursoDeExemplo.copy(valorAcumulado = BigDecimal.ZERO),
+                ),
+        )
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.home_proximo_concurso_premio_estimado))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(
+                context.getString(
+                    R.string.home_proximo_concurso_valor_acumulado,
+                    formatarReaisDeTeste(BigDecimal.ZERO),
+                ),
+            ).assertDoesNotExist()
+    }
 }
+
+private fun formatarReaisDeTeste(valor: BigDecimal): String =
+    NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(valor)
