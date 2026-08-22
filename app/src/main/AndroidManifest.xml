@@ -6,13 +6,17 @@
          primeiro aviso, nunca declarada como bastante por si (ver TelaPerfil). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Achado de auditoria de segurança: sem allowBackup="false", o Auto
+         Backup do Android (padrão true) tira nome e data de nascimento do
+         aparelho sem consentimento explícito do usuário. -->
     <application
         android:name=".TrevoApplication"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.Trevo"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="false"
+        android:allowBackup="false">
 
         <activity
             android:name=".MainActivity"

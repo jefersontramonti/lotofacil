@@ -10,22 +10,48 @@ import java.time.format.DateTimeFormatter
 
 private val FORMATO_DATA_API = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
+private const val QUANTIDADE_DE_DEZENAS_SORTEADAS = 15
+private val INTERVALO_DE_DEZENAS = 1..25
+
 // Regra estrutural do jogo (não dado de sorteio — CLAUDE.md §8 só proíbe
 // inventar resultado/prêmio, não a estrutura fixa de faixas da Lotofácil),
 // confirmada contra o concurso 3457 real via WebFetch: faixa 1 = 15
 // acertos, faixa 2 = 14, faixa 3 = 13, faixa 4 = 12, faixa 5 = 11.
 private val ACERTOS_POR_FAIXA = mapOf(1 to 15, 2 to 14, 3 to 13, 4 to 12, 5 to 11)
 
-fun ResultadoDto.paraDominio(): Resultado =
-    Resultado(
+fun ResultadoDto.paraDominio(): Resultado {
+    val dezenas = listaDezenas.map { it.toInt() }
+    validarDezenasSorteadas(dezenas)
+    return Resultado(
         numero = numero,
         dataApuracao = LocalDate.parse(dataApuracao, FORMATO_DATA_API),
-        dezenasSorteadas = listaDezenas.map { it.toInt() },
+        dezenasSorteadas = dezenas,
         faixasDePremio = listaRateioPremio.mapNotNull { it.paraDominio() },
         acumulado = acumulado,
         origem = OrigemDoResultado.API,
         proximoConcurso = paraProximoConcurso(),
     )
+}
+
+// Achado de auditoria de segurança: a API da Caixa é pública e pode mudar
+// sem aviso — aceitar um payload malformado sem checar faria a conferência
+// do palpite do usuário contra dezenas erradas, o que é pior que um erro de
+// rede (dá acerto/erro incorreto em vez de só falhar). A exceção não é
+// IOException/HttpException, então nunca é retentada por
+// comRecuoExponencial — propaga na hora e cai no mesmo tratamento genérico
+// de falha do serviço que qualquer outro erro (ConferenciaViewModel.buscar()
+// → ConferenciaUiState.Falha).
+private fun validarDezenasSorteadas(dezenas: List<Int>) {
+    check(dezenas.size == QUANTIDADE_DE_DEZENAS_SORTEADAS) {
+        "resultado da API veio com ${dezenas.size} dezenas, esperava $QUANTIDADE_DE_DEZENAS_SORTEADAS"
+    }
+    check(dezenas.all { it in INTERVALO_DE_DEZENAS }) {
+        "resultado da API tem dezena fora do intervalo $INTERVALO_DE_DEZENAS: $dezenas"
+    }
+    check(dezenas.toSet().size == dezenas.size) {
+        "resultado da API tem dezena repetida: $dezenas"
+    }
+}
 
 // Os 4 campos chegam juntos ou não chegam — schema real confirmado contra
 // a API (não documentado em nenhum doc do projeto): numeroConcursoProximo,
