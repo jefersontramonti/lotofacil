@@ -1,14 +1,19 @@
 package com.trevo.app.detalhe
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import com.trevo.app.R
 import com.trevo.core.engine.crenca.Crenca
@@ -416,5 +421,57 @@ class TelaDetalheTest {
         composeTestRule.onNodeWithText(context.getString(R.string.detalhe_ver_desdobramentos_cta)).performClick()
 
         assertTrue(abriu)
+    }
+
+    // RNF-03.1 — os ícones do cabeçalho (📤/⤓/↻/🗑) eram alvos de toque sem
+    // tamanho garantido (achado de auditoria de acessibilidade, 2026-08-23),
+    // corrigidos envolvendo cada glifo num Box(size = 48.dp), mesmo padrão
+    // de BotaoVoltar — Text isolado ignora constraints de tamanho mínimo.
+    @Test
+    fun botaoExcluirTemAlvoDeToqueDeAoMenos48dp() {
+        mostrarTelaDetalhe()
+
+        composeTestRule
+            .onNodeWithTag(tagBotaoExcluirDetalhe())
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
+    }
+
+    // RNF-03.4 — "guardar como fixas" tinha um Checkbox decorativo ao lado
+    // (onCheckedChange = null) e o clique não expunha o estado marcado/
+    // desmarcado ao TalkBack; trocado por Modifier.toggleable (mesmo achado).
+    @Test
+    fun guardarComoFixasExpoeOEstadoMarcadoAoTalkBack() {
+        val estadoDeEdicao =
+            estadoDeExemplo.copy(
+                modoEdicao = true,
+                dezenasEmEdicao = (1..15).toSet(),
+                guardarComoFixasAoSalvar = true,
+            )
+
+        mostrarTelaDetalhe(uiState = estadoDeEdicao)
+
+        composeTestRule.onNodeWithTag(tagGuardarComoFixas()).performScrollTo().assertIsOn()
+    }
+
+    @Test
+    fun tocarGuardarComoFixasDisparaOCallback() {
+        var alternou = false
+        val estadoDeEdicao =
+            estadoDeExemplo.copy(
+                modoEdicao = true,
+                dezenasEmEdicao = (1..15).toSet(),
+                guardarComoFixasAoSalvar = false,
+            )
+
+        mostrarTelaDetalhe(uiState = estadoDeEdicao, onAlternarGuardarFixasClick = { alternou = true })
+
+        composeTestRule
+            .onNodeWithTag(tagGuardarComoFixas())
+            .performScrollTo()
+            .assertIsOff()
+            .performClick()
+
+        assertTrue(alternou)
     }
 }

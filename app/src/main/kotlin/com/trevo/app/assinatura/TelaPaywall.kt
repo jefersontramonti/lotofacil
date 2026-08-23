@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,12 +13,16 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -39,9 +44,9 @@ import com.trevo.core.data.assinatura.PRODUTO_ID_ANUAL
 import com.trevo.core.data.assinatura.ProdutoDeAssinatura
 import com.trevo.core.ui.BotaoPrimario
 import com.trevo.core.ui.NocturneAccent
+import com.trevo.core.ui.NocturneBackground
 import com.trevo.core.ui.NocturneOutline
 import com.trevo.core.ui.NocturneSurface
-import com.trevo.core.ui.NocturneText
 
 const val TAG_PAYWALL_FECHAR = "paywall_fechar"
 const val TAG_PAYWALL_CTA_COMECAR = "paywall_cta_comecar"
@@ -93,17 +98,21 @@ fun TelaPaywall(
             // tem os produtos, em vez de esconder a tela inteira.
             ConteudoEstaticoDoPaywall()
             SecaoDePlanos(uiState, onEscolherPlanoClick, onComecarTesteClick)
-            Text(
-                text = stringResource(id = R.string.paywall_cta_continuar_gratis),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
+            Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .height(48.dp)
                         .clickable(role = Role.Button, onClick = onFecharClick)
-                        .testTag(TAG_PAYWALL_CTA_CONTINUAR_GRATIS)
-                        .padding(vertical = 12.dp),
-            )
+                        .testTag(TAG_PAYWALL_CTA_CONTINUAR_GRATIS),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.paywall_cta_continuar_gratis),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }
@@ -115,18 +124,19 @@ private fun CabecalhoDoPaywall(
 ) {
     val descricaoFechar = stringResource(id = R.string.paywall_fechar_descricao)
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Spacer(modifier = Modifier.width(32.dp))
+        Spacer(modifier = Modifier.width(48.dp))
         Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = "✕",
+        Box(
             modifier =
                 Modifier
-                    .width(32.dp)
+                    .size(48.dp)
                     .clickable(role = Role.Button, onClick = onFecharClick)
                     .semantics { contentDescription = descricaoFechar }
-                    .testTag(TAG_PAYWALL_FECHAR)
-                    .padding(4.dp),
-        )
+                    .testTag(TAG_PAYWALL_FECHAR),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(text = "✕")
+        }
     }
 }
 
@@ -233,7 +243,9 @@ private fun SelinhoDoPaywall(
     Text(
         text = texto,
         style = MaterialTheme.typography.labelSmall,
-        color = if (destaque) NocturneText else NocturneAccent,
+        // NocturneText sobre NocturneAccent sólido dá ~2,66:1 (RNF-03.2);
+        // NocturneBackground é o par certo, mesmo padrão de TelaRitual.
+        color = if (destaque) NocturneBackground else NocturneAccent,
         modifier =
             modifier
                 .background(
@@ -262,6 +274,7 @@ private fun CartaoDePlano(
     Row(
         modifier =
             modifier
+                .heightIn(min = 48.dp)
                 .fillMaxWidth()
                 .background(
                     color = if (selecionado) NocturneSurface else Color.Transparent,
@@ -273,7 +286,7 @@ private fun CartaoDePlano(
                             if (selecionado) NocturneAccent else NocturneOutline,
                         ),
                     shape = RoundedCornerShape(8.dp),
-                ).clickable(role = Role.RadioButton, onClick = onClick)
+                ).selectable(selected = selecionado, onClick = onClick, role = Role.RadioButton)
                 .testTag(tagPaywallPlano(produto.productId))
                 .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,

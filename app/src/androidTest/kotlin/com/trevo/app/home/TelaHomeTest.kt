@@ -1,13 +1,17 @@
 package com.trevo.app.home
 
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import com.trevo.app.R
 import com.trevo.core.engine.crenca.FaseDaLua
@@ -582,6 +586,65 @@ class TelaHomeTest {
                     formatarReaisDeTeste(BigDecimal.ZERO),
                 ),
             ).assertDoesNotExist()
+    }
+
+    // RNF-03.1 — o ícone de excluir do CartaoPalpite era um alvo de toque
+    // sem tamanho garantido (achado de auditoria de acessibilidade,
+    // 2026-08-23), corrigido envolvendo o glifo num Box(size = 48.dp),
+    // mesmo padrão de BotaoVoltar.
+    @Test
+    fun botaoExcluirPalpiteTemAlvoDeToqueDeAoMenos48dp() {
+        mostrarTelaHome(uiState = HomeUiState(carregando = false, palpitesHoje = listOf(palpiteDeExemplo)))
+
+        composeTestRule
+            .onNodeWithTag(tagBotaoExcluirPalpite(palpiteDeExemplo.id))
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
+    }
+
+    // RNF-03.4/03.5 — o cartão de prévia do grupo só sinalizava "já
+    // confirmado como sonho hoje" pela cor/espessura da borda, sem nenhum
+    // contentDescription (mesmo achado de auditoria).
+    @Test
+    fun cartaoDoGrupoJaConfirmadoHojeAnunciaOEstadoParaOTalkBack() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    crencaSonhoAtiva = true,
+                    gruposDoSonhoPreview = listOf(grupoCobra),
+                    grupoDoSonhoConfirmadoHoje = grupoCobra.numero,
+                ),
+        )
+
+        composeTestRule
+            .onNodeWithTag(tagGrupoDoBicho(grupoCobra.numero))
+            .assertContentDescriptionEquals(
+                context.getString(
+                    R.string.home_sonho_previa_grupo_confirmado_descricao,
+                    grupoCobra.numero,
+                    grupoCobra.nome,
+                ),
+            )
+    }
+
+    @Test
+    fun cartaoDoGrupoNaoConfirmadoNaoAnunciaOEstadoDeConfirmado() {
+        mostrarTelaHome(
+            uiState =
+                HomeUiState(
+                    carregando = false,
+                    crencaSonhoAtiva = true,
+                    gruposDoSonhoPreview = listOf(grupoCobra),
+                    grupoDoSonhoConfirmadoHoje = null,
+                ),
+        )
+
+        composeTestRule
+            .onNodeWithTag(tagGrupoDoBicho(grupoCobra.numero))
+            .assertContentDescriptionEquals(
+                context.getString(R.string.home_sonho_previa_grupo_descricao, grupoCobra.numero, grupoCobra.nome),
+            )
     }
 }
 

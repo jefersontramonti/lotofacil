@@ -139,38 +139,46 @@ private fun ConteudoComDados(
         uiState.concursosRevelados.forEach { concurso -> CartaoDeConcurso(concurso) }
 
         if (uiState.temMaisConcursos) {
-            Text(
-                text =
-                    pluralStringResource(
-                        id = R.plurals.historico_ver_mais_cta,
-                        count = uiState.quantidadeDeConcursosRestantes,
-                        uiState.quantidadeDeConcursosRestantes,
-                    ),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
+            Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .height(48.dp)
                         .border(border = BorderStroke(1.dp, NocturneOutline), shape = RoundedCornerShape(8.dp))
                         .clickable(role = Role.Button, onClick = onVerMaisClick)
-                        .padding(12.dp)
                         .testTag(TAG_BOTAO_VER_MAIS_HISTORICO),
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text =
+                        pluralStringResource(
+                            id = R.plurals.historico_ver_mais_cta,
+                            count = uiState.quantidadeDeConcursosRestantes,
+                            uiState.quantidadeDeConcursosRestantes,
+                        ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
 
         if (uiState.maisConcursosSoNoPro) {
-            Text(
-                text = stringResource(id = R.string.historico_mais_concursos_pro_cta),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
+            Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .height(48.dp)
                         .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
                         .clickable(role = Role.Button, onClick = onAssinarClick)
-                        .padding(12.dp)
                         .testTag(TAG_BOTAO_ASSINAR_HISTORICO),
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.historico_mais_concursos_pro_cta),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }

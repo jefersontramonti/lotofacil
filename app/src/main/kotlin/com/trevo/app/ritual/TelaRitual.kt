@@ -118,23 +118,24 @@ private fun CabecalhoDoRitual(
     val descricaoFechar = stringResource(id = R.string.ritual_fechar_descricao)
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "✕",
+            Box(
                 modifier =
                     Modifier
-                        .width(32.dp)
+                        .size(48.dp)
                         .clickable(role = Role.Button, onClick = onFecharClick)
                         .semantics { contentDescription = descricaoFechar }
-                        .testTag(TAG_RITUAL_FECHAR)
-                        .padding(4.dp),
-            )
+                        .testTag(TAG_RITUAL_FECHAR),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text = "✕")
+            }
             Text(
                 text = stringResource(id = R.string.ritual_titulo),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f),
             )
-            Spacer(modifier = Modifier.width(32.dp))
+            Spacer(modifier = Modifier.width(48.dp))
         }
         LinhaDeChipsDoRitual(reveladas = reveladas)
     }

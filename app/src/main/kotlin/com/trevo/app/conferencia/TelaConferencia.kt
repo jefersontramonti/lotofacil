@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -25,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,14 +73,35 @@ fun TelaConferencia(
     onVoltarClick: () -> Unit,
     onTentarNovamenteClick: () -> Unit,
     onInformarResultadoManualmente: (Set<Int>) -> Unit,
+    movimentoReduzido: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         // Puxar pra baixo reusa o mesmo "tentar de novo" que já existe pros
         // estados de erro — a única diferença é o gesto em vez do botão.
+        val estadoPullToRefresh = rememberPullToRefreshState()
+        val atualizando = uiState is ConferenciaUiState.Carregando
         PullToRefreshBox(
-            isRefreshing = uiState is ConferenciaUiState.Carregando,
+            isRefreshing = atualizando,
             onRefresh = onTentarNovamenteClick,
+            state = estadoPullToRefresh,
+            indicator = {
+                if (movimentoReduzido) {
+                    if (atualizando) {
+                        Text(
+                            text = stringResource(id = R.string.conferencia_atualizando),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp),
+                        )
+                    }
+                } else {
+                    PullToRefreshDefaults.Indicator(
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        isRefreshing = atualizando,
+                        state = estadoPullToRefresh,
+                    )
+                }
+            },
             modifier = Modifier.fillMaxSize(),
         ) {
             Column(
@@ -197,15 +221,19 @@ private fun EstadoDeFalha(
             onClick = onTentarNovamenteClick,
             modifier = Modifier.padding(top = 4.dp).testTag(TAG_BOTAO_TENTAR_NOVAMENTE),
         )
-        Text(
-            text = stringResource(id = R.string.conferencia_informar_manualmente_cta),
-            style = MaterialTheme.typography.bodySmall,
+        Box(
             modifier =
                 Modifier
-                    .padding(top = 4.dp)
+                    .height(48.dp)
                     .clickable(role = Role.Button) { mostrarDialogoManual = true }
                     .testTag(TAG_BOTAO_INFORMAR_MANUALMENTE),
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(id = R.string.conferencia_informar_manualmente_cta),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
     }
 
     if (mostrarDialogoManual) {
@@ -258,19 +286,29 @@ private fun DialogoInformarResultadoManual(
                     style = MaterialTheme.typography.bodySmall,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = stringResource(id = R.string.conferencia_informar_manualmente_cancelar_cta),
-                        modifier = Modifier.clickable(role = Role.Button, onClick = onCancelarClick),
-                    )
+                    Box(
+                        modifier =
+                            Modifier
+                                .height(48.dp)
+                                .clickable(role = Role.Button, onClick = onCancelarClick),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(text = stringResource(id = R.string.conferencia_informar_manualmente_cancelar_cta))
+                    }
                     if (dezenasSelecionadas.size == 15) {
-                        Text(
-                            text = stringResource(id = R.string.conferencia_informar_manualmente_confirmar_cta),
-                            color = NocturneAccent,
+                        Box(
                             modifier =
                                 Modifier
+                                    .height(48.dp)
                                     .clickable(role = Role.Button) { onConfirmarClick(dezenasSelecionadas) }
                                     .testTag(TAG_BOTAO_CONFIRMAR_MANUAL),
-                        )
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.conferencia_informar_manualmente_confirmar_cta),
+                                color = NocturneAccent,
+                            )
+                        }
                     }
                 }
             }
@@ -519,7 +557,14 @@ private fun LinhaDeDezenas(
                         ).semantics { contentDescription = descricao },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "%02d".format(dezena), style = MaterialTheme.typography.labelSmall)
+                Text(
+                    text = "%02d".format(dezena),
+                    style = MaterialTheme.typography.labelSmall,
+                    // Mesmo achado de contraste de GradeDeDezenas.CelulaDaGrade
+                    // (RNF-03.2): texto padrão sobre NocturneAccent sólido
+                    // fica ~2,66:1.
+                    color = if (cheia) MaterialTheme.colorScheme.background else Color.Unspecified,
+                )
             }
         }
     }

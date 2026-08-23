@@ -1,13 +1,16 @@
 package com.trevo.app.historico
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import com.trevo.app.R
 import com.trevo.core.ui.TrevoTheme
@@ -115,6 +118,21 @@ class TelaHistoricoTest {
         mostrarTela(estadoComDados)
 
         composeTestRule.onAllNodesWithTag(TAG_BOTAO_VER_MAIS_HISTORICO).assertCountEquals(0)
+    }
+
+    // RNF-03.1 — "Ver mais" era um alvo de toque de ~44dp (achado de
+    // auditoria de acessibilidade, 2026-08-23), corrigido envolvendo o
+    // texto num Box(height = 48.dp) — Text isolado ignora constraints de
+    // tamanho mínimo, só Box/Row/Column respeitam.
+    @Test
+    fun botaoVerMaisTemAlvoDeToqueDeAoMenos48dp() {
+        mostrarTela(estadoComDados.copy(temMaisConcursos = true, quantidadeDeConcursosRestantes = 2))
+
+        composeTestRule
+            .onNodeWithTag(TAG_BOTAO_VER_MAIS_HISTORICO)
+            .performScrollTo()
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
     }
 
     @Test

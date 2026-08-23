@@ -12,11 +12,15 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -67,6 +71,8 @@ fun tagBotaoEnviarWhatsApp(): String = "detalhe_compartilhar_whatsapp"
 fun tagBotaoCopiarTexto(): String = "detalhe_compartilhar_copiar"
 
 fun tagBotaoExportar(): String = "detalhe_exportar"
+
+fun tagGuardarComoFixas(): String = "detalhe_guardar_como_fixas"
 
 @Composable
 fun TelaDetalhe(
@@ -209,40 +215,52 @@ private fun Cabecalho(
             val descricaoRefazer = stringResource(id = R.string.detalhe_refazer_descricao)
             val descricaoExcluir = stringResource(id = R.string.detalhe_excluir_icone_descricao)
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    text = "📤",
+                Box(
                     modifier =
                         Modifier
+                            .size(48.dp)
                             .clickable(role = Role.Button, onClick = onCompartilharClick)
                             .semantics { contentDescription = descricaoCompartilhar }
                             .testTag(tagBotaoCompartilhar()),
-                )
-                Text(
-                    text = if (uiState.isPro) "⤓" else "⤓🔒",
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = "📤")
+                }
+                Box(
                     modifier =
                         Modifier
+                            .size(48.dp)
                             .clickable(
                                 role = Role.Button,
                                 onClick = if (uiState.isPro) onExportarClick else onExportarBloqueadoClick,
                             ).semantics { contentDescription = descricaoExportar }
                             .testTag(tagBotaoExportar()),
-                )
-                Text(
-                    text = "↻",
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = if (uiState.isPro) "⤓" else "⤓🔒")
+                }
+                Box(
                     modifier =
                         Modifier
+                            .size(48.dp)
                             .clickable(role = Role.Button, onClick = onRefazerClick)
                             .semantics { contentDescription = descricaoRefazer }
                             .testTag(tagBotaoRefazer()),
-                )
-                Text(
-                    text = "🗑",
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = "↻")
+                }
+                Box(
                     modifier =
                         Modifier
+                            .size(48.dp)
                             .clickable(role = Role.Button, onClick = onExcluirClick)
                             .semantics { contentDescription = descricaoExcluir }
                             .testTag(tagBotaoExcluirDetalhe()),
-                )
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = "🗑")
+                }
             }
         }
     }
@@ -307,16 +325,20 @@ private fun FolhaDeCompartilhamento(
                 onClick = { onEnviarWhatsAppClick(mensagem) },
                 modifier = Modifier.fillMaxWidth().testTag(tagBotaoEnviarWhatsApp()),
             )
-            Text(
-                text = stringResource(id = R.string.detalhe_compartilhar_copiar_cta),
-                style = MaterialTheme.typography.bodyMedium,
+            Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .height(48.dp)
                         .clickable(role = Role.Button, onClick = { onCopiarTextoClick(mensagem) })
-                        .testTag(tagBotaoCopiarTexto())
-                        .padding(vertical = 12.dp),
-            )
+                        .testTag(tagBotaoCopiarTexto()),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.detalhe_compartilhar_copiar_cta),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
             if (uiState.copiado) {
                 Row(
                     modifier =
@@ -332,15 +354,19 @@ private fun FolhaDeCompartilhamento(
                     )
                 }
             }
-            Text(
-                text = stringResource(id = R.string.detalhe_compartilhar_fechar_cta),
-                style = MaterialTheme.typography.bodyMedium,
+            Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .clickable(role = Role.Button, onClick = onFecharClick)
-                        .padding(vertical = 12.dp),
-            )
+                        .height(48.dp)
+                        .clickable(role = Role.Button, onClick = onFecharClick),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.detalhe_compartilhar_fechar_cta),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
         }
     }
 }
@@ -369,11 +395,18 @@ private fun SecaoVisualizacao(
         }
         SeletorDeFechamento(quantidadeAtual = uiState.quantidadeDeDezenas, isPro = uiState.isPro)
         if (uiState.podeVerDesdobramentos) {
-            Text(
-                text = stringResource(id = R.string.detalhe_ver_desdobramentos_cta),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.clickable(role = Role.Button, onClick = onVerDesdobramentosClick),
-            )
+            Box(
+                modifier =
+                    Modifier
+                        .height(48.dp)
+                        .clickable(role = Role.Button, onClick = onVerDesdobramentosClick),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.detalhe_ver_desdobramentos_cta),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
         }
         HorizontalDivider(color = NocturneOutline)
         Text(text = stringResource(id = R.string.detalhe_origem_titulo), style = MaterialTheme.typography.titleMedium)
@@ -547,11 +580,18 @@ private fun FixasChip(
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.weight(1f),
         )
-        Text(
-            text = stringResource(id = R.string.detalhe_fixas_limpar),
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.clickable(role = Role.Button, onClick = onLimparClick),
-        )
+        Box(
+            modifier =
+                Modifier
+                    .height(48.dp)
+                    .clickable(role = Role.Button, onClick = onLimparClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(id = R.string.detalhe_fixas_limpar),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
     }
 }
 
@@ -580,7 +620,14 @@ private fun SecaoEdicao(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.clickable(role = Role.Checkbox, onClick = onAlternarGuardarFixasClick),
+            modifier =
+                Modifier
+                    .heightIn(min = 48.dp)
+                    .toggleable(
+                        value = uiState.guardarComoFixasAoSalvar,
+                        onValueChange = { onAlternarGuardarFixasClick() },
+                        role = Role.Checkbox,
+                    ).testTag(tagGuardarComoFixas()),
         ) {
             Checkbox(
                 checked = uiState.guardarComoFixasAoSalvar,

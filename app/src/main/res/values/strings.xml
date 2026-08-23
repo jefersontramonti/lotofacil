@@ -236,6 +236,9 @@
     <string name="home_sonho_card_confirmar_cta">☾ Foi com isso que sonhei</string>
     <string name="home_sonho_card_confirmado">✓ Sonho confirmado hoje</string>
     <string name="home_sonho_card_fechar_descricao">Fechar</string>
+    <string name="home_sonho_previa_grupo_descricao">Grupo %1$d, %2$s</string>
+    <string name="home_sonho_previa_grupo_confirmado_descricao">Grupo %1$d, %2$s. Já confirmado como sonho de hoje.</string>
+    <string name="home_atualizando">Atualizando…</string>
     <string name="fase_lua_nova">Lua nova</string>
     <string name="fase_lua_crescente_inicial">Lua crescente</string>
     <string name="fase_lua_quarto_crescente">Quarto crescente</string>
@@ -337,6 +340,7 @@
     <string name="conferencia_informar_manualmente_contagem">%1$d de 15 dezenas</string>
     <string name="conferencia_informar_manualmente_confirmar_cta">Confirmar</string>
     <string name="conferencia_informar_manualmente_cancelar_cta">Cancelar</string>
+    <string name="conferencia_atualizando">Atualizando…</string>
     <string name="historico_titulo">Histórico</string>
     <plurals name="historico_resumo">
         <item quantity="one">%1$d palpite em %2$d concursos</item>

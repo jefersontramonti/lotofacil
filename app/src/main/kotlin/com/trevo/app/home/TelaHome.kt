@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -31,6 +33,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,15 +99,35 @@ fun TelaHome(
     onAssistirAnuncioClick: () -> Unit = {},
     onAssinarClick: () -> Unit = {},
     onAtualizarClick: () -> Unit = {},
+    movimentoReduzido: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
+        val estadoPullToRefresh = rememberPullToRefreshState()
         PullToRefreshBox(
             isRefreshing = uiState.atualizando,
             onRefresh = onAtualizarClick,
+            state = estadoPullToRefresh,
+            indicator = {
+                if (movimentoReduzido) {
+                    if (uiState.atualizando) {
+                        Text(
+                            text = stringResource(id = R.string.home_atualizando),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp),
+                        )
+                    }
+                } else {
+                    PullToRefreshDefaults.Indicator(
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        isRefreshing = uiState.atualizando,
+                        state = estadoPullToRefresh,
+                    )
+                }
+            },
             modifier = Modifier.fillMaxSize(),
         ) {
             Column(
@@ -412,14 +436,19 @@ private fun SecaoSonho(
         }
         val idDoTextoDeExpandir =
             if (uiState.listaDeGruposExpandida) R.string.home_sonho_ver_menos else R.string.home_sonho_ver_todos
-        Text(
-            text = stringResource(id = idDoTextoDeExpandir),
-            style = MaterialTheme.typography.bodySmall,
+        Box(
             modifier =
                 Modifier
+                    .height(48.dp)
                     .clickable(role = Role.Button, onClick = onAlternarListaDeGruposClick)
                     .testTag(TAG_BOTAO_VER_GRUPOS),
-        )
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Text(
+                text = stringResource(id = idDoTextoDeExpandir),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
     }
 }
 
@@ -430,9 +459,16 @@ private fun CartaoDePreviaDoGrupo(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val descricao =
+        if (confirmadoHoje) {
+            stringResource(id = R.string.home_sonho_previa_grupo_confirmado_descricao, grupo.numero, grupo.nome)
+        } else {
+            stringResource(id = R.string.home_sonho_previa_grupo_descricao, grupo.numero, grupo.nome)
+        }
     Row(
         modifier =
             modifier
+                .heightIn(min = 48.dp)
                 .background(color = NocturneSurface, shape = RoundedCornerShape(8.dp))
                 .border(
                     border =
@@ -442,6 +478,7 @@ private fun CartaoDePreviaDoGrupo(
                         ),
                     shape = RoundedCornerShape(8.dp),
                 ).clickable(role = Role.Button, onClick = onClick)
+                .semantics(mergeDescendants = true) { contentDescription = descricao }
                 .testTag(tagGrupoDoBicho(grupo.numero))
                 .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -554,17 +591,21 @@ private fun SecaoModoDeGeracao(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            Text(
-                text = stringResource(id = R.string.home_assinar_cta),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
+            Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .height(48.dp)
                         .clickable(role = Role.Button, onClick = onAssinarClick)
-                        .testTag(TAG_BOTAO_ASSINAR)
-                        .padding(10.dp),
-            )
+                        .testTag(TAG_BOTAO_ASSINAR),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.home_assinar_cta),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 ModoDeGeracao.entries.forEach { modo ->
@@ -710,14 +751,17 @@ private fun CartaoPalpite(
                 )
             }
             Text(text = palpite.horario, style = MaterialTheme.typography.bodySmall)
-            Text(
-                text = "🗑",
+            Box(
                 modifier =
                     Modifier
+                        .size(48.dp)
                         .clickable(role = Role.Button, onClick = onExcluirClick)
                         .semantics { contentDescription = descricaoExcluir }
                         .testTag(tagBotaoExcluirPalpite(palpite.id)),
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text = "🗑")
+            }
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             palpite.dezenas.forEach { dezena ->
@@ -801,15 +845,16 @@ private fun DialogoCartaoDoSonho(
                         text = stringResource(id = R.string.home_sonho_card_grupo_rotulo, grupo.numero),
                         style = MaterialTheme.typography.labelSmall,
                     )
-                    Text(
-                        text = "✕",
+                    Box(
                         modifier =
                             Modifier
+                                .size(48.dp)
                                 .clickable(role = Role.Button, onClick = onFecharClick)
-                                .semantics {
-                                    contentDescription = descricaoFechar
-                                }.padding(start = 12.dp),
-                    )
+                                .semantics { contentDescription = descricaoFechar },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(text = "✕")
+                    }
                 }
                 Text(text = grupo.nome, style = MaterialTheme.typography.headlineSmall)
                 Text(
@@ -838,12 +883,11 @@ private fun DialogoCartaoDoSonho(
                     text = stringResource(id = R.string.home_sonho_card_disclaimer),
                     style = MaterialTheme.typography.bodySmall,
                 )
-                Text(
-                    text = stringResource(id = idDoTextoDoBotaoDeConfirmar),
-                    style = MaterialTheme.typography.titleSmall,
+                Box(
                     modifier =
                         Modifier
                             .fillMaxWidth()
+                            .height(48.dp)
                             .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
                             .then(
                                 if (jaConfirmadoHoje) {
@@ -851,8 +895,14 @@ private fun DialogoCartaoDoSonho(
                                 } else {
                                     Modifier.clickable(role = Role.Button, onClick = onConfirmarClick)
                                 },
-                            ).padding(12.dp),
-                )
+                            ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(id = idDoTextoDoBotaoDeConfirmar),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                }
             }
         }
     }

@@ -1,11 +1,14 @@
 package com.trevo.app.conferencia
 
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import com.trevo.app.R
 import com.trevo.app.detalhe.tagDezenaNaGrade
@@ -212,6 +215,33 @@ class TelaConferenciaTest {
         composeTestRule.onNodeWithTag(TAG_BOTAO_CONFIRMAR_MANUAL).performClick()
 
         assertEquals((1..15).toSet(), dezenasInformadas)
+    }
+
+    // RNF-03.1 — "Informar resultado manualmente"/"Cancelar"/"Confirmar"
+    // eram alvos de toque sem tamanho garantido (achado de auditoria de
+    // acessibilidade, 2026-08-23), corrigidos envolvendo o texto num
+    // Box(height = 48.dp) — Text isolado ignora constraints de tamanho
+    // mínimo, só Box/Row/Column respeitam.
+    @Test
+    fun botaoInformarManualmenteTemAlvoDeToqueDeAoMenos48dp() {
+        mostrarTela(ConferenciaUiState.Falha)
+
+        composeTestRule
+            .onNodeWithTag(TAG_BOTAO_INFORMAR_MANUALMENTE)
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
+    }
+
+    @Test
+    fun botaoConfirmarManualTemAlvoDeToqueDeAoMenos48dp() {
+        mostrarTela(ConferenciaUiState.Falha)
+        composeTestRule.onNodeWithTag(TAG_BOTAO_INFORMAR_MANUALMENTE).performClick()
+        (1..15).forEach { dezena -> composeTestRule.onNodeWithTag(tagDezenaNaGrade(dezena)).performClick() }
+
+        composeTestRule
+            .onNodeWithTag(TAG_BOTAO_CONFIRMAR_MANUAL)
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
     }
 
     @Test

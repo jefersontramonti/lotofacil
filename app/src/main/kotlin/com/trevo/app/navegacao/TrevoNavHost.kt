@@ -218,6 +218,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     },
                     onAssinarClick = { navController.navigate(Rotas.PAYWALL) },
                     onAtualizarClick = viewModel::aoAtualizar,
+                    movimentoReduzido = movimentoReduzidoAtivado(context),
                 )
             }
             composable(Rotas.RITUAL) {
@@ -248,6 +249,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
             composable(Rotas.CONFERENCIA) {
                 val viewModel: ConferenciaViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsState()
+                val context = LocalContext.current
 
                 LaunchedEffect(Unit) { viewModel.aoEntrar() }
 
@@ -256,6 +258,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onVoltarClick = { navController.popBackStack() },
                     onTentarNovamenteClick = viewModel::aoTentarNovamente,
                     onInformarResultadoManualmente = viewModel::aoInformarResultadoManualmente,
+                    movimentoReduzido = movimentoReduzidoAtivado(context),
                 )
             }
             composable(Rotas.HISTORICO) {

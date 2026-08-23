@@ -6,12 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -411,18 +413,23 @@ private fun ChipHorarioAtual(
     modifier: Modifier = Modifier,
 ) {
     val descricao = stringResource(id = R.string.perfil_horario_customizado_descricao, FORMATO_HORARIO.format(horario))
-    Text(
-        text = "${FORMATO_HORARIO.format(horario)} ⏱",
-        style = MaterialTheme.typography.bodySmall,
-        color = NocturneAccent,
+    Box(
         modifier =
             modifier
+                .height(48.dp)
                 .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
                 .clickable(role = Role.Button, onClick = onClick)
                 .semantics { contentDescription = descricao }
-                .padding(horizontal = 10.dp, vertical = 8.dp)
                 .testTag(TAG_CHIP_HORARIO_ATUAL),
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "${FORMATO_HORARIO.format(horario)} ⏱",
+            style = MaterialTheme.typography.bodySmall,
+            color = NocturneAccent,
+            modifier = Modifier.padding(horizontal = 10.dp),
+        )
+    }
 }
 
 @Composable
@@ -433,20 +440,25 @@ private fun ChipHorarioSugerido(
     modifier: Modifier = Modifier,
 ) {
     val cor = if (selecionado) NocturneAccent else NocturneOutline
-    Text(
-        text = FORMATO_HORARIO.format(horario),
-        style = MaterialTheme.typography.bodySmall,
-        // RNF: marcação nunca só por cor — o preset escolhido também
-        // engrossa o peso da fonte, não só a cor da borda.
-        fontWeight = if (selecionado) FontWeight.Bold else FontWeight.Normal,
-        textAlign = TextAlign.Center,
+    Box(
         modifier =
             modifier
+                .height(48.dp)
                 .border(border = BorderStroke(1.dp, cor), shape = RoundedCornerShape(8.dp))
                 .selectable(selected = selecionado, onClick = onClick, role = Role.RadioButton)
-                .padding(horizontal = 10.dp, vertical = 8.dp)
                 .testTag(tagChipHorario(horario)),
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = FORMATO_HORARIO.format(horario),
+            style = MaterialTheme.typography.bodySmall,
+            // RNF: marcação nunca só por cor — o preset escolhido também
+            // engrossa o peso da fonte, não só a cor da borda.
+            fontWeight = if (selecionado) FontWeight.Bold else FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 10.dp),
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

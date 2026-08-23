@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -102,6 +103,11 @@ private fun CelulaDaGrade(
         Text(
             text = "%02d".format(dezena),
             style = MaterialTheme.typography.labelMedium,
+            // NocturneText sobre NocturneAccent sólido (marcada e não fixa)
+            // dá contraste ~2,66:1 — abaixo do mínimo de 4,5:1 (RNF-03.2).
+            // `fixa` usa accent com alpha, escuro o bastante pra manter a
+            // cor padrão.
+            color = if (marcada && !fixa) MaterialTheme.colorScheme.background else Color.Unspecified,
             fontWeight = if (marcada) FontWeight.Bold else FontWeight.Normal,
         )
     }
