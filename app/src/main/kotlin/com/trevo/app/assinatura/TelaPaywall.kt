@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -102,7 +101,7 @@ fun TelaPaywall(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .heightIn(min = 48.dp)
                         .clickable(role = Role.Button, onClick = onFecharClick)
                         .testTag(TAG_PAYWALL_CTA_CONTINUAR_GRATIS),
                 contentAlignment = Alignment.Center,

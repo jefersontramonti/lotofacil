@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -224,7 +224,7 @@ private fun EstadoDeFalha(
         Box(
             modifier =
                 Modifier
-                    .height(48.dp)
+                    .heightIn(min = 48.dp)
                     .clickable(role = Role.Button) { mostrarDialogoManual = true }
                     .testTag(TAG_BOTAO_INFORMAR_MANUALMENTE),
             contentAlignment = Alignment.Center,
@@ -289,7 +289,7 @@ private fun DialogoInformarResultadoManual(
                     Box(
                         modifier =
                             Modifier
-                                .height(48.dp)
+                                .heightIn(min = 48.dp)
                                 .clickable(role = Role.Button, onClick = onCancelarClick),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -299,7 +299,7 @@ private fun DialogoInformarResultadoManual(
                         Box(
                             modifier =
                                 Modifier
-                                    .height(48.dp)
+                                    .heightIn(min = 48.dp)
                                     .clickable(role = Role.Button) { onConfirmarClick(dezenasSelecionadas) }
                                     .testTag(TAG_BOTAO_CONFIRMAR_MANUAL),
                             contentAlignment = Alignment.Center,

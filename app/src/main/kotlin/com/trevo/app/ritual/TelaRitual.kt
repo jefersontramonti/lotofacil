@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -241,7 +242,14 @@ private fun TelaEscolhaDoAmuleto(
         }
 
         if (uiState.reveladas.isNotEmpty()) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            // FlowRow, não Row: até 8 amuletos revelados nessa fila; um Row comum
+            // mede em sequência e, com fonte grande o bastante, os últimos itens
+            // sobram sem largura e quebram letra por letra (mesma causa do "seg."
+            // na Home, RNF-03.3).
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 Text(
                     text = stringResource(id = R.string.ritual_ja_revelado),
                     style = MaterialTheme.typography.bodySmall,

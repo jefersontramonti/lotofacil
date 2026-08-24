@@ -7,12 +7,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -194,72 +194,89 @@ private fun Cabecalho(
     val descricaoVoltar = stringResource(id = R.string.detalhe_voltar_descricao)
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         BotaoVoltar(onClick = onVoltarClick, descricao = descricaoVoltar)
+        // O título NÃO leva weight(1f): título com weight, ao lado de 4 ícones de
+        // 48dp fixos, sobra tão pouca largura a 200% de fonte que "Palpite 1"
+        // quebrava letra por letra ("Pal"/"pite"/"1") — achado real, RNF-03.3. O
+        // weight vai pro grupo de ícones (Arrangement.End), então o título sempre
+        // recebe sua largura natural e só os ícones cedem espaço se precisar.
         Text(
             text = stringResource(id = R.string.home_palpite_rotulo, uiState.numeroDoDia),
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.weight(1f).padding(start = 12.dp),
+            modifier = Modifier.padding(start = 12.dp),
         )
-        if (uiState.modoEdicao) {
-            Text(text = stringResource(id = R.string.detalhe_editando_tag), style = MaterialTheme.typography.labelSmall)
-        } else if (uiState.palpiteExiste) {
-            val descricaoCompartilhar = stringResource(id = R.string.detalhe_compartilhar_icone_descricao)
-            // RF-08.3 — exportar é Pro (wireframe 1p), mesmo padrão de
-            // bloqueada/desbloqueada de TelaCrencas.onCrencaClick/onCrencaBloqueadaClick.
-            val descricaoExportarId =
-                if (uiState.isPro) {
-                    R.string.detalhe_exportar_icone_descricao
-                } else {
-                    R.string.detalhe_exportar_bloqueado_descricao
-                }
-            val descricaoExportar = stringResource(id = descricaoExportarId)
-            val descricaoRefazer = stringResource(id = R.string.detalhe_refazer_descricao)
-            val descricaoExcluir = stringResource(id = R.string.detalhe_excluir_icone_descricao)
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(48.dp)
-                            .clickable(role = Role.Button, onClick = onCompartilharClick)
-                            .semantics { contentDescription = descricaoCompartilhar }
-                            .testTag(tagBotaoCompartilhar()),
-                    contentAlignment = Alignment.Center,
+        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+            if (uiState.modoEdicao) {
+                Text(
+                    text = stringResource(id = R.string.detalhe_editando_tag),
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            } else if (uiState.palpiteExiste) {
+                val descricaoCompartilhar = stringResource(id = R.string.detalhe_compartilhar_icone_descricao)
+                // RF-08.3 — exportar é Pro (wireframe 1p), mesmo padrão de
+                // bloqueada/desbloqueada de TelaCrencas.onCrencaClick/onCrencaBloqueadaClick.
+                val descricaoExportarId =
+                    if (uiState.isPro) {
+                        R.string.detalhe_exportar_icone_descricao
+                    } else {
+                        R.string.detalhe_exportar_bloqueado_descricao
+                    }
+                val descricaoExportar = stringResource(id = descricaoExportarId)
+                val descricaoRefazer = stringResource(id = R.string.detalhe_refazer_descricao)
+                val descricaoExcluir = stringResource(id = R.string.detalhe_excluir_icone_descricao)
+                // FlowRow, não Row: com o título sem weight (acima), esses 4
+                // ícones dividem o espaço que sobrar; se não sobrar o bastante a
+                // 200% de fonte, um Row comum espremeria o último ícone abaixo de
+                // 48dp em vez de descer pra uma segunda linha (RNF-03.1 x RNF-03.3).
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(text = "📤")
-                }
-                Box(
-                    modifier =
-                        Modifier
-                            .size(48.dp)
-                            .clickable(
-                                role = Role.Button,
-                                onClick = if (uiState.isPro) onExportarClick else onExportarBloqueadoClick,
-                            ).semantics { contentDescription = descricaoExportar }
-                            .testTag(tagBotaoExportar()),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(text = if (uiState.isPro) "⤓" else "⤓🔒")
-                }
-                Box(
-                    modifier =
-                        Modifier
-                            .size(48.dp)
-                            .clickable(role = Role.Button, onClick = onRefazerClick)
-                            .semantics { contentDescription = descricaoRefazer }
-                            .testTag(tagBotaoRefazer()),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(text = "↻")
-                }
-                Box(
-                    modifier =
-                        Modifier
-                            .size(48.dp)
-                            .clickable(role = Role.Button, onClick = onExcluirClick)
-                            .semantics { contentDescription = descricaoExcluir }
-                            .testTag(tagBotaoExcluirDetalhe()),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(text = "🗑")
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(48.dp)
+                                .clickable(role = Role.Button, onClick = onCompartilharClick)
+                                .semantics { contentDescription = descricaoCompartilhar }
+                                .testTag(tagBotaoCompartilhar()),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(text = "📤")
+                    }
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(48.dp)
+                                .clickable(
+                                    role = Role.Button,
+                                    onClick = if (uiState.isPro) onExportarClick else onExportarBloqueadoClick,
+                                ).semantics { contentDescription = descricaoExportar }
+                                .testTag(tagBotaoExportar()),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(text = if (uiState.isPro) "⤓" else "⤓🔒")
+                    }
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(48.dp)
+                                .clickable(role = Role.Button, onClick = onRefazerClick)
+                                .semantics { contentDescription = descricaoRefazer }
+                                .testTag(tagBotaoRefazer()),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(text = "↻")
+                    }
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(48.dp)
+                                .clickable(role = Role.Button, onClick = onExcluirClick)
+                                .semantics { contentDescription = descricaoExcluir }
+                                .testTag(tagBotaoExcluirDetalhe()),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(text = "🗑")
+                    }
                 }
             }
         }
@@ -329,7 +346,7 @@ private fun FolhaDeCompartilhamento(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .heightIn(min = 48.dp)
                         .clickable(role = Role.Button, onClick = { onCopiarTextoClick(mensagem) })
                         .testTag(tagBotaoCopiarTexto()),
                 contentAlignment = Alignment.Center,
@@ -358,7 +375,7 @@ private fun FolhaDeCompartilhamento(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .heightIn(min = 48.dp)
                         .clickable(role = Role.Button, onClick = onFecharClick),
                 contentAlignment = Alignment.Center,
             ) {
@@ -398,7 +415,7 @@ private fun SecaoVisualizacao(
             Box(
                 modifier =
                     Modifier
-                        .height(48.dp)
+                        .heightIn(min = 48.dp)
                         .clickable(role = Role.Button, onClick = onVerDesdobramentosClick),
                 contentAlignment = Alignment.CenterStart,
             ) {
@@ -583,7 +600,7 @@ private fun FixasChip(
         Box(
             modifier =
                 Modifier
-                    .height(48.dp)
+                    .heightIn(min = 48.dp)
                     .clickable(role = Role.Button, onClick = onLimparClick),
             contentAlignment = Alignment.Center,
         ) {

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -143,7 +144,7 @@ private fun ConteudoComDados(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .heightIn(min = 48.dp)
                         .border(border = BorderStroke(1.dp, NocturneOutline), shape = RoundedCornerShape(8.dp))
                         .clickable(role = Role.Button, onClick = onVerMaisClick)
                         .testTag(TAG_BOTAO_VER_MAIS_HISTORICO),
@@ -167,7 +168,7 @@ private fun ConteudoComDados(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .heightIn(min = 48.dp)
                         .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
                         .clickable(role = Role.Button, onClick = onAssinarClick)
                         .testTag(TAG_BOTAO_ASSINAR_HISTORICO),

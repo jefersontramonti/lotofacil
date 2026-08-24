@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -303,7 +302,14 @@ private fun SecaoSorteLuaSigno(
             }
             Column {
                 Text(text = stringResource(id = R.string.home_sorte_titulo), style = MaterialTheme.typography.bodySmall)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                // FlowRow, não Row: um Row comum mede as tags em sequência e, com
+                // fonte grande o bastante, a última pode sobrar só alguns dp de
+                // largura e quebrar letra por letra em vez de ir pra linha de
+                // baixo (achado real a 200% de fonte, RNF-03.3).
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     uiState.faseDaLua?.let { Tag(texto = stringResource(id = nomeDaFase(it))) }
                     uiState.signo?.let { Tag(texto = stringResource(id = nomeDoSigno(it))) }
                     uiState.diaDaSemanaAbreviado?.let { Tag(texto = it) }
@@ -439,7 +445,7 @@ private fun SecaoSonho(
         Box(
             modifier =
                 Modifier
-                    .height(48.dp)
+                    .heightIn(min = 48.dp)
                     .clickable(role = Role.Button, onClick = onAlternarListaDeGruposClick)
                     .testTag(TAG_BOTAO_VER_GRUPOS),
             contentAlignment = Alignment.CenterStart,
@@ -595,7 +601,7 @@ private fun SecaoModoDeGeracao(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .heightIn(min = 48.dp)
                         .clickable(role = Role.Button, onClick = onAssinarClick)
                         .testTag(TAG_BOTAO_ASSINAR),
                 contentAlignment = Alignment.Center,
@@ -887,7 +893,7 @@ private fun DialogoCartaoDoSonho(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(48.dp)
+                            .heightIn(min = 48.dp)
                             .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
                             .then(
                                 if (jaConfirmadoHoje) {

@@ -8,12 +8,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -180,7 +181,15 @@ fun TelaPerfil(
                         testTag = TAG_SWITCH_LEMBRETE,
                     )
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                // FlowRow, não Row: um Row comum mede os chips em sequência e,
+                // com fonte grande o bastante, o último pode sobrar só alguns dp
+                // de largura e quebrar letra por letra em vez de ir pra linha de
+                // baixo (achado real a 200% de fonte, RNF-03.3 — mesma causa do
+                // "seg." na Home).
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     ChipHorarioAtual(
                         horario = uiState.horarioLembreteFechamento,
                         onClick = { mostrarDialogoDeHorario = true },
@@ -416,7 +425,7 @@ private fun ChipHorarioAtual(
     Box(
         modifier =
             modifier
-                .height(48.dp)
+                .heightIn(min = 48.dp)
                 .border(border = BorderStroke(1.dp, NocturneAccent), shape = RoundedCornerShape(8.dp))
                 .clickable(role = Role.Button, onClick = onClick)
                 .semantics { contentDescription = descricao }
@@ -443,7 +452,7 @@ private fun ChipHorarioSugerido(
     Box(
         modifier =
             modifier
-                .height(48.dp)
+                .heightIn(min = 48.dp)
                 .border(border = BorderStroke(1.dp, cor), shape = RoundedCornerShape(8.dp))
                 .selectable(selected = selecionado, onClick = onClick, role = Role.RadioButton)
                 .testTag(tagChipHorario(horario)),
