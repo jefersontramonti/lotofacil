@@ -20,11 +20,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -39,6 +42,7 @@ import androidx.navigation.navArgument
 import com.trevo.app.R
 import com.trevo.app.assinatura.PaywallViewModel
 import com.trevo.app.assinatura.TelaPaywall
+import com.trevo.app.conferencia.ConferenciaUiState
 import com.trevo.app.conferencia.ConferenciaViewModel
 import com.trevo.app.conferencia.TelaConferencia
 import com.trevo.app.detalhe.DesdobramentosViewModel
@@ -64,9 +68,14 @@ import com.trevo.app.perfil.PerfilEvento
 import com.trevo.app.perfil.PerfilViewModel
 import com.trevo.app.perfil.TelaPerfil
 import com.trevo.app.ritual.RitualEvento
+import com.trevo.app.ritual.RitualUiState
 import com.trevo.app.ritual.RitualViewModel
 import com.trevo.app.ritual.TelaRitual
+import com.trevo.app.som.Efeito
+import com.trevo.app.som.TocadorDeSom
+import com.trevo.app.som.efeitoDoAmuleto
 import com.trevo.core.engine.crenca.ModoDeGeracao
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -88,6 +97,13 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rotaAtual = backStackEntry?.destination?.route
 
+    // Um único TocadorDeSom pro app inteiro (não recriado a cada troca de
+    // rota) — o SoundPool decodifica os 26 efeitos curtos uma vez ao criar;
+    // recriar isso por tela pesaria à toa. Liberado só quando o app fecha.
+    val contextoDoApp = LocalContext.current
+    val tocadorDeSom = remember { TocadorDeSom(contextoDoApp) }
+    DisposableEffect(Unit) { onDispose { tocadorDeSom.liberar() } }
+
     Scaffold(
         modifier = modifier,
         bottomBar = {
@@ -102,6 +118,15 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(paddingDoConteudo),
         ) {
             composable(Rotas.ABERTURA) {
+                // Delay curto de propósito: é o primeiro som do app inteiro,
+                // tocando quase no mesmo frame em que o SoundPool começou a
+                // decodificar os 27 efeitos — sem isso corre real risco de
+                // disparar antes do load() assíncrono terminar (achado real
+                // no emulador: "SoundPool: play soundID not READY").
+                LaunchedEffect(Unit) {
+                    delay(200L)
+                    tocadorDeSom.tocar(Efeito.ABERTURA_BOAS_VINDAS)
+                }
                 TelaAbertura(onComecarClick = { navController.navigate(Rotas.IDENTIDADE) })
             }
             composable(Rotas.IDENTIDADE) {
@@ -133,7 +158,10 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
 
                 TelaCrencas(
                     uiState = uiState,
-                    onCrencaClick = viewModel::aoTocarCrenca,
+                    onCrencaClick = { crenca ->
+                        viewModel.aoTocarCrenca(crenca)
+                        tocadorDeSom.tocar(Efeito.CRENCA_MARCAR)
+                    },
                     onCrencaBloqueadaClick = { navController.navigate(Rotas.PAYWALL) },
                     onVoltarClick = { navController.popBackStack() },
                     onContinuarClick = {
@@ -161,8 +189,14 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 LaunchedEffect(Unit) {
                     viewModel.iniciar(movimentoReduzido = movimentoReduzidoAtivado(context))
                 }
+                DisposableEffect(Unit) {
+                    tocadorDeSom.iniciarAmbiente()
+                    onDispose { tocadorDeSom.pararAmbiente() }
+                }
+                LaunchedEffect(uiState.indiceFrase) { tocadorDeSom.tocar(Efeito.GERACAO_FRASE) }
                 LaunchedEffect(uiState.concluido) {
                     if (uiState.concluido) {
+                        tocadorDeSom.tocar(Efeito.GERACAO_CONCLUIDA)
                         navController.navigate(Rotas.HOME) {
                             popUpTo(Rotas.ABERTURA) { inclusive = true }
                         }
@@ -182,18 +216,37 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 LaunchedEffect(
                     Unit,
                 ) { gerenciadorDeAnuncio.carregar(context, aoCarregar = viewModel::aoAnuncioCarregado) }
+                // Pull-to-refresh só tem som de "concluído" na borda de
+                // descida de uiState.atualizando — sem isso tocaria o
+                // "puxar" de novo (ou tocaria à toa na 1ª carga silenciosa).
+                var estavaAtualizandoHome by remember { mutableStateOf(false) }
+                LaunchedEffect(uiState.atualizando) {
+                    if (estavaAtualizandoHome && !uiState.atualizando) {
+                        tocadorDeSom.tocar(Efeito.PULL_REFRESH_CONCLUIDO)
+                    }
+                    estavaAtualizandoHome = uiState.atualizando
+                }
 
                 TelaHome(
                     uiState = uiState,
                     onExcluirClick = viewModel::aoPedirExclusao,
-                    onConfirmarExclusaoClick = viewModel::aoConfirmarExclusao,
+                    onConfirmarExclusaoClick = {
+                        viewModel.aoConfirmarExclusao()
+                        tocadorDeSom.tocar(Efeito.ACAO_EXCLUIR)
+                    },
                     onCancelarExclusaoClick = viewModel::aoCancelarExclusao,
                     onPalpiteClick = { id -> navController.navigate(Rotas.detalhe(id)) },
                     onAlternarListaDeGruposClick = viewModel::aoAlternarListaDeGrupos,
                     onGrupoClick = viewModel::aoAbrirGrupo,
                     onFecharDialogoSonhoClick = viewModel::aoFecharDialogDoSonho,
-                    onConfirmarSonhoClick = viewModel::aoConfirmarSonho,
-                    onSelecionarModoClick = viewModel::aoSelecionarModo,
+                    onConfirmarSonhoClick = { numero ->
+                        viewModel.aoConfirmarSonho(numero)
+                        tocadorDeSom.tocar(Efeito.SONHO_CONFIRMAR)
+                    },
+                    onSelecionarModoClick = { modo ->
+                        viewModel.aoSelecionarModo(modo)
+                        tocadorDeSom.tocar(Efeito.MODO_SELECIONAR)
+                    },
                     onCtaPrincipalClick = {
                         // RF-11.3 — só o modo Destino abre o ritual; Místico e
                         // Cientista geram direto por HomeViewModel.aoGerarClick.
@@ -217,7 +270,10 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                         }
                     },
                     onAssinarClick = { navController.navigate(Rotas.PAYWALL) },
-                    onAtualizarClick = viewModel::aoAtualizar,
+                    onAtualizarClick = {
+                        viewModel.aoAtualizar()
+                        tocadorDeSom.tocar(Efeito.PULL_REFRESH_PUXAR)
+                    },
                     movimentoReduzido = movimentoReduzidoAtivado(context),
                 )
             }
@@ -233,16 +289,39 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                         }
                     }
                 }
+                // Identidade do amuleto atual e revelação (o som "mágico"
+                // principal) — chaveado no uiState inteiro: por serem data
+                // class/data object, só reinicia quando o estado realmente
+                // muda (não a cada recomposição do mesmo amuleto/revelação).
+                LaunchedEffect(uiState) {
+                    when (val estado = uiState) {
+                        is RitualUiState.Escolha -> tocadorDeSom.tocar(efeitoDoAmuleto(estado.amuletoAtual))
+                        is RitualUiState.Revelando -> tocadorDeSom.tocar(Efeito.RITUAL_REVELACAO)
+                        else -> Unit
+                    }
+                }
 
                 TelaRitual(
                     uiState = uiState,
                     onFecharClick = { navController.popBackStack() },
-                    onEscolherOpcao = viewModel::aoEscolherOpcao,
+                    onEscolherOpcao = { opcao ->
+                        viewModel.aoEscolherOpcao(opcao)
+                        tocadorDeSom.tocar(Efeito.RITUAL_ESCOLHA)
+                    },
                     onRevelacaoTerminou = viewModel::aoRevelacaoTerminou,
-                    onRefazerClick = viewModel::aoRefazerRitualClick,
+                    onRefazerClick = {
+                        viewModel.aoRefazerRitualClick()
+                        tocadorDeSom.tocar(Efeito.RITUAL_REFAZER)
+                    },
                     onEscolherTamanhoClick = viewModel::aoEscolherTamanho,
-                    onTamanhoBloqueadoClick = { navController.navigate(Rotas.PAYWALL) },
-                    onMontarPalpiteClick = viewModel::aoMontarPalpiteClick,
+                    onTamanhoBloqueadoClick = {
+                        tocadorDeSom.tocar(Efeito.RITUAL_BLOQUEADO)
+                        navController.navigate(Rotas.PAYWALL)
+                    },
+                    onMontarPalpiteClick = {
+                        viewModel.aoMontarPalpiteClick()
+                        tocadorDeSom.tocar(Efeito.RITUAL_MONTAR)
+                    },
                     movimentoReduzido = movimentoReduzidoAtivado(context),
                 )
             }
@@ -252,12 +331,31 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                 val context = LocalContext.current
 
                 LaunchedEffect(Unit) { viewModel.aoEntrar() }
+                // Sem som de pull-to-refresh aqui: TelaConferencia reusa
+                // onTentarNovamenteClick tanto pro gesto de puxar quanto pro
+                // botão "Tentar de novo", e Carregando também é o estado
+                // inicial (não só de refresh) — as duas coisas juntas
+                // deixariam a borda de "concluído" ambígua. O resultado
+                // pronto já tem som próprio abaixo.
+                LaunchedEffect(uiState) {
+                    val sucesso = uiState as? ConferenciaUiState.Sucesso ?: return@LaunchedEffect
+                    tocadorDeSom.tocar(Efeito.CONFERENCIA_RESULTADO_PRONTO)
+                    sucesso.itens.forEach { item ->
+                        if (item.premio != null) {
+                            delay(150L)
+                            tocadorDeSom.tocar(Efeito.CONFERENCIA_ACERTO)
+                        }
+                    }
+                }
 
                 TelaConferencia(
                     uiState = uiState,
                     onVoltarClick = { navController.popBackStack() },
                     onTentarNovamenteClick = viewModel::aoTentarNovamente,
-                    onInformarResultadoManualmente = viewModel::aoInformarResultadoManualmente,
+                    onInformarResultadoManualmente = { dezenas ->
+                        viewModel.aoInformarResultadoManualmente(dezenas)
+                        tocadorDeSom.tocar(Efeito.CONFERENCIA_GRADE_CONFIRMAR)
+                    },
                     movimentoReduzido = movimentoReduzidoAtivado(context),
                 )
             }
@@ -331,7 +429,10 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                             navController.navigate(Rotas.PAYWALL)
                         }
                     },
-                    onConfirmarExclusaoDeDadosClick = viewModel::aoConfirmarExclusaoDeDados,
+                    onConfirmarExclusaoDeDadosClick = {
+                        viewModel.aoConfirmarExclusaoDeDados()
+                        tocadorDeSom.tocar(Efeito.ACAO_EXCLUIR)
+                    },
                 )
             }
             composable(Rotas.PERFIL_CRENCAS) {
@@ -340,7 +441,10 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
 
                 TelaCrencas(
                     uiState = uiState,
-                    onCrencaClick = viewModel::aoTocarCrenca,
+                    onCrencaClick = { crenca ->
+                        viewModel.aoTocarCrenca(crenca)
+                        tocadorDeSom.tocar(Efeito.CRENCA_MARCAR)
+                    },
                     onCrencaBloqueadaClick = { navController.navigate(Rotas.PAYWALL) },
                     onVoltarClick = { navController.popBackStack() },
                     onContinuarClick = {
@@ -368,6 +472,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onExcluirClick = viewModel::aoPedirExclusao,
                     onConfirmarExclusaoClick = {
                         viewModel.aoConfirmarExclusao()
+                        tocadorDeSom.tocar(Efeito.ACAO_EXCLUIR)
                         navController.popBackStack()
                     },
                     onCancelarExclusaoClick = viewModel::aoCancelarExclusao,
@@ -383,6 +488,7 @@ fun TrevoNavHost(modifier: Modifier = Modifier) {
                     onCopiarTextoClick = { mensagem ->
                         copiarParaAreaDeTransferencia(context, mensagem)
                         viewModel.aoMarcarCopiadoClick()
+                        tocadorDeSom.tocar(Efeito.ACAO_CONFIRMAR)
                     },
                     onExportarClick = {
                         escopo.launch {
